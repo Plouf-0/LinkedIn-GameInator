@@ -1,2 +1,2 @@
-# Tango-Inator
-Many different ways to resolve the LinkedIn's Tango
+# LinkedIn-GameInator
+Many different ways to resolve the LinkedIn games
