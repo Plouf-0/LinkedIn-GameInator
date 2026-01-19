@@ -76,7 +76,7 @@ class Grid:
 
             # if the selected cell is on the left or on the right of the region
             if cell.row < left.row or cell.row > right.row:
-                cell.blockCell()
+                cell.block_cell()
 
             # if the selected cell is on over or under the region
             elif (size == 2 and cell.col in (left.col, right.col)) or (
@@ -85,11 +85,11 @@ class Grid:
                 if left.row != 0:
                     upperCell = self.grid[left.row - 1][cell.col]
                     if upperCell.value != 1:
-                        upperCell.blockCell()
+                        upperCell.block_cell()
                 if left.row != len(self.grid) - 1:
                     lowerCell = self.grid[left.row + 1][cell.col]
                     if lowerCell.value != 1:
-                        lowerCell.blockCell()
+                        lowerCell.block_cell()
 
         return
 
@@ -104,7 +104,7 @@ class Grid:
 
             # if the selected cell is on over or under the region
             if cell.row < top.row or cell.row > bottom.row:
-                cell.blockCell()
+                cell.block_cell()
 
             # claim all sides of the region if size = 2 on the centers if size = 3
             elif (size == 2 and cell.row in (top.row, bottom.row)) or (
@@ -113,11 +113,11 @@ class Grid:
                 if top.col != 0:
                     leftCell = row[top.col - 1]
                     if leftCell.value != 1:
-                        leftCell.blockCell()
+                        leftCell.block_cell()
                 if top.col != len(row) - 1:
                     rightCell = row[top.col + 1]
                     if rightCell.value != 1:
-                        rightCell.blockCell()
+                        rightCell.block_cell()
 
         return
 
@@ -125,8 +125,8 @@ class Grid:
     def claim_region(self, region: list) -> None:
         for row in self.grid:
             for cell in row:
-                if cell.coord in region and cell.value == 0:
-                    cell.blockCell()
+                if cell.coord in region and cell.is_empty():
+                    cell.block_cell()
         return
 
 
