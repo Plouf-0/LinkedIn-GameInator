@@ -190,14 +190,14 @@ def printGrid(grid: Grid) -> None:
             else:
                 print("\033[90m", end="")
 
-            if cell.value == 1:
+            if cell.value == QUEEN:
                 print(" Q ", end="")
-            elif cell.value == -1:
+            elif cell.value == BLOCKED:
                 print(" X ", end="")
             else:
                 print(" . ", end="")
-            print("\033[90m", end="")
-        print("\033[90m")
+            print("\033[0m", end="")
+        print("\033[0m ")
 
 
 # DONE
