@@ -34,6 +34,7 @@ class Cell:
 class Grid:
     def __init__(self, grid: list):
         self.grid = grid
+        self.regions = self.find_regions()
 
     def __getitem__(self, index):
         return self.grid[index]
@@ -54,18 +55,39 @@ class Grid:
 
         return regions
 
-    # TODO: claime region
+    # DONE
+    def claim_region(self, targetCell: Cell) -> None:
+        # find the region of the target cell
+        region = None
+        for regs in self.regions:
+            if targetCell.coord in regs:
+                region = regs
+                break
+        if region is None:
+            warn(f"No region found for cell {targetCell.coord}")
+            return
+
+        for row, col in region:
+            cell = self.grid[row][col]
+            if cell.coord != targetCell.coord and cell.is_empty():
+                cell.block_cell()
+        return
+
+    # TODO: claim region
     def claim_cell(self, cell: Cell) -> None:
-        cell.value = 1
+        cell.value = QUEEN
         for row in range(len(self.grid)):
             for column in range(len(self.grid[0])):
                 if row == cell.row or column == cell.col:
-                    if self.grid[row][column].value == 0:
-                        self.grid[row][column].value = -1
-        self.grid[cell.row - 1][cell.col - 1].value = -1
-        self.grid[cell.row - 1][cell.col + 1].value = -1
-        self.grid[cell.row + 1][cell.col - 1].value = -1
-        self.grid[cell.row + 1][cell.col + 1].value = -1
+                    if self.grid[row][column].value == EMPTY:
+                        self.grid[row][column].value = BLOCKED
+        self.grid[cell.row - 1][cell.col - 1].value = BLOCKED
+        self.grid[cell.row - 1][cell.col + 1].value = BLOCKED
+        self.grid[cell.row + 1][cell.col - 1].value = BLOCKED
+        self.grid[cell.row + 1][cell.col + 1].value = BLOCKED
+
+        self.claim_region()
+
         return
 
     # TOTEST
@@ -81,7 +103,7 @@ class Grid:
 
             # if the selected cell is on the left or on the right of the region
             if (cell.col < left.col or cell.col > right.col) and cell.is_empty():
-                    cell.block_cell()
+                cell.block_cell()
 
             # if the selected cell is on over or under the region
             elif (size == 2 and cell.col in (left.col, right.col)) or (
@@ -127,14 +149,6 @@ class Grid:
                     if rightCell.value != QUEEN:
                         rightCell.block_cell()
 
-        return
-
-    # DONE
-    def claim_region(self, region: list) -> None:
-        for row in self.grid:
-            for cell in row:
-                if cell.coord in region and cell.is_empty():
-                    cell.block_cell()
         return
 
 
