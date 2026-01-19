@@ -1,19 +1,31 @@
 # Queens/resolver.py
 
+EMPTY = 0
+QUEEN = 1
+BLOCKED = -1
 
 # DONE
 class Cell:
     def __init__(self, coord: tuple, color: str, value: int = 0):
         self.row, self.col = coord
         self.color = color
-        # 0 = empty, 1 = queen, -1 = blocked
         self.value = value
 
-    def makeQueen(self) -> None:
-        self.value = 1
+    @property
+    def coord(self) -> tuple[int, int]:
+        return (self.row, self.col)
 
-    def blockCell(self) -> None:
-        self.value = -1
+    def make_queen(self) -> None:
+        self.value = QUEEN
+
+    def block_cell(self) -> None:
+        self.value = BLOCKED
+
+    def is_empty(self) -> bool:
+        return self.value == EMPTY
+
+    def __repr__(self):
+        return f"Cell({self.row},{self.col},{self.color},{self.value})"
 
 
 # DONE
@@ -28,7 +40,7 @@ class Grid:
         return iter(self.grid)
 
     # DONE
-    def findRegions(self) -> list:
+    def find_regions(self) -> list:
         colors = []
         regions = []
         for line in self.grid:
@@ -41,7 +53,7 @@ class Grid:
         return regions
 
     # TODO: claime region
-    def claimCell(self, cell: Cell) -> None:
+    def claim_cell(self, cell: Cell) -> None:
         cell.value = 1
         for row in range(len(self.grid)):
             for column in range(len(self.grid[0])):
@@ -55,7 +67,7 @@ class Grid:
         return
 
     # TOTEST
-    def claimRow(self, left: Cell, right: Cell) -> None:
+    def claim_row(self, left: Cell, right: Cell) -> None:
         if left.row != right.row:
             raise ValueError("Left and right cells must be in the same row.")
         size = abs(left.col - right.col) + 1
@@ -82,7 +94,7 @@ class Grid:
         return
 
     # TOTEST
-    def claimColumn(self, top: Cell, bottom: Cell) -> None:
+    def claim_column(self, top: Cell, bottom: Cell) -> None:
         if top.col != bottom.col:
             raise ValueError("Top and bottom cells must be in the same column.")
         size = abs(top.row - bottom.row) + 1
@@ -110,7 +122,7 @@ class Grid:
         return
 
     # DONE
-    def claimRegion(self, region: list) -> None:
+    def claim_region(self, region: list) -> None:
         for row in self.grid:
             for cell in row:
                 if cell.coord in region and cell.value == 0:
@@ -145,8 +157,7 @@ def build_example_grid(testGrid: list) -> Grid:
             row.append(Cell((r, c), color))
         grid.append(row)
 
-    return grid
-
+    return Grid(grid)
 
 # DONE
 def printGrid(grid: Grid) -> None:
@@ -192,10 +203,10 @@ def main(grid: Grid) -> None:
     if not grid or grid == [[]]:
         print("This is the Queens resolver module.")
 
-    regions = grid.findRegions()
+    regions = grid.find_regions()
     printRegions(regions)
     # grid.claimCell(grid[4][3])
-    grid.claimColumn(grid[3][3], grid[4][3])
+    grid.claim_column(grid[3][3], grid[4][3])
     printGrid(grid)
 
 
@@ -209,5 +220,5 @@ if __name__ == "__main__":
         "R R B B B G G",
         "R R R R B G G",
     ]
-    example = Grid(build_example_grid(testGrid))
+    example = build_example_grid(testGrid)
     main(example)
