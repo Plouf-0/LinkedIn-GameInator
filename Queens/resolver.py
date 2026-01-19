@@ -1,5 +1,7 @@
 # Queens/resolver.py
 
+from warnings import warn
+
 EMPTY = 0
 QUEEN = 1
 BLOCKED = -1
@@ -70,25 +72,28 @@ class Grid:
     def claim_row(self, left: Cell, right: Cell) -> None:
         if left.row != right.row:
             raise ValueError("Left and right cells must be in the same row.")
+        if left.col > right.col:
+            left, right = right, left
+            warn("Left and right cells were swapped to maintain order.")
         size = abs(left.col - right.col) + 1
 
         for cell in self.grid[left.row]:
 
             # if the selected cell is on the left or on the right of the region
-            if cell.row < left.row or cell.row > right.row:
+            if cell.row < left.row or cell.row > right.row and cell.is_empty():
                 cell.block_cell()
 
             # if the selected cell is on over or under the region
             elif (size == 2 and cell.col in (left.col, right.col)) or (
                 size == 3 and cell.col == left.col + 1
             ):
-                if left.row != 0:
+                if left.row != BLOCKED:
                     upperCell = self.grid[left.row - 1][cell.col]
-                    if upperCell.value != 1:
+                    if upperCell.value != QUEEN:
                         upperCell.block_cell()
                 if left.row != len(self.grid) - 1:
                     lowerCell = self.grid[left.row + 1][cell.col]
-                    if lowerCell.value != 1:
+                    if lowerCell.value != QUEEN:
                         lowerCell.block_cell()
 
         return
@@ -97,26 +102,29 @@ class Grid:
     def claim_column(self, top: Cell, bottom: Cell) -> None:
         if top.col != bottom.col:
             raise ValueError("Top and bottom cells must be in the same column.")
+        if top.row > bottom.row:
+            top, bottom = bottom, top
+            warn("Top and bottom cells were swapped to maintain order.")
         size = abs(top.row - bottom.row) + 1
 
         for row in self.grid:
             cell = row[top.col]
 
             # if the selected cell is on over or under the region
-            if cell.row < top.row or cell.row > bottom.row:
+            if cell.row < top.row or cell.row > bottom.row and cell.is_empty():
                 cell.block_cell()
 
             # claim all sides of the region if size = 2 on the centers if size = 3
             elif (size == 2 and cell.row in (top.row, bottom.row)) or (
                 size == 3 and cell.row == top.row - 1
             ):
-                if top.col != 0:
+                if top.col != BLOCKED:
                     leftCell = row[top.col - 1]
-                    if leftCell.value != 1:
+                    if leftCell.value != QUEEN:
                         leftCell.block_cell()
                 if top.col != len(row) - 1:
                     rightCell = row[top.col + 1]
-                    if rightCell.value != 1:
+                    if rightCell.value != QUEEN:
                         rightCell.block_cell()
 
         return
