@@ -1,21 +1,126 @@
 # Queens/resolver.py
 
 
-class grid:
-    def __init__(self, table: list):
-        self.table = table
-
-
+# DONE
 class Cell:
-    def __init__(self, position: tuple, color: str, value: int = 0):
-        self.position = position
+    def __init__(self, coord: tuple, color: str, value: int = 0):
+        self.row, self.col = coord
         self.color = color
         # 0 = empty, 1 = queen, -1 = blocked
         self.value = value
 
+    def makeQueen(self) -> None:
+        self.value = 1
 
-def build_example_table(testGrid) -> list:
-    """Construit une table d'exemple à partir d'une représentation ASCII.
+    def blockCell(self) -> None:
+        self.value = -1
+
+
+# DONE
+class Grid:
+    def __init__(self, grid: list):
+        self.grid = grid
+
+    def __getitem__(self, index):
+        return self.grid[index]
+
+    def __iter__(self):
+        return iter(self.grid)
+
+    # DONE
+    def findRegions(self) -> list:
+        colors = []
+        regions = []
+        for line in self.grid:
+            for cell in line:
+                if cell.color not in colors:
+                    colors.append(cell.color)
+                    regions.append([])
+                regions[colors.index(cell.color)].append((cell.row, cell.col))
+
+        return regions
+
+    # TODO: claime region
+    def claimCell(self, cell: Cell) -> None:
+        cell.value = 1
+        for row in range(len(self.grid)):
+            for column in range(len(self.grid[0])):
+                if row == cell.row or column == cell.col:
+                    if self.grid[row][column].value == 0:
+                        self.grid[row][column].value = -1
+        self.grid[cell.row - 1][cell.col - 1].value = -1
+        self.grid[cell.row - 1][cell.col + 1].value = -1
+        self.grid[cell.row + 1][cell.col - 1].value = -1
+        self.grid[cell.row + 1][cell.col + 1].value = -1
+        return
+
+    # TOTEST
+    def claimRow(self, left: Cell, right: Cell) -> None:
+        if left.row != right.row:
+            raise ValueError("Left and right cells must be in the same row.")
+        size = abs(left.col - right.col) + 1
+
+        for cell in self.grid[left.row]:
+
+            # if the selected cell is on the left or on the right of the region
+            if cell.row < left.row or cell.row > right.row:
+                cell.blockCell()
+
+            # if the selected cell is on over or under the region
+            elif (size == 2 and cell.col in (left.col, right.col)) or (
+                size == 3 and cell.col == left.col + 1
+            ):
+                if left.row != 0:
+                    upperCell = self.grid[left.row - 1][cell.col]
+                    if upperCell.value != 1:
+                        upperCell.blockCell()
+                if left.row != len(self.grid) - 1:
+                    lowerCell = self.grid[left.row + 1][cell.col]
+                    if lowerCell.value != 1:
+                        lowerCell.blockCell()
+
+        return
+
+    # TOTEST
+    def claimColumn(self, top: Cell, bottom: Cell) -> None:
+        if top.col != bottom.col:
+            raise ValueError("Top and bottom cells must be in the same column.")
+        size = abs(top.row - bottom.row) + 1
+
+        for row in self.grid:
+            cell = row[top.col]
+
+            # if the selected cell is on over or under the region
+            if cell.row < top.row or cell.row > bottom.row:
+                cell.blockCell()
+
+            # claim all sides of the region if size = 2 on the centers if size = 3
+            elif (size == 2 and cell.row in (top.row, bottom.row)) or (
+                size == 3 and cell.row == top.row - 1
+            ):
+                if top.col != 0:
+                    leftCell = row[top.col - 1]
+                    if leftCell.value != 1:
+                        leftCell.blockCell()
+                if top.col != len(row) - 1:
+                    rightCell = row[top.col + 1]
+                    if rightCell.value != 1:
+                        rightCell.blockCell()
+
+        return
+
+    # DONE
+    def claimRegion(self, region: list) -> None:
+        for row in self.grid:
+            for cell in row:
+                if cell.coord in region and cell.value == 0:
+                    cell.blockCell()
+        return
+
+
+# DONE
+def build_example_grid(testGrid: list) -> Grid:
+    """Construit une grid d'exemple à partir d'une représentation ASCII.
 
     Lettres utilisées dans cet exemple:
     C = cyan, R = red, B = blue, O = orange, G = green
@@ -32,72 +137,20 @@ def build_example_table(testGrid) -> list:
         "W": "white",
     }
 
-    table = []
+    grid = []
     for r, line in enumerate(testGrid):
         row = []
         for c, token in enumerate(line.split()):
             color = mapping.get(token, "unknown")
             row.append(Cell((r, c), color))
-        table.append(row)
+        grid.append(row)
 
-    return table
-
-
-def findRegions(table: list) -> list:
-    colors = []
-    regions = []
-    for line in table:
-        for cell in line:
-            if cell.color not in colors:
-                colors.append(cell.color)
-                regions.append([])
-            regions[colors.index(cell.color)].append(cell.position)
-
-    return regions
+    return grid
 
 
-def printRegions(regions: list) -> None:
-    print("Found regions (list of positions per color):")
-    for i, region in enumerate(regions):
-        print(f"Region {i}: {region}")
-
-
-def claimCell(table: list, cell: Cell) -> None:
-    cell.value = 1
-    for row in range(len(table)):
-        for column in range(len(table[0])):
-            if row == cell.position[0] or column == cell.position[1]:
-                if table[row][column].value == 0:
-                    table[row][column].value = -1
-    table[cell.position[0] - 1][cell.position[1] - 1].value = -1
-    table[cell.position[0] - 1][cell.position[1] + 1].value = -1
-    table[cell.position[0] + 1][cell.position[1] - 1].value = -1
-    table[cell.position[0] + 1][cell.position[1] + 1].value = -1
-    return
-
-
-def claimRow(table: list, left: Cell, right: Cell) -> None:
-    size = abs(left.position[1] - right.position[1])
-    for cell in table[left.position[0]]:
-        if cell.position[0] < left.position[0] or cell.position[0] > right.position[0]:
-            cell.value = -1
-
-        if cell.position[0] in (left.position[0] - 1, left.position[0] + 1):
-            if (size == 2 and cell.position[1] in (left.position[1], right.position[1])) or (
-                size == 3 and cell.position[1] == left.position[1] + 1
-            ):
-                cell.value = -1
-
-    return
-
-def claimRegion(table: list, region: list) -> None:
-    for cell in table:
-        if cell.position in region:
-            cell.value = -1
-    return
-
-def printGrid(table: list) -> None:
-    for row in table:
+# DONE
+def printGrid(grid: Grid) -> None:
+    for row in grid:
         for cell in row:
             if cell.color == "red":
                 print("\033[41m", end="")
@@ -128,14 +181,22 @@ def printGrid(table: list) -> None:
         print("\033[90m")
 
 
-def main(table: list) -> None:
-    if not table or table == [[]]:
+# DONE
+def printRegions(regions: list) -> None:
+    print("Found regions (list of coords per color):")
+    for i, region in enumerate(regions):
+        print(f"Region {i}: {region}")
+
+
+def main(grid: Grid) -> None:
+    if not grid or grid == [[]]:
         print("This is the Queens resolver module.")
 
-    regions = findRegions(table)
+    regions = grid.findRegions()
     printRegions(regions)
-    claimCell(table, table[4][3])  # Example: claim cell at (3, 3)
-    printGrid(table)
+    # grid.claimCell(grid[4][3])
+    grid.claimColumn(grid[3][3], grid[4][3])
+    printGrid(grid)
 
 
 if __name__ == "__main__":
@@ -148,5 +209,5 @@ if __name__ == "__main__":
         "R R B B B G G",
         "R R R R B G G",
     ]
-    example = build_example_table(testGrid)
+    example = Grid(build_example_grid(testGrid))
     main(example)
