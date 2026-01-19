@@ -80,8 +80,8 @@ class Grid:
         for cell in self.grid[left.row]:
 
             # if the selected cell is on the left or on the right of the region
-            if cell.row < left.row or cell.row > right.row and cell.is_empty():
-                cell.block_cell()
+            if (cell.col < left.col or cell.col > right.col) and cell.is_empty():
+                    cell.block_cell()
 
             # if the selected cell is on over or under the region
             elif (size == 2 and cell.col in (left.col, right.col)) or (
@@ -214,7 +214,8 @@ def main(grid: Grid) -> None:
     regions = grid.find_regions()
     printRegions(regions)
     # grid.claimCell(grid[4][3])
-    grid.claim_column(grid[3][3], grid[4][3])
+    # grid.claim_column(grid[3][3], grid[4][3])
+    grid.claim_row(grid[5][2], grid[5][4])
     printGrid(grid)
 
 
