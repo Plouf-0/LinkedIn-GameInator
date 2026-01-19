@@ -86,7 +86,7 @@ class Grid:
         self.grid[cell.row + 1][cell.col - 1].value = BLOCKED
         self.grid[cell.row + 1][cell.col + 1].value = BLOCKED
 
-        self.claim_region()
+        self.claim_region(cell)
 
         return
 
@@ -227,9 +227,9 @@ def main(grid: Grid) -> None:
 
     regions = grid.find_regions()
     printRegions(regions)
-    # grid.claimCell(grid[4][3])
+    grid.claim_cell(grid[4][1])
     # grid.claim_column(grid[3][3], grid[4][3])
-    grid.claim_row(grid[5][2], grid[5][4])
+    # grid.claim_row(grid[5][2], grid[5][4])
     printGrid(grid)
 
 
