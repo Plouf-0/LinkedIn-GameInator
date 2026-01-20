@@ -151,6 +151,83 @@ class Grid:
 
         return
 
+    # WIP
+    def claim_corner(self, cells: list) -> None:
+        if cells[0].row == cells[1].row:
+            # ¤ ¤
+            # ¤
+            if cells[0].col == cells[1].col:
+                self.grid[cells[0].row - 1][cells[0].col].block_cell()  # ↑
+                self.grid[cells[0].row][cells[0].col - 1].block_cell()  # ←
+                self.grid[cells[0].row + 1][cells[0].col + 1].block_cell()  # ↘
+            # ¤ ¤
+            #   ¤
+            else:
+                self.grid[cells[1].row - 1][cells[1].col].block_cell()  # ↑
+                self.grid[cells[1].row][cells[1].col + 1].block_cell()  # →
+                self.grid[cells[1].row + 1][cells[1].col - 1].block_cell()  # ↙
+        # ¤
+        # ¤ ¤
+        elif cells[0].col == cells[1].col:
+            self.grid[cells[1].row + 1][cells[1].col].block_cell()  # ↓
+            self.grid[cells[1].row][cells[1].col - 1].block_cell()  # ←
+            self.grid[cells[1].row - 1][cells[1].col + 1].block_cell()  # ↗
+        #   ¤
+        # ¤ ¤
+        else:
+            self.grid[cells[2].row + 1][cells[2].col].block_cell()  # ↓
+            self.grid[cells[2].row][cells[2].col + 1].block_cell()  # →
+            self.grid[cells[2].row - 1][cells[2].col - 1].block_cell()  # ↖
+
+        return
+
+    # WIP
+    def resolve(self) -> None:
+
+        singles = [
+            self.grid[row][col]
+            for region in self.regions
+            if len(region) == 1
+            for (row, col) in region
+        ]
+
+        duos = [
+            (self.grid[r1][c1], self.grid[r2][c2])
+            for region in self.regions
+            if len(region) == 2
+            for (r1, c1), (r2, c2) in [region]
+        ]
+
+        trios = [
+            [self.grid[r1][c1], self.grid[r2][c2], self.grid[r3][c3]]
+            for region in self.regions
+            if len(region) == 3
+            for (r1, c1), (r2, c2), (r3, c3) in [region]
+        ]
+
+        for cell in singles:
+            self.claim_cell(cell)
+
+        for duo in duos:
+            if duo[0].row == duo[1].row:
+                self.claim_row(duo[0], duo[1])
+            elif duo[0].col == duo[1].col:
+                self.claim_column(duo[0], duo[1])
+            else:
+                warn("Duo is not aligned in row or column.")
+
+        for trio in trios:
+            rows = {cell.row for cell in trio}
+            cols = {cell.col for cell in trio}
+            if len(rows) == 1:
+                self.claim_row(trio[0], trio[2])
+            elif len(cols) == 1:
+                self.claim_column(trio[0], trio[2])
+            else:
+                self.claim_corner(trio)
+
+        return
+
 
 # DONE
 def build_example_grid(testGrid: list) -> Grid:
