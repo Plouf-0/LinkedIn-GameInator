@@ -343,12 +343,18 @@ if __name__ == "__main__":
         "R R B B B G G",
         "R R R R B G G",
     ]
-    
+
     testGrid2 = [
-        "R R R R",
-        "R R R R",
-        "R R R R",
-        "R R R R",
+        "P P P P P P P P P P",
+        "P P P P V P N P P P",
+        "P P P P V P N P P P",
+        "P P P B V G N P P P",
+        "P P P B V G N P P P",
+        "P P R R R R R R P P",
+        "P P C C C C C C P P",
+        "P O O O O O O O O P",
+        "P W W W W W W W W P",
+        "Y Y Y Y Y Y Y Y Y P",
     ]
-    example = build_example_grid(testGrid)
+    example = build_example_grid(testGrid2)
     main(example)
