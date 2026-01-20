@@ -152,7 +152,7 @@ class Grid:
 
         return
 
-    # WIP
+    # DONE
     def claim_corner(self, cells: list) -> None:
         if cells[0].row == cells[1].row:
             # ¤ ¤
@@ -280,23 +280,25 @@ def printGrid(grid: Grid) -> None:
         print(f" {i} ", end="")
         for cell in row:
             if cell.color == "red":
-                print("\033[41m", end="")
+                print("\033[1;30;41m", end="")
             elif cell.color == "cyan":
-                print("\033[46m", end="")
+                print("\033[1;30;46m", end="")
             elif cell.color == "blue":
-                print("\033[44m", end="")
+                print("\033[1;30;44m", end="")
             elif cell.color == "orange":
-                print("\033[43m", end="")
+                print("\033[1;30;43m", end="")
             elif cell.color == "green":
-                print("\033[42m", end="")
+                print("\033[1;30;42m", end="")
             elif cell.color == "yellow":
-                print("\033[103m", end="")
+                print("\033[1;30;103m", end="")
             elif cell.color == "purple":
-                print("\033[45m", end="")
-            elif cell.color == "white":
-                print("\033[40m", end="")
+                print("\033[1;30;45m", end="")
+            elif cell.color == "gray":
+                print("\033[1;30;40m", end="")
+            elif cell.color == "black":
+                print("\033[1;30;47m", end="")
             else:
-                print("\033[90m", end="")
+                print("\033[0m", end="")
 
             if cell.value == QUEEN:
                 print(" Q ", end="")
@@ -307,6 +309,7 @@ def printGrid(grid: Grid) -> None:
             print("\033[0m", end="")
         print("\033[0m ")
 
+    return
 
 # DONE
 def printRegions(regions: list) -> None:
@@ -330,6 +333,8 @@ def print_color_palette() -> None:
 def main(grid: Grid) -> None:
     if not grid or grid == [[]]:
         print("This is the Queens resolver module.")
+
+    printGrid(grid)
 
     # printRegions(grid.regions)
     # grid.claim_cell(grid[4][1])
