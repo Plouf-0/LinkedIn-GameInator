@@ -6,6 +6,7 @@ EMPTY = 0
 QUEEN = 1
 BLOCKED = -1
 
+
 # DONE
 class Cell:
     def __init__(self, coord: tuple, color: str, value: int = 0):
@@ -73,7 +74,7 @@ class Grid:
                 cell.block_cell()
         return
 
-    # TODO: claim region
+    # DONE
     def claim_cell(self, cell: Cell) -> None:
         cell.value = QUEEN
         for row in range(len(self.grid)):
@@ -90,7 +91,7 @@ class Grid:
 
         return
 
-    # TOTEST
+    # DONE
     def claim_row(self, left: Cell, right: Cell) -> None:
         if left.row != right.row:
             raise ValueError("Left and right cells must be in the same row.")
@@ -120,7 +121,7 @@ class Grid:
 
         return
 
-    # TOTEST
+    # DONE
     def claim_column(self, top: Cell, bottom: Cell) -> None:
         if top.col != bottom.col:
             raise ValueError("Top and bottom cells must be in the same column.")
@@ -258,6 +259,7 @@ def build_example_grid(testGrid: list) -> Grid:
 
     return Grid(grid)
 
+
 # DONE
 def printGrid(grid: Grid) -> None:
     print("⟍  ", end="")
@@ -307,11 +309,13 @@ def main(grid: Grid) -> None:
     if not grid or grid == [[]]:
         print("This is the Queens resolver module.")
 
-    regions = grid.find_regions()
-    printRegions(regions)
-    grid.claim_cell(grid[4][1])
+    # printRegions(grid.regions)
+    # grid.claim_cell(grid[4][1])
     # grid.claim_column(grid[3][3], grid[4][3])
     # grid.claim_row(grid[5][2], grid[5][4])
+
+    grid.resolve()
+
     printGrid(grid)
 
 
@@ -324,6 +328,13 @@ if __name__ == "__main__":
         "R R P O P G G",
         "R R B B B G G",
         "R R R R B G G",
+    ]
+    
+    testGrid2 = [
+        "R R R R",
+        "R R R R",
+        "R R R R",
+        "R R R R",
     ]
     example = build_example_grid(testGrid)
     main(example)
