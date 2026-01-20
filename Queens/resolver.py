@@ -183,7 +183,12 @@ def build_example_grid(testGrid: list) -> Grid:
 
 # DONE
 def printGrid(grid: Grid) -> None:
-    for row in grid:
+    print("⟍  ", end="")
+    for i in range(len(grid.grid)):
+        print(f" {i} ", end="")
+    print()
+    for i, row in enumerate(grid.grid):
+        print(f" {i} ", end="")
         for cell in row:
             if cell.color == "red":
                 print("\033[41m", end="")
