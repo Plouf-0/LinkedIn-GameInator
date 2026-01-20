@@ -243,10 +243,12 @@ def build_example_grid(testGrid: list) -> Grid:
         "R": "red",
         "B": "blue",
         "O": "orange",
-        "G": "green",
+        "V": "green", # "V" for vert (green in French)
         "Y": "yellow",
         "P": "purple",
         "W": "white",
+        "G": "gray",
+        "N": "black", # "N" for noir (black in French)
     }
 
     grid = []
