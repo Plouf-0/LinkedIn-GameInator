@@ -227,6 +227,14 @@ class Grid:
             else:
                 self.claim_corner(trio)
 
+        # One liner/column
+        for region in self.regions:
+            rows = {cell[0] for cell in region}
+            cols = {cell[1] for cell in region}
+            if len(rows) == 1:
+                self.claim_row(self.grid[region[0][0]][region[0][1]], self.grid[region[-1][0]][region[-1][1]])
+            elif len(cols) == 1:
+                self.claim_column(self.grid[region[0][0]][region[0][1]], self.grid[region[-1][0]][region[-1][1]])
         return
 
 
