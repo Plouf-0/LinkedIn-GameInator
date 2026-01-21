@@ -261,7 +261,7 @@ class Grid:
     def resolve(self) -> None:
 
         iteration = 0
-        while not self.is_grid_finished() or iteration < 10:
+        while iteration < 50:
             iteration += 1
 
             singles = []
