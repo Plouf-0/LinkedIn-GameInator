@@ -335,7 +335,11 @@ class Grid:
                     two_rowcol_regions.append(region)
             self._claim_parallel(two_rowcol_regions)
 
-            printGrid(self)
+            # printGrid(self)
+
+            if self._is_grid_finished():
+                print("Grid solved!")
+                break
 
         return
 
