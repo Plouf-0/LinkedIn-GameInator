@@ -52,7 +52,14 @@ class Grid:
         return True
 
     # DONE
-    def find_regions(self) -> list:
+    def _safe_block(self, r, c):
+        if 0 <= r < len(self.grid) and 0 <= c < len(self.grid[0]):
+            cell = self.grid[r][c]
+            if cell.value != QUEEN:
+                cell.block_cell()
+
+    # DONE
+    def _find_regions(self) -> list:
         colors = []
         regions = []
         for line in self.grid:
