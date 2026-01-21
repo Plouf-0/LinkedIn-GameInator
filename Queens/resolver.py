@@ -340,6 +340,8 @@ class Grid:
             if self._is_grid_finished():
                 print("Grid solved!")
                 break
+            if iteration == 49:
+                print("Max iterations reached, stopping resolution.")
 
         return
 
@@ -488,5 +490,5 @@ if __name__ == "__main__":
         "P R R P P P P P",
         "P P P P P P P P",
     ]
-    example = build_example_grid(testGrid)
+    example = build_example_grid(testGrid2)
     main(example)
