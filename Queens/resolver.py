@@ -44,7 +44,7 @@ class Grid:
         return iter(self.grid)
 
     # DONE
-    def is_grid_finished(self) -> bool:
+    def _is_grid_finished(self) -> bool:
         for row in self.grid:
             for cell in row:
                 if cell.is_empty():
@@ -488,5 +488,5 @@ if __name__ == "__main__":
         "P R R P P P P P",
         "P P P P P P P P",
     ]
-    example = build_example_grid(testGrid2)
+    example = build_example_grid(testGrid)
     main(example)
