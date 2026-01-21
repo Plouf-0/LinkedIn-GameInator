@@ -44,6 +44,14 @@ class Grid:
         return iter(self.grid)
 
     # DONE
+    def is_grid_finished(self) -> bool:
+        for row in self.grid:
+            for cell in row:
+                if cell.is_empty():
+                    return False
+        return True
+
+    # DONE
     def find_regions(self) -> list:
         colors = []
         regions = []
@@ -122,6 +130,32 @@ class Grid:
         return
 
     # DONE
+    def claim_row_parallel(self, cells1: list, cells2: list) -> None:
+        color1 = cells1[0].color
+        color2 = cells2[0].color
+        rows = {cell.row for cell in cells1}
+
+        for row in rows:
+            for cell in self.grid[row]:
+                if cell.color != color1 and cell.color != color2:
+                    if cell.is_empty():
+                        cell.block_cell()
+        return
+
+    # DONE
+    def claim_column_parallel(self, cells1: list, cells2: list) -> None:
+        color1 = cells1[0].color
+        color2 = cells2[0].color
+        cols = {cell.col for cell in cells1}
+
+        for col in cols:
+            for cell in self.grid:
+                target_cell = cell[col]
+                if target_cell.color != color1 and target_cell.color != color2:
+                    if target_cell.is_empty():
+                        target_cell.block_cell()
+
+    # DONE
     def claim_column(self, top: Cell, bottom: Cell) -> None:
         if top.col != bottom.col:
             raise ValueError("Top and bottom cells must be in the same column.")
@@ -182,59 +216,121 @@ class Grid:
 
         return
 
+    # WIP first version for 2 empty-cells regions
+    def claim_parallel(self, regions: list) -> None:
+        horizontal_regions = []
+        vertical_regions = []
+        for region in regions:
+            rows = {cell.row for cell in region}
+            cols = {cell.col for cell in region}
+            if len(rows) == 2:
+                vertical_regions.append(region)
+            if len(cols) == 2:
+                horizontal_regions.append(region)
+        for vertical_region_index in range(len(vertical_regions)):
+            for vertical_region_index2 in range(
+                vertical_region_index + 1, len(vertical_regions)
+            ):
+                vertical_region1 = vertical_regions[vertical_region_index]
+                vertical_region2 = vertical_regions[vertical_region_index2]
+                rows1 = {cell.row for cell in vertical_region1}
+                rows2 = {cell.row for cell in vertical_region2}
+                if rows1 == rows2:
+                    self.claim_row_parallel(vertical_region1, vertical_region2)
+
+        for horizontal_region_index in range(len(horizontal_regions)):
+            for horizontal_region_index2 in range(
+                horizontal_region_index + 1, len(horizontal_regions)
+            ):
+                horizontal_region1 = horizontal_regions[horizontal_region_index]
+                horizontal_region2 = horizontal_regions[horizontal_region_index2]
+                cols1 = {cell.col for cell in horizontal_region1}
+                cols2 = {cell.col for cell in horizontal_region2}
+                if cols1 == cols2:
+                    self.claim_column_parallel(horizontal_region1, horizontal_region2)
+        return
+
     # WIP
     def resolve(self) -> None:
 
-        singles = [
-            self.grid[row][col]
-            for region in self.regions
-            if len(region) == 1
-            for (row, col) in region
-        ]
+        iteration = 0
+        while not self.is_grid_finished() or iteration < 10:
+            iteration += 1
 
-        duos = [
-            (self.grid[r1][c1], self.grid[r2][c2])
-            for region in self.regions
-            if len(region) == 2
-            for (r1, c1), (r2, c2) in [region]
-        ]
+            singles = [
+                self.grid[row][col]
+                for region in self.regions
+                if len(region) == 1
+                for (row, col) in region
+            ]
 
-        trios = [
-            [self.grid[r1][c1], self.grid[r2][c2], self.grid[r3][c3]]
-            for region in self.regions
-            if len(region) == 3
-            for (r1, c1), (r2, c2), (r3, c3) in [region]
-        ]
+            duos = [
+                (self.grid[r1][c1], self.grid[r2][c2])
+                for region in self.regions
+                if len(region) == 2
+                for (r1, c1), (r2, c2) in [region]
+            ]
 
-        for cell in singles:
-            self.claim_cell(cell)
+            trios = [
+                [self.grid[r1][c1], self.grid[r2][c2], self.grid[r3][c3]]
+                for region in self.regions
+                if len(region) == 3
+                for (r1, c1), (r2, c2), (r3, c3) in [region]
+            ]
 
-        for duo in duos:
-            if duo[0].row == duo[1].row:
-                self.claim_row(duo[0], duo[1])
-            elif duo[0].col == duo[1].col:
-                self.claim_column(duo[0], duo[1])
-            else:
-                warn("Duo is not aligned in row or column.")
+            for cell in singles:
+                self.claim_cell(cell)
 
-        for trio in trios:
-            rows = {cell.row for cell in trio}
-            cols = {cell.col for cell in trio}
-            if len(rows) == 1:
-                self.claim_row(trio[0], trio[2])
-            elif len(cols) == 1:
-                self.claim_column(trio[0], trio[2])
-            else:
-                self.claim_corner(trio)
+            for duo in duos:
+                if duo[0].row == duo[1].row:
+                    self.claim_row(duo[0], duo[1])
+                elif duo[0].col == duo[1].col:
+                    self.claim_column(duo[0], duo[1])
+                else:
+                    warn("Duo is not aligned in row or column.")
 
-        # One liner/column
-        for region in self.regions:
-            rows = {cell[0] for cell in region}
-            cols = {cell[1] for cell in region}
-            if len(rows) == 1:
-                self.claim_row(self.grid[region[0][0]][region[0][1]], self.grid[region[-1][0]][region[-1][1]])
-            elif len(cols) == 1:
-                self.claim_column(self.grid[region[0][0]][region[0][1]], self.grid[region[-1][0]][region[-1][1]])
+            for trio in trios:
+                rows = {cell.row for cell in trio}
+                cols = {cell.col for cell in trio}
+                if len(rows) == 1:
+                    self.claim_row(trio[0], trio[2])
+                elif len(cols) == 1:
+                    self.claim_column(trio[0], trio[2])
+                else:
+                    self.claim_corner(trio)
+
+            emptycells_regions = []
+            # One liner/column
+            for region in self.regions:
+                rows = {cell[0] for cell in region}
+                cols = {cell[1] for cell in region}
+                if len(rows) == 1:
+                    self.claim_row(
+                        self.grid[region[0][0]][region[0][1]],
+                        self.grid[region[-1][0]][region[-1][1]],
+                    )
+                elif len(cols) == 1:
+                    self.claim_column(
+                        self.grid[region[0][0]][region[0][1]],
+                        self.grid[region[-1][0]][region[-1][1]],
+                    )
+
+                # regrouper les regions qui ont soit 2 lignes et x colonnes en commun soit 2 colonnes et x lignes en commun en ne regardant que les cellules vides
+                emptycells_regions.append([])
+                for cell in region:
+                    if self.grid[cell[0]][cell[1]].is_empty():
+                        emptycells_regions[-1].append(self.grid[cell[0]][cell[1]])
+
+            two_rowcol_regions = []
+            for region in emptycells_regions:
+                rows = {cell.row for cell in region}
+                cols = {cell.col for cell in region}
+                if len(rows) == 2 or len(cols) == 2:
+                    two_rowcol_regions.append(region)
+            self.claim_parallel(two_rowcol_regions)
+
+            printGrid(self)
+
         return
 
 
@@ -251,12 +347,12 @@ def build_example_grid(testGrid: list) -> Grid:
         "R": "red",
         "B": "blue",
         "O": "orange",
-        "V": "green", # "V" for vert (green in French)
+        "V": "green",  # "V" for vert (green in French)
         "Y": "yellow",
         "P": "purple",
         "W": "white",
         "G": "gray",
-        "N": "black", # "N" for noir (black in French)
+        "N": "black",  # "N" for noir (black in French)
     }
 
     grid = []
@@ -311,11 +407,13 @@ def printGrid(grid: Grid) -> None:
 
     return
 
+
 # DONE
 def printRegions(regions: list) -> None:
     print("Found regions (list of coords per color):")
     for i, region in enumerate(regions):
         print(f"Region {i}: {region}")
+
 
 # DONE
 def print_color_palette() -> None:
@@ -368,6 +466,17 @@ if __name__ == "__main__":
         "P O O O O O O O O P",
         "P W W W W W W W W P",
         "Y Y Y Y Y Y Y Y Y P",
+    ]
+
+    testGrid3 = [
+        "P P P P P P P P",
+        "P V V P P W W P",
+        "P V V P P W W P",
+        "P P P P P P P P",
+        "P P P P P P P P",
+        "P R R P P P P P",
+        "P R R P P P P P",
+        "P P P P P P P P",
     ]
     example = build_example_grid(testGrid2)
     main(example)
