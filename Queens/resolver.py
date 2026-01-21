@@ -35,7 +35,7 @@ class Cell:
 class Grid:
     def __init__(self, grid: list):
         self.grid = grid
-        self.regions = self.find_regions()
+        self.regions = self._find_regions()
 
     def __getitem__(self, index):
         return self.grid[index]
@@ -72,7 +72,7 @@ class Grid:
         return regions
 
     # DONE
-    def claim_region(self, targetCell: Cell) -> None:
+    def _claim_region(self, targetCell: Cell) -> None:
         # find the region of the target cell
         region = None
         for regs in self.regions:
@@ -90,7 +90,7 @@ class Grid:
         return
 
     # DONE
-    def claim_cell(self, cell: Cell) -> None:
+    def _claim_cell(self, cell: Cell) -> None:
         cell.value = QUEEN
         for row in range(len(self.grid)):
             for column in range(len(self.grid[0])):
@@ -107,7 +107,7 @@ class Grid:
         return
 
     # DONE
-    def claim_row(self, left: Cell, right: Cell) -> None:
+    def _claim_row(self, left: Cell, right: Cell) -> None:
         if left.row != right.row:
             raise ValueError("Left and right cells must be in the same row.")
         if left.col > right.col:
@@ -137,7 +137,7 @@ class Grid:
         return
 
     # DONE
-    def claim_row_parallel(self, cells1: list, cells2: list) -> None:
+    def _claim_row_parallel(self, cells1: list, cells2: list) -> None:
         color1 = cells1[0].color
         color2 = cells2[0].color
         rows = {cell.row for cell in cells1}
@@ -150,7 +150,7 @@ class Grid:
         return
 
     # DONE
-    def claim_column_parallel(self, cells1: list, cells2: list) -> None:
+    def _claim_column_parallel(self, cells1: list, cells2: list) -> None:
         color1 = cells1[0].color
         color2 = cells2[0].color
         cols = {cell.col for cell in cells1}
@@ -163,7 +163,7 @@ class Grid:
                         target_cell.block_cell()
 
     # DONE
-    def claim_column(self, top: Cell, bottom: Cell) -> None:
+    def _claim_column(self, top: Cell, bottom: Cell) -> None:
         if top.col != bottom.col:
             raise ValueError("Top and bottom cells must be in the same column.")
         if top.row > bottom.row:
@@ -194,7 +194,7 @@ class Grid:
         return
 
     # DONE
-    def claim_corner(self, cells: list) -> None:
+    def _claim_corner(self, cells: list) -> None:
         if cells[0].row == cells[1].row:
             # ¤ ¤
             # ¤
@@ -224,7 +224,7 @@ class Grid:
         return
 
     # WIP first version for 2 empty-cells regions
-    def claim_parallel(self, regions: list) -> None:
+    def _claim_parallel(self, regions: list) -> None:
         horizontal_regions = []
         vertical_regions = []
         for region in regions:
@@ -243,7 +243,7 @@ class Grid:
                 rows1 = {cell.row for cell in vertical_region1}
                 rows2 = {cell.row for cell in vertical_region2}
                 if rows1 == rows2:
-                    self.claim_row_parallel(vertical_region1, vertical_region2)
+                    self._claim_row_parallel(vertical_region1, vertical_region2)
 
         for horizontal_region_index in range(len(horizontal_regions)):
             for horizontal_region_index2 in range(
@@ -254,7 +254,7 @@ class Grid:
                 cols1 = {cell.col for cell in horizontal_region1}
                 cols2 = {cell.col for cell in horizontal_region2}
                 if cols1 == cols2:
-                    self.claim_column_parallel(horizontal_region1, horizontal_region2)
+                    self._claim_column_parallel(horizontal_region1, horizontal_region2)
         return
 
     # WIP
@@ -264,12 +264,11 @@ class Grid:
         while not self.is_grid_finished() or iteration < 10:
             iteration += 1
 
-            singles = [
-                self.grid[row][col]
-                for region in self.regions
-                if len(region) == 1
-                for (row, col) in region
-            ]
+            singles = []
+            for region in self.regions:
+                empty_cells = [self.grid[r][c] for (r, c) in region if self.grid[r][c].is_empty()]
+                if len(empty_cells) == 1:
+                    singles.append(empty_cells[0])
 
             duos = [
                 (self.grid[r1][c1], self.grid[r2][c2])
@@ -286,13 +285,13 @@ class Grid:
             ]
 
             for cell in singles:
-                self.claim_cell(cell)
+                self._claim_cell(cell)
 
             for duo in duos:
                 if duo[0].row == duo[1].row:
-                    self.claim_row(duo[0], duo[1])
+                    self._claim_row(duo[0], duo[1])
                 elif duo[0].col == duo[1].col:
-                    self.claim_column(duo[0], duo[1])
+                    self._claim_column(duo[0], duo[1])
                 else:
                     warn("Duo is not aligned in row or column.")
 
@@ -300,11 +299,11 @@ class Grid:
                 rows = {cell.row for cell in trio}
                 cols = {cell.col for cell in trio}
                 if len(rows) == 1:
-                    self.claim_row(trio[0], trio[2])
+                    self._claim_row(trio[0], trio[2])
                 elif len(cols) == 1:
-                    self.claim_column(trio[0], trio[2])
+                    self._claim_column(trio[0], trio[2])
                 else:
-                    self.claim_corner(trio)
+                    self._claim_corner(trio)
 
             emptycells_regions = []
             # One liner/column
@@ -312,12 +311,12 @@ class Grid:
                 rows = {cell[0] for cell in region}
                 cols = {cell[1] for cell in region}
                 if len(rows) == 1:
-                    self.claim_row(
+                    self._claim_row(
                         self.grid[region[0][0]][region[0][1]],
                         self.grid[region[-1][0]][region[-1][1]],
                     )
                 elif len(cols) == 1:
-                    self.claim_column(
+                    self._claim_column(
                         self.grid[region[0][0]][region[0][1]],
                         self.grid[region[-1][0]][region[-1][1]],
                     )
@@ -334,7 +333,7 @@ class Grid:
                 cols = {cell.col for cell in region}
                 if len(rows) == 2 or len(cols) == 2:
                     two_rowcol_regions.append(region)
-            self.claim_parallel(two_rowcol_regions)
+            self._claim_parallel(two_rowcol_regions)
 
             printGrid(self)
 
