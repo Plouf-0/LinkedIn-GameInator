@@ -97,12 +97,12 @@ class Grid:
                 if row == cell.row or column == cell.col:
                     if self.grid[row][column].value == EMPTY:
                         self.grid[row][column].value = BLOCKED
-        self.grid[cell.row - 1][cell.col - 1].value = BLOCKED
-        self.grid[cell.row - 1][cell.col + 1].value = BLOCKED
-        self.grid[cell.row + 1][cell.col - 1].value = BLOCKED
-        self.grid[cell.row + 1][cell.col + 1].value = BLOCKED
 
-        self.claim_region(cell)
+        self._safe_block(cell.row - 1, cell.col - 1)
+        self._safe_block(cell.row - 1, cell.col + 1)
+        self._safe_block(cell.row + 1, cell.col - 1)
+        self._safe_block(cell.row + 1, cell.col + 1)
+        self._claim_region(cell)
 
         return
 
