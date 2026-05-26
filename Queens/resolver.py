@@ -1,6 +1,7 @@
 # Queens/resolver.py
 
 from warnings import warn
+from typing import Tuple
 
 EMPTY = 0
 QUEEN = 1
@@ -9,13 +10,13 @@ BLOCKED = -1
 
 # DONE
 class Cell:
-    def __init__(self, coord: tuple, color: str, value: int = 0):
+    def __init__(self, coord: Tuple[int, int], color: str, value: int = 0):
         self.row, self.col = coord
         self.color = color
         self.value = value
 
     @property
-    def coord(self) -> tuple[int, int]:
+    def coord(self) -> Tuple[int, int]:
         return (self.row, self.col)
 
     def make_queen(self) -> None:
@@ -377,7 +378,6 @@ def build_example_grid(testGrid: list) -> Grid:
 
     return Grid(grid)
 
-
 # DONE
 def printGrid(grid: Grid) -> None:
     print("⟍  ", end="")
@@ -419,13 +419,11 @@ def printGrid(grid: Grid) -> None:
 
     return
 
-
 # DONE
 def printRegions(regions: list) -> None:
     print("Found regions (list of coords per color):")
     for i, region in enumerate(regions):
         print(f"Region {i}: {region}")
-
 
 # DONE
 def print_color_palette() -> None:
@@ -440,7 +438,7 @@ def print_color_palette() -> None:
     return
 
 
-def main(grid: Grid) -> None:
+def QueenResolver(grid: Grid) -> None:
     if not grid or grid == [[]]:
         print("This is the Queens resolver module.")
 
@@ -491,4 +489,4 @@ if __name__ == "__main__":
         "P P P P P P P P",
     ]
     example = build_example_grid(testGrid2)
-    main(example)
+    QueenResolver(example)
