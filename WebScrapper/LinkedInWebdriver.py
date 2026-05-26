@@ -27,9 +27,8 @@ def main():
         except:
             raise Exception("alternate-signin-container not found")
         else:
-            _: int = driver.execute_script(
-                "(document.getElementsByClassName('alternate-signin-container'))[0].setAttribute('style', 'visibility: hidden');",
-                
+            driver.execute_script(
+                "(document.getElementsByClassName('alternate-signin-container'))[0].setAttribute('style', 'visibility: hidden');"
             )
 
         # Hide credential_picker_container
