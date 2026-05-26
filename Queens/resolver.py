@@ -1,7 +1,17 @@
 # Queens/resolver.py
 
 from warnings import warn
+from dataclasses import dataclass, field
+import logging
 from typing import List, Tuple, Set
+
+# Try to import UI helpers from the same folder; prefer relative import when used as a package
+try:
+    from . import ui  # type: ignore
+except Exception:
+    import ui  # type: ignore
+
+logger = logging.getLogger(__name__)
 
 EMPTY = 0
 QUEEN = 1
@@ -9,8 +19,15 @@ BLOCKED = -1
 
 
 # DONE
+@dataclass
 class Cell:
-    def __init__(self, coord: Tuple[int, int], color: str, value: int = 0):
+    # dataclass with custom __init__ to keep existing construction API
+    row: int = field(init=False)
+    col: int = field(init=False)
+    color: str = field(init=False)
+    value: int = field(default=EMPTY)
+
+    def __init__(self, coord: Tuple[int, int], color: str, value: int = EMPTY):
         self.row, self.col = coord
         self.color = color
         self.value = value
@@ -28,7 +45,7 @@ class Cell:
     def is_empty(self) -> bool:
         return self.value == EMPTY
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Cell({self.row},{self.col},{self.color},{self.value})"
 
 
@@ -338,10 +355,10 @@ class Grid:
             # printGrid(self)
 
             if self._is_grid_finished():
-                print("Grid solved!")
+                logger.info("Grid solved!")
                 break
             if iteration == 49:
-                print("Max iterations reached, stopping resolution.")
+                logger.info("Max iterations reached, stopping resolution.")
 
         return
 
@@ -441,7 +458,8 @@ def QueenResolver(grid: Grid) -> None:
     if not grid or not grid.grid:
         print("This is the Queens resolver module.")
 
-    printGrid(grid)
+    # Use the UI module for printing
+    ui.print_grid(grid)
 
     # printRegions(grid.regions)
     # grid.claim_cell(grid[4][1])
@@ -450,7 +468,7 @@ def QueenResolver(grid: Grid) -> None:
 
     grid.resolve()
 
-    printGrid(grid)
+    ui.print_grid(grid)
 
 
 if __name__ == "__main__":
