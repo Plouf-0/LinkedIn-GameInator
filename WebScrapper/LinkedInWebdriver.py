@@ -2,6 +2,8 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.remote.webdriver import WebDriver
+from typing import Callable, Any, cast
 
 
 def main():
@@ -9,13 +11,15 @@ def main():
     login_url = "https://www.linkedin.com/uas/login?session_redirect=%2Fgames%2F&fromSignIn=true&trk=games_nav-header-signin"
 
     # DONE Open LinkedIn login window with redirection
-    driver = webdriver.Firefox()
+    driver: WebDriver = webdriver.Firefox()
     driver.get(login_url)
     assert "LinkedIn" in driver.title
 
-    # DONE Wait until page loaded
+    # DONE Wait until page loaded then hide google auth elems
     time_to_wait_page_loaded = 1
-    # DONE Hide google auth elems
+
+    # Helper typed reference to execute_script to satisfy type checkers
+    exec_script: Callable[..., Any] = cast(Callable[..., Any], driver.execute_script)  # type: ignore
     try:
         # Hide alternate-signin-container
         try:
@@ -27,7 +31,7 @@ def main():
         except:
             raise Exception("alternate-signin-container not found")
         else:
-            driver.execute_script(
+            exec_script(  # type: ignore
                 "(document.getElementsByClassName('alternate-signin-container'))[0].setAttribute('style', 'visibility: hidden');"
             )
 
@@ -39,7 +43,7 @@ def main():
         except:
             raise Exception("credential_picker_container not found")
         else:
-            driver.execute_script(
+            exec_script(  # type: ignore
                 "document.getElementById('credential_picker_container').setAttribute('style', 'visibility: hidden');"
             )
     except Exception as e:

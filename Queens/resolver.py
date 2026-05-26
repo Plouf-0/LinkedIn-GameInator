@@ -1,7 +1,7 @@
 # Queens/resolver.py
 
 from warnings import warn
-from typing import Tuple
+from typing import List, Tuple, Set
 
 EMPTY = 0
 QUEEN = 1
@@ -34,11 +34,11 @@ class Cell:
 
 # DONE
 class Grid:
-    def __init__(self, grid: list):
-        self.grid = grid
-        self.regions = self._find_regions()
+    def __init__(self, grid: List[List[Cell]]):
+        self.grid: List[List[Cell]] = grid
+        self.regions: List[List[Tuple[int, int]]] = self._find_regions()
 
-    def __getitem__(self, index):
+    def __getitem__(self, index: int) -> List[Cell]:
         return self.grid[index]
 
     def __iter__(self):
@@ -53,16 +53,16 @@ class Grid:
         return True
 
     # DONE
-    def _safe_block(self, r, c):
+    def _safe_block(self, r: int, c: int):
         if 0 <= r < len(self.grid) and 0 <= c < len(self.grid[0]):
             cell = self.grid[r][c]
             if cell.value != QUEEN:
                 cell.block_cell()
 
     # DONE
-    def _find_regions(self) -> list:
-        colors = []
-        regions = []
+    def _find_regions(self) -> List[List[Tuple[int, int]]]:
+        colors: List[str] = []
+        regions: List[List[Tuple[int, int]]] = []
         for line in self.grid:
             for cell in line:
                 if cell.color not in colors:
@@ -138,10 +138,10 @@ class Grid:
         return
 
     # DONE
-    def _claim_row_parallel(self, cells1: list, cells2: list) -> None:
+    def _claim_row_parallel(self, cells1: List[Cell], cells2: List[Cell]) -> None:
         color1 = cells1[0].color
         color2 = cells2[0].color
-        rows = {cell.row for cell in cells1}
+        rows: Set[int] = {cell.row for cell in cells1}
 
         for row in rows:
             for cell in self.grid[row]:
@@ -151,10 +151,10 @@ class Grid:
         return
 
     # DONE
-    def _claim_column_parallel(self, cells1: list, cells2: list) -> None:
+    def _claim_column_parallel(self, cells1: List[Cell], cells2: List[Cell]) -> None:
         color1 = cells1[0].color
         color2 = cells2[0].color
-        cols = {cell.col for cell in cells1}
+        cols: Set[int] = {cell.col for cell in cells1}
 
         for col in cols:
             for cell in self.grid:
@@ -195,7 +195,7 @@ class Grid:
         return
 
     # DONE
-    def _claim_corner(self, cells: list) -> None:
+    def _claim_corner(self, cells: List[Cell]) -> None:
         if cells[0].row == cells[1].row:
             # ¤ ¤
             # ¤
@@ -225,12 +225,12 @@ class Grid:
         return
 
     # WIP first version for 2 empty-cells regions
-    def _claim_parallel(self, regions: list) -> None:
-        horizontal_regions = []
-        vertical_regions = []
+    def _claim_parallel(self, regions: List[List[Cell]]) -> None:
+        horizontal_regions: List[List[Cell]] = []
+        vertical_regions: List[List[Cell]] = []
         for region in regions:
-            rows = {cell.row for cell in region}
-            cols = {cell.col for cell in region}
+            rows: Set[int] = {cell.row for cell in region}
+            cols: Set[int] = {cell.col for cell in region}
             if len(rows) == 2:
                 vertical_regions.append(region)
             if len(cols) == 2:
@@ -265,20 +265,19 @@ class Grid:
         while iteration < 50:
             iteration += 1
 
-            singles = []
+            singles: List[Cell] = []
             for region in self.regions:
                 empty_cells = [self.grid[r][c] for (r, c) in region if self.grid[r][c].is_empty()]
                 if len(empty_cells) == 1:
                     singles.append(empty_cells[0])
-
-            duos = [
+            duos: List[Tuple[Cell, Cell]] = [
                 (self.grid[r1][c1], self.grid[r2][c2])
                 for region in self.regions
                 if len(region) == 2
                 for (r1, c1), (r2, c2) in [region]
             ]
 
-            trios = [
+            trios: List[List[Cell]] = [
                 [self.grid[r1][c1], self.grid[r2][c2], self.grid[r3][c3]]
                 for region in self.regions
                 if len(region) == 3
@@ -306,11 +305,11 @@ class Grid:
                 else:
                     self._claim_corner(trio)
 
-            emptycells_regions = []
+            emptycells_regions: List[List[Cell]] = []
             # One liner/column
             for region in self.regions:
-                rows = {cell[0] for cell in region}
-                cols = {cell[1] for cell in region}
+                rows: Set[int] = {cell[0] for cell in region}
+                cols: Set[int] = {cell[1] for cell in region}
                 if len(rows) == 1:
                     self._claim_row(
                         self.grid[region[0][0]][region[0][1]],
@@ -328,10 +327,10 @@ class Grid:
                     if self.grid[cell[0]][cell[1]].is_empty():
                         emptycells_regions[-1].append(self.grid[cell[0]][cell[1]])
 
-            two_rowcol_regions = []
+            two_rowcol_regions: List[List[Cell]] = []
             for region in emptycells_regions:
-                rows = {cell.row for cell in region}
-                cols = {cell.col for cell in region}
+                rows: Set[int] = {cell.row for cell in region}
+                cols: Set[int] = {cell.col for cell in region}
                 if len(rows) == 2 or len(cols) == 2:
                     two_rowcol_regions.append(region)
             self._claim_parallel(two_rowcol_regions)
@@ -348,7 +347,7 @@ class Grid:
 
 
 # DONE
-def build_example_grid(testGrid: list) -> Grid:
+def build_example_grid(testGrid: list[str]) -> Grid:
     """Construit une grid d'exemple à partir d'une représentation ASCII.
 
     Lettres utilisées dans cet exemple:
@@ -368,9 +367,9 @@ def build_example_grid(testGrid: list) -> Grid:
         "N": "black",  # "N" for noir (black in French)
     }
 
-    grid = []
+    grid: List[List[Cell]] = []
     for r, line in enumerate(testGrid):
-        row = []
+        row: List[Cell] = []
         for c, token in enumerate(line.split()):
             color = mapping.get(token, "unknown")
             row.append(Cell((r, c), color))
@@ -420,7 +419,7 @@ def printGrid(grid: Grid) -> None:
     return
 
 # DONE
-def printRegions(regions: list) -> None:
+def printRegions(regions: List[List[Tuple[int, int]]]) -> None:
     print("Found regions (list of coords per color):")
     for i, region in enumerate(regions):
         print(f"Region {i}: {region}")
@@ -439,7 +438,7 @@ def print_color_palette() -> None:
 
 
 def QueenResolver(grid: Grid) -> None:
-    if not grid or grid == [[]]:
+    if not grid or not grid.grid:
         print("This is the Queens resolver module.")
 
     printGrid(grid)
