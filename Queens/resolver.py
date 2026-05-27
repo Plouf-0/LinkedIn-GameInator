@@ -276,7 +276,7 @@ class Grid:
         return
 
     # WIP
-    def resolve(self) -> None:
+    def resolve(self) -> List[List[Cell]]:
 
         iteration = 0
         while iteration < 50:
@@ -360,7 +360,7 @@ class Grid:
             if iteration == 49:
                 logger.info("Max iterations reached, stopping resolution.")
 
-        return
+        return self.grid
 
 
 # DONE
@@ -394,7 +394,7 @@ def build_example_grid(testGrid: list[str]) -> Grid:
 
     return Grid(grid)
 
-
+# Main resolver function to be called from the WebScrapper module; expects a Grid object and modifies it in place, then prints the result using the UI module
 def QueenResolver(grid: Grid) -> None:
     if not grid or not grid.grid:
         print("This is the Queens resolver module.")
