@@ -21,21 +21,21 @@ def print_grid(grid: "Grid") -> None:
     for i, row in enumerate(grid.grid):
         print(f" {i} ", end="")
         for cell in row:
-            if cell.color == "red":
+            if cell.color == "corail":
                 print("\033[1;30;41m", end="")
             elif cell.color == "cyan":
                 print("\033[1;30;46m", end="")
-            elif cell.color == "blue":
+            elif cell.color == "bleu":
                 print("\033[1;30;44m", end="")
             elif cell.color == "orange":
                 print("\033[1;30;43m", end="")
-            elif cell.color == "green":
+            elif cell.color == "vert":
                 print("\033[1;30;42m", end="")
-            elif cell.color == "yellow":
+            elif cell.color == "jaune":
                 print("\033[1;30;103m", end="")
-            elif cell.color == "purple":
+            elif cell.color == "lavande":
                 print("\033[1;30;45m", end="")
-            elif cell.color == "gray":
+            elif cell.color == "gris":
                 print("\033[1;30;40m", end="")
             elif cell.color == "black":
                 print("\033[1;30;47m", end="")
