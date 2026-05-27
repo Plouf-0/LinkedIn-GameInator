@@ -1,9 +1,13 @@
+#WebScrapper/LinkedInWebdriver.py
+
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.remote.webdriver import WebDriver
 from typing import Callable, Any, cast
+
+from Queens_api import queens_api
 
 
 def main():
@@ -87,7 +91,8 @@ def main():
     elif "Tango" in driver.title:
         print("Resolver not yet implemented")
     elif "Queens" in driver.title:
-        print("Resolver not yet implemented")
+        queens_api(driver)
+        # print("Resolver not yet implemented")
     elif "Crossclimb" in driver.title:
         print("Resolver not yet implemented")
     elif "Pinpoint" in driver.title:
