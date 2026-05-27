@@ -66,7 +66,6 @@ def main():
     print("User logged in")
 
     # DONE Detect which game is lunched and if game not resolved, call the game's resolver
-
     print("Now select a game to complete")
 
     time_to_wait_game_selected = 6
