@@ -278,8 +278,10 @@ class Grid:
     # WIP
     def resolve(self) -> List[List[Cell]]:
 
+        max_iterations = 100
+
         iteration = 0
-        while iteration < 50:
+        while iteration < max_iterations:
             iteration += 1
 
             singles: List[Cell] = []
@@ -356,9 +358,11 @@ class Grid:
 
             if self._is_grid_finished():
                 logger.info("Grid solved!")
+                print("Grid solved!")
                 break
-            if iteration == 49:
+            if iteration == max_iterations:
                 logger.info("Max iterations reached, stopping resolution.")
+                print("Max iterations reached, stopping resolution.")
 
         return self.grid
 
