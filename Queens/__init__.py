@@ -9,10 +9,10 @@ Also expose the `ui` module for printing utilities.
 
 from __future__ import annotations
 
-from typing import Final
 import logging
+from typing import Final
 
-from .resolver import Grid, Cell, build_example_grid, QueenResolver
+from .resolver import Grid, Cell, QueenResolver
 from . import ui
 
 __all__ = [
@@ -23,7 +23,7 @@ __all__ = [
 	"ui",
 ]
 
-__version__: Final[str] = "0.1.0"
+__version__: str = "0.1.0"
 
 # Package logger (users can configure logging as needed)
 logger = logging.getLogger(__name__)
