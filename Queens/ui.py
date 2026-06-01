@@ -51,12 +51,10 @@ def print_grid(grid: "Grid") -> None:
             print("\033[0m", end="")
         print("\033[0m ")
 
-
 def print_regions(regions: List[List[Tuple[int, int]]]) -> None:
     print("Found regions (list of coords per color):")
     for i, region in enumerate(regions):
         print(f"Region {i}: {region}")
-
 
 def print_color_palette() -> None:
     for style in [0, 1]:  # 0: normal, 1: bold/bright
@@ -66,5 +64,4 @@ def print_color_palette() -> None:
                 print(f"\033[{code}m {code} \033[0m", end=" ")
             print()  # Newline after each row
         print()  # Extra newline between normal and bold
-
     return
