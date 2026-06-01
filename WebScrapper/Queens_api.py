@@ -5,7 +5,7 @@ from pathlib import Path
 
 sys.path.append(str(Path(__file__).parent.parent))
 
-from Queens.resolver import Cell, Grid
+from Queens.resolver import Cell, Grid, QUEEN
 from Queens.ui import print_grid
 
 from typing import List
@@ -18,9 +18,11 @@ def queens_api(driver: webdriver.Firefox) -> None:
     grid = create_grid_from_html(driver)
     grid.resolve()
     print_grid(grid)
+    put_queens_in_html(driver, grid)
+
+    while True:
+        pass
     return
-
-
 
 def create_grid_from_html(driver: webdriver.Firefox) -> Grid:
     assert "Queens" in driver.title
@@ -46,6 +48,14 @@ def create_grid_from_html(driver: webdriver.Firefox) -> Grid:
 
     return Grid(grid)
 
+def put_queens_in_html(driver: webdriver.Firefox, grid: Grid) -> None:
+    for row in grid.grid:
+        for cell in row:
+            if cell.value == QUEEN :
+                div = driver.find_element(By.CSS_SELECTOR, f"div[aria-label*='ligne {cell.coord[0]+1}, colonne {cell.coord[1]+1}']")
+                div.click()
+                div.click()
+    return
 
 
 testGrid3 = [
