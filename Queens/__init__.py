@@ -10,7 +10,6 @@ Also expose the `ui` module for printing utilities.
 from __future__ import annotations
 
 import logging
-from typing import Final
 
 from .resolver import Grid, Cell, QueenResolver
 from . import ui
@@ -18,7 +17,6 @@ from . import ui
 __all__ = [
 	"Grid",
 	"Cell",
-	"build_example_grid",
 	"QueenResolver",
 	"ui",
 ]
