@@ -72,7 +72,7 @@ def main():
     # DONE Detect which game is lunched and if game not resolved, call the game's resolver
     print("Now select a game to complete")
 
-    time_to_wait_game_selected = 6
+    time_to_wait_game_selected = 600  # 600s = 10 mins
     try:
         WebDriverWait(driver, time_to_wait_game_selected).until(
             EC.presence_of_element_located((By.ID, "clock-small"))
@@ -80,6 +80,7 @@ def main():
     except:
         print("User did not select a game")
         driver.close()
+
     print("game selected: " + driver.title)
 
     if "Patches" in driver.title:
