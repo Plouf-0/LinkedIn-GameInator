@@ -9,6 +9,8 @@ Comprehensive test suite covering:
 - Utility functions (build_example_grid, QueenResolver)
 """
 
+# pyright: reportPrivateUsage=false
+
 import pytest
 import warnings
 
@@ -841,14 +843,14 @@ class TestBuildExampleGrid:
 class TestQueenResolver:
     """Tests for QueenResolver function."""
 
-    def test_queen_resolver_empty_grid(self, capsys: pytest.CaptureFixture):
+    def test_queen_resolver_empty_grid(self, capsys: pytest.CaptureFixture[str]):
         """Test QueenResolver with empty grid."""
         grid = Grid([])
         QueenResolver(grid)
         captured = capsys.readouterr()
         assert len(captured.out) > 0
 
-    def test_queen_resolver_valid_grid(self, capsys: pytest.CaptureFixture):
+    def test_queen_resolver_valid_grid(self, capsys: pytest.CaptureFixture[str]):
         """Test QueenResolver with valid grid."""
         test_grid = [
             "R R",
