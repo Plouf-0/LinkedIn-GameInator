@@ -1,6 +1,7 @@
 # WebScrapper/Queens_api.py
 
 import sys
+import time
 from pathlib import Path
 
 sys.path.append(str(Path(__file__).parent.parent))
@@ -12,6 +13,10 @@ from typing import List
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
+
+# The time to wait between placing queens in the HTML, in seconds.
+# Adjust as needed.
+TIME_TO_RESOLVE = 4
 
 
 def queens_api(driver: webdriver.Firefox) -> None:
@@ -60,4 +65,5 @@ def put_queens_in_html(driver: webdriver.Firefox, grid: Grid) -> None:
                 )
                 div.click()
                 div.click()
+                time.sleep(TIME_TO_RESOLVE / (len(grid.regions)))
     return
