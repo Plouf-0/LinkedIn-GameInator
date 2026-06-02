@@ -13,8 +13,10 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 
+
 def queens_api(driver: webdriver.Firefox) -> None:
-    
+    assert "Queens" in driver.title
+
     grid = create_grid_from_html(driver)
     grid.resolve()
     print_grid(grid)
@@ -24,47 +26,38 @@ def queens_api(driver: webdriver.Firefox) -> None:
         pass
     return
 
-def create_grid_from_html(driver: webdriver.Firefox) -> Grid:
-    assert "Queens" in driver.title
 
+def create_grid_from_html(driver: webdriver.Firefox) -> Grid:
     grid: List[List[Cell]] = []
 
     divs: list[WebElement] = driver.find_elements(By.CSS_SELECTOR, "div[aria-label]")
     div: WebElement
     label: str
     for div in divs:
-        label = div.get_attribute("aria-label") # type: ignore
+        label = div.get_attribute("aria-label")  # type: ignore
         if "couleur" in label:
 
-            parts = label.split(', ')
-            color = parts[0].split('couleur ')[1].split(' ')[0]
-            row = int(parts[1].split('ligne ')[1]) -1
-            column = int(parts[2].split('colonne ')[1]) -1
+            parts = label.split(", ")
+            color = parts[0].split("couleur ")[1].split(" ")[0]
+            row = int(parts[1].split("ligne ")[1]) - 1
+            column = int(parts[2].split("colonne ")[1]) - 1
 
             while len(grid) <= row:
                 grid.append([])
             grid[row].append(Cell((row, column), color))
-            grid[row].sort(key=lambda c: c.coord[1]) # type: ignore
+            grid[row].sort(key=lambda c: c.coord[1])  # type: ignore
 
     return Grid(grid)
+
 
 def put_queens_in_html(driver: webdriver.Firefox, grid: Grid) -> None:
     for row in grid.grid:
         for cell in row:
-            if cell.value == QUEEN :
-                div = driver.find_element(By.CSS_SELECTOR, f"div[aria-label*='ligne {cell.coord[0]+1}, colonne {cell.coord[1]+1}']")
+            if cell.value == QUEEN:
+                div = driver.find_element(
+                    By.CSS_SELECTOR,
+                    f"div[aria-label*='ligne {cell.coord[0]+1}, colonne {cell.coord[1]+1}']",
+                )
                 div.click()
                 div.click()
     return
-
-
-testGrid3 = [
-    "P P P P P P P P",
-    "P V V P P W W P",
-    "P V V P P W W P",
-    "P P P P P P P P",
-    "P P P P P P P P",
-    "P R R P P P P P",
-    "P R R P P P P P",
-    "P P P P P P P P",
-]
