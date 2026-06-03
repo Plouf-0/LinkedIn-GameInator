@@ -439,14 +439,7 @@ def QueenResolver(grid: Grid) -> None:
 
     # Use the UI module for printing
     ui.print_grid(grid)
-
-    # printRegions(grid.regions)
-    # grid.claim_cell(grid[4][1])
-    # grid.claim_column(grid[3][3], grid[4][3])
-    # grid.claim_row(grid[5][2], grid[5][4])
-
     grid.resolve()
-
     ui.print_grid(grid)
 
 
