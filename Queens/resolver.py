@@ -180,7 +180,7 @@ class Grid:
             elif size == 3 and cell.col == left.col + 1:
                 if cell.row != 0:
                     self.grid[cell.row - 1][cell.col].block_cell()
-                if cell.row != len(self.grid[0]) - 1:
+                if cell.row < len(self.grid) - 1:
                     self.grid[cell.row + 1][cell.col].block_cell()
         return
 
@@ -240,7 +240,7 @@ class Grid:
             elif size == 3 and cell.row == top.row + 1:
                 if cell.col != 0:
                     self.grid[cell.row][cell.col - 1].block_cell()
-                if cell.col != len(self.grid[0]) - 1:
+                if cell.col < len(self.grid[0]) - 1:
                     self.grid[cell.row][cell.col + 1].block_cell()
         return
 
