@@ -170,18 +170,18 @@ class Grid:
             if (cell.col < left.col or cell.col > right.col) and cell.is_empty():
                 cell.block_cell()
 
-            # if the selected cell is on over or under the region
-            elif (size == 2 and cell.col in (left.col, right.col)) or (
-                size == 3 and cell.col == left.col + 1
-            ):
-                if left.row != BLOCKED:
-                    upperCell = self.grid[left.row - 1][cell.col]
-                    if upperCell.value != QUEEN:
-                        upperCell.block_cell()
-                if left.row != len(self.grid) - 1:
-                    lowerCell = self.grid[left.row + 1][cell.col]
-                    if lowerCell.value != QUEEN:
-                        lowerCell.block_cell()
+            # claim all sides of the region if size = 2
+            elif size == 2 and cell.col in (left.col, right.col):
+                if cell.row != 0:
+                    self.grid[cell.row - 1][cell.col].block_cell()
+                if cell.row != len(self.grid[0]) - 1:
+                    self.grid[cell.row + 1][cell.col].block_cell()
+            # claim the centers if size = 3
+            elif size == 3 and cell.col == left.col + 1:
+                if cell.row != 0:
+                    self.grid[cell.row - 1][cell.col].block_cell()
+                if cell.row != len(self.grid[0]) - 1:
+                    self.grid[cell.row + 1][cell.col].block_cell()
         return
 
     # DONE
@@ -230,18 +230,18 @@ class Grid:
             if cell.row < top.row or cell.row > bottom.row and cell.is_empty():
                 cell.block_cell()
 
-            # claim all sides of the region if size = 2 on the centers if size = 3
-            elif (size == 2 and cell.row in (top.row, bottom.row)) or (
-                size == 3 and cell.row == top.row - 1
-            ):
-                if top.col != BLOCKED:
-                    leftCell = row[top.col - 1]
-                    if leftCell.value != QUEEN:
-                        leftCell.block_cell()
-                if top.col != len(row) - 1:
-                    rightCell = row[top.col + 1]
-                    if rightCell.value != QUEEN:
-                        rightCell.block_cell()
+            # claim all sides of the region if size = 2
+            elif size == 2 and cell.row in (top.row, bottom.row):
+                if cell.col != 0:
+                    self.grid[cell.row][cell.col - 1].block_cell()
+                if cell.col != len(self.grid[0]) - 1:
+                    self.grid[cell.row][cell.col + 1].block_cell()
+            # claim the centers if size = 3
+            elif size == 3 and cell.row == top.row + 1:
+                if cell.col != 0:
+                    self.grid[cell.row][cell.col - 1].block_cell()
+                if cell.col != len(self.grid[0]) - 1:
+                    self.grid[cell.row][cell.col + 1].block_cell()
         return
 
     # DONE
