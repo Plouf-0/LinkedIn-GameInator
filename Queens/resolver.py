@@ -18,21 +18,6 @@ QUEEN = 1
 BLOCKED = -1
 
 
-def is_empty(cell: Cell) -> bool:
-    """Check if a cell is empty."""
-    return cell.value == EMPTY
-
-
-def is_queen(cell: Cell) -> bool:
-    """Check if a cell has a queen."""
-    return cell.value == QUEEN
-
-
-def is_blocked(cell: Cell) -> bool:
-    """Check if a cell is blocked."""
-    return cell.value == BLOCKED
-
-
 # DONE
 @dataclass
 class Cell:
@@ -56,6 +41,12 @@ class Cell:
 
     def block_cell(self) -> None:
         self.value = BLOCKED
+
+    def is_queen(self) -> bool:
+        return self.value == QUEEN
+
+    def is_blocked(self) -> bool:
+        return self.value == BLOCKED
 
     def is_empty(self) -> bool:
         return self.value == EMPTY
