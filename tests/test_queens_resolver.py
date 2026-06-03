@@ -785,7 +785,9 @@ class TestClaimCorner:
         # Test on top edge (row 0) - same row pattern
         grid = Grid([[Cell((r, c), "red") for c in range(5)] for r in range(5)])
         grid._claim_corner([grid[0][1], grid[0][2], grid[1][1]])  # Case 2: same row
-        assert grid[1][2].is_blocked()  # No upward from row 0, but cells[1] gets processed
+        assert grid[1][
+            2
+        ].is_blocked()  # No upward from row 0, but cells[1] gets processed
 
         # Test on bottom edge (row 4) - same row pattern
         grid = Grid([[Cell((r, c), "red") for c in range(5)] for r in range(5)])
@@ -1115,7 +1117,7 @@ class TestResolve:
         assert isinstance(result, list)
         assert len(result) > 0
 
-    def test_resolve_max_iterations(self):
+    def test_resolve_max_iterations(self, capsys: pytest.CaptureFixture[str]):
         """Test that resolve stops at max iterations."""
         test_grid = [
             "R R R R R",
@@ -1126,6 +1128,10 @@ class TestResolve:
         ]
         grid = build_example_grid(test_grid)
         result = grid.resolve()
+
+        captured = capsys.readouterr()
+        output = captured.out
+        assert "Max iterations reached, stopping resolution.\n" == output
         assert result is not None
 
 
