@@ -15,15 +15,19 @@ import pytest
 import warnings
 
 from Queens.resolver import (
-    Cell, Grid, build_example_grid, QueenResolver,
-    EMPTY, QUEEN, BLOCKED,
-    
+    Cell,
+    Grid,
+    build_example_grid,
+    QueenResolver,
+    EMPTY,
+    QUEEN,
+    BLOCKED,
 )
-
 
 # =============================================================================
 # Fixtures for testing
 # =============================================================================
+
 
 @pytest.fixture
 def empty_cell():
@@ -52,47 +56,60 @@ def simple_grid_1x1():
 @pytest.fixture
 def simple_grid_2x2():
     """Create a 2x2 grid with different colors."""
-    return Grid([
-        [Cell((0, 0), "cyan"), Cell((0, 1), "red")],
-        [Cell((1, 0), "blue"), Cell((1, 1), "green")],
-    ])
+    return Grid(
+        [
+            [Cell((0, 0), "cyan"), Cell((0, 1), "red")],
+            [Cell((1, 0), "blue"), Cell((1, 1), "green")],
+        ]
+    )
 
 
 @pytest.fixture
 def grid_single_color():
     """Create a 3x3 grid with a single color."""
-    return Grid([
-        [Cell((r, c), "red") for c in range(3)]
-        for r in range(3)
-    ])
+    return Grid([[Cell((r, c), "red") for c in range(3)] for r in range(3)])
 
 
 @pytest.fixture
 def grid_all_queens():
     """Create a 2x2 grid where all cells are queens."""
-    return Grid([
-        [Cell((0, 0), "cyan", QUEEN), Cell((0, 1), "red", QUEEN)],
-        [Cell((1, 0), "blue", QUEEN), Cell((1, 1), "green", QUEEN)],
-    ])
+    return Grid(
+        [
+            [Cell((0, 0), "cyan", QUEEN), Cell((0, 1), "red", QUEEN)],
+            [Cell((1, 0), "blue", QUEEN), Cell((1, 1), "green", QUEEN)],
+        ]
+    )
 
 
 @pytest.fixture
 def grid_all_blocked():
     """Create a 2x2 grid where all cells are blocked."""
-    return Grid([
-        [Cell((0, 0), "cyan", BLOCKED), Cell((0, 1), "red", BLOCKED)],
-        [Cell((1, 0), "blue", BLOCKED), Cell((1, 1), "green", BLOCKED)],
-    ])
+    return Grid(
+        [
+            [Cell((0, 0), "cyan", BLOCKED), Cell((0, 1), "red", BLOCKED)],
+            [Cell((1, 0), "blue", BLOCKED), Cell((1, 1), "green", BLOCKED)],
+        ]
+    )
 
 
 @pytest.fixture
 def grid_mixed():
     """Create a 3x3 grid with mixed values."""
-    return Grid([
-        [Cell((0, 0), "cyan", QUEEN), Cell((0, 1), "cyan", BLOCKED), Cell((0, 2), "cyan")],
-        [Cell((1, 0), "red", BLOCKED), Cell((1, 1), "red"), Cell((1, 2), "red", BLOCKED)],
-        [Cell((2, 0), "blue"), Cell((2, 1), "blue", BLOCKED), Cell((2, 2), "blue")],
-    ])
+    return Grid(
+        [
+            [
+                Cell((0, 0), "cyan", QUEEN),
+                Cell((0, 1), "cyan", BLOCKED),
+                Cell((0, 2), "cyan"),
+            ],
+            [
+                Cell((1, 0), "red", BLOCKED),
+                Cell((1, 1), "red"),
+                Cell((1, 2), "red", BLOCKED),
+            ],
+            [Cell((2, 0), "blue"), Cell((2, 1), "blue", BLOCKED), Cell((2, 2), "blue")],
+        ]
+    )
 
 
 @pytest.fixture
@@ -109,6 +126,7 @@ def sample_grid_for_resolution():
 # Test Cell class
 # =============================================================================
 
+
 class TestCell:
     """Tests for Cell class."""
 
@@ -118,6 +136,12 @@ class TestCell:
         assert empty_cell.col == 0
         assert empty_cell.color == "cyan"
         assert empty_cell.value == EMPTY
+
+    def test_cell_getters(self, empty_cell: Cell):
+        """Test cell getters."""
+        assert empty_cell.coord == (0, 0)
+        assert empty_cell.get_color == "cyan"
+        assert empty_cell.get_value == EMPTY
 
     def test_cell_creation_with_value(self):
         """Test cell creation with specific value."""
@@ -221,6 +245,7 @@ class TestCell:
 # Test Grid class - Basics
 # =============================================================================
 
+
 class TestGridBasics:
     """Tests for Grid class basic functionality."""
 
@@ -257,7 +282,7 @@ class TestGridBasics:
 
     def test_grid_regions_populated(self, simple_grid_2x2: Grid):
         """Test that regions are populated on grid creation."""
-        assert hasattr(simple_grid_2x2, 'regions')
+        assert hasattr(simple_grid_2x2, "regions")
         assert isinstance(simple_grid_2x2.regions, list)
 
     def test_grid_empty(self):
@@ -274,11 +299,13 @@ class TestGridBasics:
 
     def test_grid_single_column(self):
         """Test grid with single column."""
-        grid = Grid([
-            [Cell((0, 0), "red")],
-            [Cell((1, 0), "blue")],
-            [Cell((2, 0), "green")],
-        ])
+        grid = Grid(
+            [
+                [Cell((0, 0), "red")],
+                [Cell((1, 0), "blue")],
+                [Cell((2, 0), "green")],
+            ]
+        )
         assert len(grid.grid) == 3
         assert len(grid.grid[0]) == 1
 
@@ -286,6 +313,7 @@ class TestGridBasics:
 # =============================================================================
 # Test _is_grid_finished
 # =============================================================================
+
 
 class TestIsGridFinished:
     """Tests for _is_grid_finished method."""
@@ -308,10 +336,12 @@ class TestIsGridFinished:
 
     def test_grid_finished_mixed(self, grid_mixed: Grid):
         """Test that grid with only QUEEN and BLOCKED is finished."""
-        grid = Grid([
-            [Cell((0, 0), "cyan", QUEEN), Cell((0, 1), "cyan", BLOCKED)],
-            [Cell((1, 0), "red", BLOCKED), Cell((1, 1), "red", QUEEN)],
-        ])
+        grid = Grid(
+            [
+                [Cell((0, 0), "cyan", QUEEN), Cell((0, 1), "cyan", BLOCKED)],
+                [Cell((1, 0), "red", BLOCKED), Cell((1, 1), "red", QUEEN)],
+            ]
+        )
         assert grid._is_grid_finished() is True
 
     def test_grid_finished_empty_grid(self):
@@ -338,6 +368,7 @@ class TestIsGridFinished:
 # =============================================================================
 # Test _safe_block
 # =============================================================================
+
 
 class TestSafeBlock:
     """Tests for _safe_block method."""
@@ -395,6 +426,7 @@ class TestSafeBlock:
 # Test _find_regions
 # =============================================================================
 
+
 class TestFindRegions:
     """Tests for _find_regions method."""
 
@@ -429,19 +461,23 @@ class TestFindRegions:
 
     def test_find_regions_order_preserved(self):
         """Test that region order matches color appearance order."""
-        grid = Grid([
-            [Cell((0, 0), "first"), Cell((0, 1), "second")],
-            [Cell((1, 0), "first"), Cell((1, 1), "third")],
-        ])
+        grid = Grid(
+            [
+                [Cell((0, 0), "first"), Cell((0, 1), "second")],
+                [Cell((1, 0), "first"), Cell((1, 1), "third")],
+            ]
+        )
         regions = grid.regions
         assert (0, 0) in regions[0] or (1, 0) in regions[0]
 
     def test_find_regions_all_cells_accounted_for(self):
         """Test that all cells are in some region."""
-        grid = Grid([
-            [Cell((0, 0), "A"), Cell((0, 1), "B")],
-            [Cell((1, 0), "A"), Cell((1, 1), "B")],
-        ])
+        grid = Grid(
+            [
+                [Cell((0, 0), "A"), Cell((0, 1), "B")],
+                [Cell((1, 0), "A"), Cell((1, 1), "B")],
+            ]
+        )
         regions = grid.regions
         all_coords = {(r, c) for reg in regions for (r, c) in reg}
         expected_coords = {(0, 0), (0, 1), (1, 0), (1, 1)}
@@ -449,10 +485,12 @@ class TestFindRegions:
 
     def test_find_regions_no_duplicate_coords(self):
         """Test that no coordinate appears in multiple regions."""
-        grid = Grid([
-            [Cell((0, 0), "A"), Cell((0, 1), "B")],
-            [Cell((1, 0), "A"), Cell((1, 1), "B")],
-        ])
+        grid = Grid(
+            [
+                [Cell((0, 0), "A"), Cell((0, 1), "B")],
+                [Cell((1, 0), "A"), Cell((1, 1), "B")],
+            ]
+        )
         regions = grid.regions
         all_coords: list[tuple[int, int]] = []
         for reg in regions:
@@ -463,6 +501,7 @@ class TestFindRegions:
 # =============================================================================
 # Test _claim_cell
 # =============================================================================
+
 
 class TestClaimCell:
     """Tests for _claim_cell method."""
@@ -475,9 +514,11 @@ class TestClaimCell:
 
     def test_claim_cell_blocks_row(self):
         """Test that _claim_cell blocks all cells in the same row."""
-        grid = Grid([
-            [Cell((0, 0), "cyan"), Cell((0, 1), "cyan"), Cell((0, 2), "cyan")],
-        ])
+        grid = Grid(
+            [
+                [Cell((0, 0), "cyan"), Cell((0, 1), "cyan"), Cell((0, 2), "cyan")],
+            ]
+        )
         grid._claim_cell(grid[0][1])
         assert grid[0][0].value == BLOCKED
         assert grid[0][1].value == QUEEN
@@ -485,11 +526,13 @@ class TestClaimCell:
 
     def test_claim_cell_blocks_column(self):
         """Test that _claim_cell blocks all cells in the same column."""
-        grid = Grid([
-            [Cell((0, 0), "cyan")],
-            [Cell((1, 0), "cyan")],
-            [Cell((2, 0), "cyan")],
-        ])
+        grid = Grid(
+            [
+                [Cell((0, 0), "cyan")],
+                [Cell((1, 0), "cyan")],
+                [Cell((2, 0), "cyan")],
+            ]
+        )
         grid._claim_cell(grid[1][0])
         assert grid[0][0].value == BLOCKED
         assert grid[1][0].value == QUEEN
@@ -497,11 +540,13 @@ class TestClaimCell:
 
     def test_claim_cell_blocks_diagonals(self):
         """Test that _claim_cell blocks diagonal cells."""
-        grid = Grid([
-            [Cell((0, 0), "cyan"), Cell((0, 1), "cyan"), Cell((0, 2), "cyan")],
-            [Cell((1, 0), "cyan"), Cell((1, 1), "cyan"), Cell((1, 2), "cyan")],
-            [Cell((2, 0), "cyan"), Cell((2, 1), "cyan"), Cell((2, 2), "cyan")],
-        ])
+        grid = Grid(
+            [
+                [Cell((0, 0), "cyan"), Cell((0, 1), "cyan"), Cell((0, 2), "cyan")],
+                [Cell((1, 0), "cyan"), Cell((1, 1), "cyan"), Cell((1, 2), "cyan")],
+                [Cell((2, 0), "cyan"), Cell((2, 1), "cyan"), Cell((2, 2), "cyan")],
+            ]
+        )
         grid._claim_cell(grid[1][1])
         assert grid[0][0].value == BLOCKED
         assert grid[0][2].value == BLOCKED
@@ -527,14 +572,17 @@ class TestClaimCell:
 # Test _claim_region
 # =============================================================================
 
+
 class TestClaimRegion:
     """Tests for _claim_region method."""
 
     def test_claim_region_blocks_all_except_target(self):
         """Test that _claim_region blocks all cells in region except target."""
-        grid = Grid([
-            [Cell((0, 0), "red"), Cell((0, 1), "red"), Cell((0, 2), "red")],
-        ])
+        grid = Grid(
+            [
+                [Cell((0, 0), "red"), Cell((0, 1), "red"), Cell((0, 2), "red")],
+            ]
+        )
         target = grid[0][1]
         grid._claim_region(target)
         assert grid[0][0].value == BLOCKED
@@ -543,9 +591,11 @@ class TestClaimRegion:
 
     def test_claim_region_with_queens(self):
         """Test _claim_region respects existing queens."""
-        grid = Grid([
-            [Cell((0, 0), "red", QUEEN), Cell((0, 1), "red"), Cell((0, 2), "red")],
-        ])
+        grid = Grid(
+            [
+                [Cell((0, 0), "red", QUEEN), Cell((0, 1), "red"), Cell((0, 2), "red")],
+            ]
+        )
         target = grid[0][1]
         grid._claim_region(target)
         assert grid[0][0].value == QUEEN
@@ -554,10 +604,12 @@ class TestClaimRegion:
 
     def test_claim_region_multiple_regions(self):
         """Test _claim_region with multiple regions."""
-        grid = Grid([
-            [Cell((0, 0), "red"), Cell((0, 1), "blue")],
-            [Cell((1, 0), "red"), Cell((1, 1), "blue")],
-        ])
+        grid = Grid(
+            [
+                [Cell((0, 0), "red"), Cell((0, 1), "blue")],
+                [Cell((1, 0), "red"), Cell((1, 1), "blue")],
+            ]
+        )
         target = grid[0][0]
         grid._claim_region(target)
         assert grid[0][0].value == EMPTY
@@ -570,15 +622,18 @@ class TestClaimRegion:
 # Test _claim_row
 # =============================================================================
 
+
 class TestClaimRow:
     """Tests for _claim_row method."""
 
     def test_claim_row_different_rows_raises(self):
         """Test _claim_row raises ValueError for different rows."""
-        grid = Grid([
-            [Cell((0, 0), "red"), Cell((0, 1), "red")],
-            [Cell((1, 0), "red"), Cell((1, 1), "red")],
-        ])
+        grid = Grid(
+            [
+                [Cell((0, 0), "red"), Cell((0, 1), "red")],
+                [Cell((1, 0), "red"), Cell((1, 1), "red")],
+            ]
+        )
         left = grid[0][0]
         right = grid[1][1]
         with pytest.raises(ValueError, match="same row"):
@@ -586,9 +641,11 @@ class TestClaimRow:
 
     def test_claim_row_same_row_basic(self):
         """Test _claim_row with cells in same row - basic functionality."""
-        grid = Grid([
-            [Cell((0, 0), "red"), Cell((0, 1), "red"), Cell((0, 2), "red")],
-        ])
+        grid = Grid(
+            [
+                [Cell((0, 0), "red"), Cell((0, 1), "red"), Cell((0, 2), "red")],
+            ]
+        )
         left = grid[0][0]
         right = grid[0][2]
         grid._claim_row(left, right)
@@ -596,9 +653,11 @@ class TestClaimRow:
 
     def test_claim_row_swaps_left_right_with_warning(self):
         """Test _claim_row swaps left and right if needed with warning."""
-        grid = Grid([
-            [Cell((0, 0), "red"), Cell((0, 1), "red"), Cell((0, 2), "red")],
-        ])
+        grid = Grid(
+            [
+                [Cell((0, 0), "red"), Cell((0, 1), "red"), Cell((0, 2), "red")],
+            ]
+        )
         left = grid[0][2]
         right = grid[0][0]
         with warnings.catch_warnings(record=True) as w:
@@ -611,15 +670,18 @@ class TestClaimRow:
 # Test _claim_column
 # =============================================================================
 
+
 class TestClaimColumn:
     """Tests for _claim_column method."""
 
     def test_claim_column_different_columns_raises(self):
         """Test _claim_column raises ValueError for different columns."""
-        grid = Grid([
-            [Cell((0, 0), "red"), Cell((0, 1), "red")],
-            [Cell((1, 0), "red"), Cell((1, 1), "red")],
-        ])
+        grid = Grid(
+            [
+                [Cell((0, 0), "red"), Cell((0, 1), "red")],
+                [Cell((1, 0), "red"), Cell((1, 1), "red")],
+            ]
+        )
         top = grid[0][0]
         bottom = grid[1][1]
         with pytest.raises(ValueError, match="same column"):
@@ -627,11 +689,13 @@ class TestClaimColumn:
 
     def test_claim_column_same_column_basic(self):
         """Test _claim_column with cells in same column - basic functionality."""
-        grid = Grid([
-            [Cell((0, 0), "red")],
-            [Cell((1, 0), "red")],
-            [Cell((2, 0), "red")],
-        ])
+        grid = Grid(
+            [
+                [Cell((0, 0), "red")],
+                [Cell((1, 0), "red")],
+                [Cell((2, 0), "red")],
+            ]
+        )
         top = grid[0][0]
         bottom = grid[2][0]
         grid._claim_column(top, bottom)
@@ -639,11 +703,13 @@ class TestClaimColumn:
 
     def test_claim_column_swaps_top_bottom_with_warning(self):
         """Test _claim_column swaps top and bottom if needed with warning."""
-        grid = Grid([
-            [Cell((0, 0), "red")],
-            [Cell((1, 0), "red")],
-            [Cell((2, 0), "red")],
-        ])
+        grid = Grid(
+            [
+                [Cell((0, 0), "red")],
+                [Cell((1, 0), "red")],
+                [Cell((2, 0), "red")],
+            ]
+        )
         top = grid[2][0]
         bottom = grid[0][0]
         with warnings.catch_warnings(record=True) as w:
@@ -656,27 +722,139 @@ class TestClaimColumn:
 # Test _claim_corner
 # =============================================================================
 
+
 class TestClaimCorner:
     """Tests for _claim_corner method."""
 
-    def test_claim_corner_2_cells_same_position(self):
-        """Test _claim_corner with 2 cells at same position."""
-        grid = Grid([
-            [Cell((r, c), "red") for c in range(5)]
-            for r in range(5)
-        ])
-        cells = [grid[2][2], grid[2][2]]
+    def test_claim_corner_notenough_cells(self):
+        """Test _claim_corner with not enough cells."""
+        grid = Grid([[Cell((r, c), "red") for c in range(5)] for r in range(5)])
+        with pytest.raises(
+            ValueError, match="Exactly 3 cells are required to claim a corner."
+        ):
+            grid._claim_corner([grid[2][2], grid[2][3]])  # Only 2 cells
+
+    def test_claim_corner_in_middle_southwest(self):
+        """Test _claim_corner with southwest pointing corner."""
+        grid = Grid([[Cell((r, c), "red") for c in range(5)] for r in range(5)])
+        cells = [grid[1][1], grid[2][1], grid[2][2]]
         grid._claim_corner(cells)
+        assert (
+            grid[1][2].is_blocked()
+            and grid[2][0].is_blocked()
+            and grid[3][1].is_blocked()
+        )
+
+    def test_claim_corner_in_middle_southeast(self):
+        """Test _claim_corner with southeast pointing corner."""
+        grid = Grid([[Cell((r, c), "red") for c in range(5)] for r in range(5)])
+        cells = [grid[1][2], grid[2][1], grid[2][2]]
+        grid._claim_corner(cells)
+        assert (
+            grid[1][1].is_blocked()
+            and grid[3][2].is_blocked()
+            and grid[2][3].is_blocked()
+        )
+
+    def test_claim_corner_in_middle_northwest(self):
+        """Test _claim_corner with northwest pointing corner."""
+        grid = Grid([[Cell((r, c), "red") for c in range(5)] for r in range(5)])
+        cells = [grid[1][1], grid[1][2], grid[2][1]]
+        grid._claim_corner(cells)
+        assert (
+            grid[2][2].is_blocked()
+            and grid[1][0].is_blocked()
+            and grid[0][1].is_blocked()
+        )
+
+    def test_claim_corner_in_middle_northeast(self):
+        """Test _claim_corner with northeast pointing corner."""
+        grid = Grid([[Cell((r, c), "red") for c in range(5)] for r in range(5)])
+        cells = [grid[1][1], grid[1][2], grid[2][2]]
+        grid._claim_corner(cells)
+        assert (
+            grid[2][1].is_blocked()
+            and grid[0][2].is_blocked()
+            and grid[1][3].is_blocked()
+        )
+
+    def test_claim_corner_edges_cases(self):
+        """Test _claim_corner with cells on grid edges - all corner rotations on borders."""
+        # Test all corner orientations on all four edges of the grid
+
+        # Test on top edge (row 0) - same row pattern
+        grid = Grid([[Cell((r, c), "red") for c in range(5)] for r in range(5)])
+        grid._claim_corner([grid[0][1], grid[0][2], grid[1][1]])  # Case 2: same row
+        assert grid[1][
+            1
+        ].is_blocked()  # No upward from row 0, but cells[1] gets processed
+
+        # Test on bottom edge (row 4) - same row pattern
+        grid = Grid([[Cell((r, c), "red") for c in range(5)] for r in range(5)])
+        grid._claim_corner([grid[3][1], grid[4][1], grid[4][2]])  # Case 2: same row
+        assert (
+            grid[3][1].is_blocked()
+            or grid[4][0].is_blocked()
+            or grid[4][3].is_blocked()
+        )
+
+        # Test on left edge (col 0) - same column pattern
+        grid = Grid([[Cell((r, c), "red") for c in range(5)] for r in range(5)])
+        grid._claim_corner([grid[1][0], grid[2][0], grid[2][1]])  # Case 3: same column
+        assert (
+            grid[3][0].is_blocked()
+            or grid[2][1].is_blocked()
+            or grid[1][1].is_blocked()
+        )
+
+        # Test on right edge (col 4) - same column pattern
+        grid = Grid([[Cell((r, c), "red") for c in range(5)] for r in range(5)])
+        grid._claim_corner([grid[1][4], grid[2][3], grid[2][4]])  # Case 3: same column
+        assert (
+            grid[3][4].is_blocked()
+            or grid[2][3].is_blocked()
+            or grid[1][3].is_blocked()
+        )
+
+        # Test top-left corner of grid (0,0)
+        grid = Grid([[Cell((r, c), "red") for c in range(5)] for r in range(5)])
+        grid._claim_corner([grid[0][0], grid[0][1], grid[1][0]])  # Top-left corner
+        # Should not crash with index errors
         assert True
 
-    def test_claim_corner_large_grid_safe(self):
-        """Test _claim_corner with cells that wont cause index errors."""
-        grid = Grid([
-            [Cell((r, c), "red") for c in range(5)]
-            for r in range(5)
-        ])
-        cells = [grid[2][2], grid[2][3]]
-        grid._claim_corner(cells)
+        # Test top-right corner of grid (0,4)
+        grid = Grid([[Cell((r, c), "red") for c in range(5)] for r in range(5)])
+        grid._claim_corner([grid[0][3], grid[0][4], grid[1][4]])  # Top-right corner
+        assert True
+
+        # Test bottom-left corner of grid (4,0)
+        grid = Grid([[Cell((r, c), "red") for c in range(5)] for r in range(5)])
+        grid._claim_corner([grid[3][0], grid[4][0], grid[4][1]])  # Bottom-left corner
+        assert True
+
+        # Test bottom-right corner of grid (4,4)
+        grid = Grid([[Cell((r, c), "red") for c in range(5)] for r in range(5)])
+        grid._claim_corner([grid[3][4], grid[4][3], grid[4][4]])  # Bottom-right corner
+        assert True
+
+        # Test case 4 (else branch) on top edge
+        grid = Grid([[Cell((r, c), "red") for c in range(5)] for r in range(5)])
+        grid._claim_corner([grid[0][2], grid[1][1], grid[1][2]])  # Case 4: diagonal
+        assert True
+
+        # Test case 4 (else branch) on bottom edge
+        grid = Grid([[Cell((r, c), "red") for c in range(5)] for r in range(5)])
+        grid._claim_corner([grid[3][1], grid[4][1], grid[4][2]])  # Case 4: diagonal
+        assert True
+
+        # Test case 4 (else branch) on left edge
+        grid = Grid([[Cell((r, c), "red") for c in range(5)] for r in range(5)])
+        grid._claim_corner([grid[1][1], grid[2][0], grid[2][1]])  # Case 4: diagonal
+        assert True
+
+        # Test case 4 (else branch) on right edge
+        grid = Grid([[Cell((r, c), "red") for c in range(5)] for r in range(5)])
+        grid._claim_corner([grid[1][3], grid[2][3], grid[2][4]])  # Case 4: diagonal
         assert True
 
 
@@ -684,15 +862,18 @@ class TestClaimCorner:
 # Test Parallel Claiming
 # =============================================================================
 
+
 class TestClaimParallel:
     """Tests for parallel claiming methods."""
 
     def test_claim_row_parallel_basic(self):
         """Test _claim_row_parallel basic execution."""
-        grid = Grid([
-            [Cell((0, 0), "red"), Cell((0, 1), "red"), Cell((0, 2), "blue")],
-            [Cell((1, 0), "red"), Cell((1, 1), "red"), Cell((1, 2), "blue")],
-        ])
+        grid = Grid(
+            [
+                [Cell((0, 0), "red"), Cell((0, 1), "red"), Cell((0, 2), "blue")],
+                [Cell((1, 0), "red"), Cell((1, 1), "red"), Cell((1, 2), "blue")],
+            ]
+        )
         cells1 = [grid[0][0], grid[0][1]]
         cells2 = [grid[1][0], grid[1][1]]
         grid._claim_row_parallel(cells1, cells2)
@@ -700,10 +881,12 @@ class TestClaimParallel:
 
     def test_claim_column_parallel_basic(self):
         """Test _claim_column_parallel basic execution."""
-        grid = Grid([
-            [Cell((0, 0), "red"), Cell((0, 1), "blue"), Cell((0, 2), "blue")],
-            [Cell((1, 0), "red"), Cell((1, 1), "blue"), Cell((1, 2), "blue")],
-        ])
+        grid = Grid(
+            [
+                [Cell((0, 0), "red"), Cell((0, 1), "blue"), Cell((0, 2), "blue")],
+                [Cell((1, 0), "red"), Cell((1, 1), "blue"), Cell((1, 2), "blue")],
+            ]
+        )
         cells1 = [grid[0][1], grid[0][2]]
         cells2 = [grid[1][1], grid[1][2]]
         grid._claim_column_parallel(cells1, cells2)
@@ -717,10 +900,12 @@ class TestClaimParallel:
 
     def test_claim_parallel_no_matching_regions(self):
         """Test _claim_parallel with non-matching regions."""
-        grid = Grid([
-            [Cell((0, 0), "red"), Cell((0, 1), "blue")],
-            [Cell((1, 0), "red"), Cell((1, 1), "blue")],
-        ])
+        grid = Grid(
+            [
+                [Cell((0, 0), "red"), Cell((0, 1), "blue")],
+                [Cell((1, 0), "red"), Cell((1, 1), "blue")],
+            ]
+        )
         regions = [[grid[0][0]], [grid[1][1]]]
         grid._claim_parallel(regions)
         assert True
@@ -729,6 +914,7 @@ class TestClaimParallel:
 # =============================================================================
 # Test build_example_grid
 # =============================================================================
+
 
 class TestBuildExampleGrid:
     """Tests for build_example_grid function."""
@@ -821,16 +1007,26 @@ class TestBuildExampleGrid:
             "N N N N N N N N N N",
         ]
         grid = build_example_grid(test_grid)
-        
+
         assert len(grid.grid) == 10
         assert all(len(row) == 10 for row in grid.grid)
-        
-        expected_colors = ["cyan", "red", "blue", "orange", "green", 
-                          "yellow", "purple", "white", "gray", "black"]
+
+        expected_colors = [
+            "cyan",
+            "red",
+            "blue",
+            "orange",
+            "green",
+            "yellow",
+            "purple",
+            "white",
+            "gray",
+            "black",
+        ]
         for row_idx, expected_color in enumerate(expected_colors):
             for cell in grid[row_idx]:
                 assert cell.color == expected_color
-        
+
         assert len(grid.regions) == 10
         for region in grid.regions:
             assert len(region) == 10
@@ -839,6 +1035,7 @@ class TestBuildExampleGrid:
 # =============================================================================
 # Test QueenResolver
 # =============================================================================
+
 
 class TestQueenResolver:
     """Tests for QueenResolver function."""
@@ -876,6 +1073,7 @@ class TestQueenResolver:
 # Test resolve
 # =============================================================================
 
+
 class TestResolve:
     """Tests for resolve method."""
 
@@ -892,10 +1090,12 @@ class TestResolve:
 
     def test_resolve_already_solved(self):
         """Test resolve on already solved grid."""
-        grid = Grid([
-            [Cell((0, 0), "red", QUEEN), Cell((0, 1), "red", BLOCKED)],
-            [Cell((1, 0), "blue", BLOCKED), Cell((1, 1), "blue", QUEEN)],
-        ])
+        grid = Grid(
+            [
+                [Cell((0, 0), "red", QUEEN), Cell((0, 1), "red", BLOCKED)],
+                [Cell((1, 0), "blue", BLOCKED), Cell((1, 1), "blue", QUEEN)],
+            ]
+        )
         result = grid.resolve()
         assert result is not None
 
@@ -935,6 +1135,7 @@ class TestResolve:
 # Integration Tests
 # =============================================================================
 
+
 class TestIntegration:
     """Integration tests combining multiple components."""
 
@@ -964,10 +1165,12 @@ class TestIntegration:
 
     def test_cell_to_grid_integration(self):
         """Test that cells work correctly within a grid."""
-        grid = Grid([
-            [Cell((0, 0), "red"), Cell((0, 1), "red")],
-            [Cell((1, 0), "blue"), Cell((1, 1), "blue")],
-        ])
+        grid = Grid(
+            [
+                [Cell((0, 0), "red"), Cell((0, 1), "red")],
+                [Cell((1, 0), "blue"), Cell((1, 1), "blue")],
+            ]
+        )
         grid._claim_cell(grid[0][0])
         assert grid[0][0].value == QUEEN
         assert grid[0][1].value == BLOCKED
@@ -976,9 +1179,11 @@ class TestIntegration:
 
     def test_region_finding_with_claiming(self):
         """Test that region finding works with cell claiming."""
-        grid = Grid([
-            [Cell((0, 0), "red"), Cell((0, 1), "red")],
-            [Cell((1, 0), "red"), Cell((1, 1), "red")],
-        ])
+        grid = Grid(
+            [
+                [Cell((0, 0), "red"), Cell((0, 1), "red")],
+                [Cell((1, 0), "red"), Cell((1, 1), "red")],
+            ]
+        )
         grid._claim_cell(grid[0][0])
         assert len(grid.regions) == 1
