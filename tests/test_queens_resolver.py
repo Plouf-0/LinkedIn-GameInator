@@ -104,7 +104,7 @@ def grid_mixed():
             ],
             [
                 Cell((1, 0), "red", BLOCKED),
-                Cell((1, 1), "red"),
+                Cell((1, 1), "red", QUEEN),
                 Cell((1, 2), "red", BLOCKED),
             ],
             [Cell((2, 0), "blue"), Cell((2, 1), "blue", BLOCKED), Cell((2, 2), "blue")],
@@ -334,7 +334,7 @@ class TestIsGridFinished:
         """Test that grid with all blocked cells is finished."""
         assert grid_all_blocked._is_grid_finished() is True
 
-    def test_grid_finished_mixed(self, grid_mixed: Grid):
+    def test_grid_finished_mixed(self):
         """Test that grid with only QUEEN and BLOCKED is finished."""
         grid = Grid(
             [
@@ -496,6 +496,36 @@ class TestFindRegions:
         for reg in regions:
             all_coords.extend(reg)
         assert len(all_coords) == len(set(all_coords)) == 4
+
+
+# =============================================================================
+# Test _is_region_claimed
+# =============================================================================
+
+
+class TestIsRegionClaimed:
+    """Tests for _is_region_claimed method."""
+
+    def test_is_region_claimed_all_blocked(self, grid_all_blocked: Grid):
+        """Test _is_region_claimed returns True for all blocked region."""
+        assert grid_all_blocked._is_region_claimed((0, 0)) is True
+
+    def test_is_region_claimed_all_queens(self, grid_all_queens: Grid):
+        """Test _is_region_claimed returns True for all queens region."""
+        assert grid_all_queens._is_region_claimed((0, 0)) is True
+
+    def test_is_region_claimed_mixed_false(self, grid_mixed: Grid):
+        """Test _is_region_claimed returns False for mixed region."""
+        assert grid_mixed._is_region_claimed((0, 0)) is False
+
+    def test_is_region_claimed_mixed_true(self, grid_mixed: Grid):
+        """Test _is_region_claimed returns True for region with only QUEEN and BLOCKED."""
+        assert grid_mixed._is_region_claimed((1, 0)) is True
+
+    def test_is_region_claimed_empty_grid(self):
+        """Test _is_region_claimed on empty grid - should return True."""
+        grid = Grid([])
+        assert grid._is_region_claimed([]) is True
 
 
 # =============================================================================
@@ -926,7 +956,6 @@ class TestClaimParallel:
         assert grid[2][0].is_blocked()
         assert grid[2][2].is_blocked()
         assert grid[2][4].is_blocked()
-
 
     def test_claim_parallel_vertical(self):
         """Test _claim_parallel with vertical regions."""
