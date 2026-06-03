@@ -649,7 +649,9 @@ class TestClaimRow:
         left = grid[0][0]
         right = grid[0][2]
         grid._claim_row(left, right)
-        assert True
+        assert grid[0][0].is_blocked()
+        assert grid[0][1].is_blocked()
+        assert grid[0][2].is_blocked()
 
     def test_claim_row_swaps_left_right_with_warning(self):
         """Test _claim_row swaps left and right if needed with warning."""
@@ -699,7 +701,9 @@ class TestClaimColumn:
         top = grid[0][0]
         bottom = grid[2][0]
         grid._claim_column(top, bottom)
-        assert True
+        assert grid[0][0].is_blocked()
+        assert grid[1][0].is_blocked()
+        assert grid[2][0].is_blocked()
 
     def test_claim_column_swaps_top_bottom_with_warning(self):
         """Test _claim_column swaps top and bottom if needed with warning."""
@@ -870,27 +874,31 @@ class TestClaimParallel:
         """Test _claim_row_parallel basic execution."""
         grid = Grid(
             [
-                [Cell((0, 0), "red"), Cell((0, 1), "red"), Cell((0, 2), "blue")],
-                [Cell((1, 0), "red"), Cell((1, 1), "red"), Cell((1, 2), "blue")],
+                [Cell((0, 0), "red"), Cell((0, 1), "blue"), Cell((0, 2), "yellow")],
+                [Cell((1, 0), "red"), Cell((1, 1), "blue"), Cell((1, 2), "yellow")],
+                [Cell((2, 0), "red"), Cell((2, 1), "blue"), Cell((2, 2), "yellow")]
             ]
         )
-        cells1 = [grid[0][0], grid[0][1]]
-        cells2 = [grid[1][0], grid[1][1]]
+        cells1 = [grid[0][0], grid[2][0]]
+        cells2 = [grid[0][1], grid[2][1]]
         grid._claim_row_parallel(cells1, cells2)
-        assert True
+        assert grid[0][2].is_blocked()
+        assert grid[2][2].is_blocked()
 
     def test_claim_column_parallel_basic(self):
         """Test _claim_column_parallel basic execution."""
         grid = Grid(
             [
-                [Cell((0, 0), "red"), Cell((0, 1), "blue"), Cell((0, 2), "blue")],
-                [Cell((1, 0), "red"), Cell((1, 1), "blue"), Cell((1, 2), "blue")],
+                [Cell((0, 0), "red"), Cell((0, 1), "red"), Cell((0, 2), "red")],
+                [Cell((1, 0), "blue"), Cell((1, 1), "blue"), Cell((1, 2), "blue")],
+                [Cell((2, 0), "yellow"), Cell((2, 1), "yellow"), Cell((2, 2), "yellow")],
             ]
         )
-        cells1 = [grid[0][1], grid[0][2]]
-        cells2 = [grid[1][1], grid[1][2]]
+        cells1 = [grid[0][0], grid[0][2]]
+        cells2 = [grid[2][0], grid[2][2]]
         grid._claim_column_parallel(cells1, cells2)
-        assert True
+        assert grid[1][0].is_blocked()
+        assert grid[1][2].is_blocked()
 
     def test_claim_parallel_empty_regions(self):
         """Test _claim_parallel with empty regions list."""
@@ -898,17 +906,48 @@ class TestClaimParallel:
         grid._claim_parallel([])
         assert grid[0][0].value == EMPTY
 
-    def test_claim_parallel_no_matching_regions(self):
-        """Test _claim_parallel with non-matching regions."""
+    def test_claim_parallel_horizontal(self):
+        """Test _claim_parallel with horizontal regions."""
         grid = Grid(
             [
-                [Cell((0, 0), "red"), Cell((0, 1), "blue")],
-                [Cell((1, 0), "red"), Cell((1, 1), "blue")],
+                [Cell((0, 0), "red"), Cell((0, 1), "red"), Cell((0, 2), "yellow"), Cell((0, 3), "yellow"), Cell((0, 4), "cyan")],
+                [Cell((1, 0), "red"), Cell((1, 1), "blue"), Cell((1, 2), "yellow"), Cell((1, 3), "green"), Cell((1, 4), "cyan")],
+                [Cell((2, 0), "red"), Cell((2, 1), "blue"), Cell((2, 2), "yellow"), Cell((2, 3), "green"), Cell((2, 4), "cyan")],
+                [Cell((3, 0), "red"), Cell((3, 1), "red"), Cell((3, 2), "yellow"), Cell((3, 3), "yellow"), Cell((3, 4), "cyan")],
+                [Cell((4, 0), "red"), Cell((4, 1), "red"), Cell((4, 2), "yellow"), Cell((4, 3), "yellow"), Cell((4, 4), "cyan")],
+                
             ]
         )
-        regions = [[grid[0][0]], [grid[1][1]]]
+        regions = [[grid[1][1], grid[2][1]], [grid[1][3], grid[2][3]]]
         grid._claim_parallel(regions)
-        assert True
+        assert grid[1][0].is_blocked()
+        assert grid[1][2].is_blocked()
+        assert grid[1][4].is_blocked()
+        assert grid[2][0].is_blocked()
+        assert grid[2][2].is_blocked()
+        assert grid[2][4].is_blocked()
+
+
+    def test_claim_parallel_vertical(self):
+        """Test _claim_parallel with vertical regions."""
+        grid = Grid(
+            [
+                [Cell((0, 0), "red"), Cell((0, 1), "red"), Cell((0, 2), "yellow"), Cell((0, 3), "yellow"), Cell((0, 4), "cyan")],
+                [Cell((1, 0), "red"), Cell((1, 1), "blue"), Cell((1, 2), "yellow"), Cell((1, 3), "blue"), Cell((1, 4), "cyan")],
+                [Cell((2, 0), "red"), Cell((2, 1), "red"), Cell((2, 2), "yellow"), Cell((2, 3), "yellow"), Cell((2, 4), "cyan")],
+                [Cell((3, 0), "red"), Cell((3, 1), "green"), Cell((3, 2), "yellow"), Cell((3, 3), "green"), Cell((3, 4), "cyan")],
+                [Cell((4, 0), "red"), Cell((4, 1), "red"), Cell((4, 2), "yellow"), Cell((4, 3), "yellow"), Cell((4, 4), "cyan")],
+                
+            ]
+        )
+        regions = [[grid[1][1], grid[1][3]], [grid[3][1], grid[3][3]]]
+        grid._claim_parallel(regions)
+        assert grid[0][1].is_blocked()
+        assert grid[2][1].is_blocked()
+        assert grid[4][1].is_blocked()
+        assert grid[0][3].is_blocked()
+        assert grid[2][3].is_blocked()
+        assert grid[4][3].is_blocked()
 
 
 # =============================================================================
