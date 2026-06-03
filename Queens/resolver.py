@@ -84,11 +84,12 @@ class Grid:
         return True
 
     # DONE
-    def _safe_block(self, r: int, c: int):
+    def _safe_block(self, r: int, c: int) -> None:
         if 0 <= r < len(self.grid) and 0 <= c < len(self.grid[0]):
             cell = self.grid[r][c]
             if cell.value != QUEEN:
                 cell.block_cell()
+        return
 
     # DONE
     def _find_regions(self) -> List[List[Tuple[int, int]]]:
