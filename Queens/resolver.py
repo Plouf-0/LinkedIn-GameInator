@@ -19,6 +19,7 @@ BLOCKED = -1
 
 
 # DONE
+# Classe représentant une cellule individuelle de la grille avec sa position (ligne, colonne), sa couleur et sa valeur (EMPTY, QUEEN, BLOCKED)
 @dataclass
 class Cell:
     # dataclass with custom __init__ to keep existing construction API
@@ -136,11 +137,11 @@ class Grid:
         self._safe_block(cell.row + 1, cell.col - 1)
         self._safe_block(cell.row + 1, cell.col + 1)
         self._claim_region(cell)
-
         return
 
     # DONE
     def _claim_row(self, left: Cell, right: Cell) -> None:
+        """Claim cells in the same row of the given left and right cells that are not of the same color as the given left and right cells."""
         if left.row != right.row:
             raise ValueError("Left and right cells must be in the same row.")
         if left.col > right.col:
@@ -166,11 +167,11 @@ class Grid:
                     lowerCell = self.grid[left.row + 1][cell.col]
                     if lowerCell.value != QUEEN:
                         lowerCell.block_cell()
-
         return
 
     # DONE
     def _claim_row_parallel(self, cells1: List[Cell], cells2: List[Cell]) -> None:
+        """Claim cells in the same row of the cells1 and cells2 that are not of the same color as the given parallel regions."""
         color1 = cells1[0].color
         color2 = cells2[0].color
         rows: Set[int] = {cell.row for cell in cells1}
@@ -184,6 +185,7 @@ class Grid:
 
     # DONE
     def _claim_column_parallel(self, cells1: List[Cell], cells2: List[Cell]) -> None:
+        """Claim cells in the same column of the cells1 and cells2 that are not of the same color as the given parallel regions."""
         color1 = cells1[0].color
         color2 = cells2[0].color
         cols: Set[int] = {cell.col for cell in cells1}
@@ -194,9 +196,11 @@ class Grid:
                 if target_cell.color != color1 and target_cell.color != color2:
                     if target_cell.is_empty():
                         target_cell.block_cell()
+        return
 
     # DONE
     def _claim_column(self, top: Cell, bottom: Cell) -> None:
+        """Claim cells in the same column of the given top and bottom cells that are not of the same color as the given top and bottom cells."""
         if top.col != bottom.col:
             raise ValueError("Top and bottom cells must be in the same column.")
         if top.row > bottom.row:
@@ -223,7 +227,6 @@ class Grid:
                     rightCell = row[top.col + 1]
                     if rightCell.value != QUEEN:
                         rightCell.block_cell()
-
         return
 
     # DONE
@@ -270,11 +273,11 @@ class Grid:
                 self.grid[cells[2].row][cells[2].col + 1].block_cell()  # →
             if cells[2].row - 1 >= 0 and cells[2].col - 1 >= 0:
                 self.grid[cells[2].row - 1][cells[2].col - 1].block_cell()  # ↖
-
         return
 
     # WIP first version for 2 empty-cells regions
     def _claim_parallel(self, regions: List[List[Cell]]) -> None:
+        """Claim cells in the same row or column of the given parallel regions that are not of the same color as the given parallel regions."""
         horizontal_regions: List[List[Cell]] = []
         vertical_regions: List[List[Cell]] = []
         for region in regions:
@@ -433,8 +436,15 @@ def build_example_grid(testGrid: list[str]) -> Grid:
     return Grid(grid)
 
 
-# Main resolver function to be called from the WebScrapper module; expects a Grid object and modifies it in place, then prints the result using the UI module
 def QueenResolver(grid: Grid) -> None:
+    """Résout et affiche une grille de jeu des reines.
+
+    Fonction principale à appeler depuis le module WebScrapper.
+    Affiche la grille initiale, la résout, puis affiche le résultat.
+
+    Args:
+        grid: Objet Grid à résoudre et afficher.
+    """
     if not grid or not grid.grid:
         print("This is the Queens resolver module.")
 
