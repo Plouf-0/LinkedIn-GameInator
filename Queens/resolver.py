@@ -131,11 +131,12 @@ class Grid:
             if target_cell in regs:
                 region = regs
                 break
+        empties: int = 0
         cell: Tuple[int, int]
         for cell in region:
             if self.grid[cell[0]][cell[1]].is_empty():
-                return False
-        return True
+                empties += 1
+        return empties == 0
 
     # DONE
     def _claim_cell(self, cell: Cell) -> None:
@@ -340,6 +341,7 @@ class Grid:
                 ]
                 if len(empty_cells) == 1:
                     singles.append(empty_cells[0])
+
             duos: List[Tuple[Cell, Cell]] = [
                 (self.grid[r1][c1], self.grid[r2][c2])
                 for region in self.regions
@@ -378,17 +380,24 @@ class Grid:
             emptycells_regions: List[List[Cell]] = []
             # One liner/column
             for region in self.regions:
-                rows: Set[int] = {cell[0] for cell in region}
-                cols: Set[int] = {cell[1] for cell in region}
+                if self._is_region_claimed(region[0]):
+                    continue
+                tmp_region: List[Tuple[int, int]] = []
+                for cell in region:
+                    if self.grid[cell[0]][cell[1]].is_empty():
+                        tmp_region.append(cell)
+
+                rows: Set[int] = {cell[0] for cell in tmp_region}
+                cols: Set[int] = {cell[1] for cell in tmp_region}
                 if len(rows) == 1:
                     self._claim_row(
-                        self.grid[region[0][0]][region[0][1]],
-                        self.grid[region[-1][0]][region[-1][1]],
+                        self.grid[tmp_region[0][0]][tmp_region[0][1]],
+                        self.grid[tmp_region[-1][0]][tmp_region[-1][1]],
                     )
                 elif len(cols) == 1:
                     self._claim_column(
-                        self.grid[region[0][0]][region[0][1]],
-                        self.grid[region[-1][0]][region[-1][1]],
+                        self.grid[tmp_region[0][0]][tmp_region[0][1]],
+                        self.grid[tmp_region[-1][0]][tmp_region[-1][1]],
                     )
 
                 # regrouper les regions qui ont soit 2 lignes et x colonnes en commun soit 2 colonnes et x lignes en commun en ne regardant que les cellules vides
