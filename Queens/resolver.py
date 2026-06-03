@@ -105,7 +105,7 @@ class Grid:
 
     # DONE
     def _claim_region(self, targetCell: Cell) -> None:
-        # find the region of the target cell
+        # claim the region of the target cell
         region = None
         for regs in self.regions:
             if targetCell.coord in regs:
