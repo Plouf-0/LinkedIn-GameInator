@@ -303,7 +303,9 @@ class Grid:
 
             singles: List[Cell] = []
             for region in self.regions:
-                empty_cells = [self.grid[r][c] for (r, c) in region if self.grid[r][c].is_empty()]
+                empty_cells = [
+                    self.grid[r][c] for (r, c) in region if self.grid[r][c].is_empty()
+                ]
                 if len(empty_cells) == 1:
                     singles.append(empty_cells[0])
             duos: List[Tuple[Cell, Cell]] = [
@@ -414,6 +416,7 @@ def build_example_grid(testGrid: list[str]) -> Grid:
         grid.append(row)
 
     return Grid(grid)
+
 
 # Main resolver function to be called from the WebScrapper module; expects a Grid object and modifies it in place, then prints the result using the UI module
 def QueenResolver(grid: Grid) -> None:
