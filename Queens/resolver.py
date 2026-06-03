@@ -124,6 +124,20 @@ class Grid:
         return
 
     # DONE
+    def _is_region_claimed(self, target_cell: Tuple[int, int]) -> bool:
+        # check if the region of the target cell is claimed
+        region: List[Tuple[int, int]] = []
+        for regs in self.regions:
+            if target_cell in regs:
+                region = regs
+                break
+        cell: Tuple[int, int]
+        for cell in region:
+            if self.grid[cell[0]][cell[1]].is_empty():
+                return False
+        return True
+
+    # DONE
     def _claim_cell(self, cell: Cell) -> None:
         cell.value = QUEEN
         for row in range(len(self.grid)):
