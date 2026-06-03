@@ -785,9 +785,7 @@ class TestClaimCorner:
         # Test on top edge (row 0) - same row pattern
         grid = Grid([[Cell((r, c), "red") for c in range(5)] for r in range(5)])
         grid._claim_corner([grid[0][1], grid[0][2], grid[1][1]])  # Case 2: same row
-        assert grid[1][
-            1
-        ].is_blocked()  # No upward from row 0, but cells[1] gets processed
+        assert grid[1][2].is_blocked()  # No upward from row 0, but cells[1] gets processed
 
         # Test on bottom edge (row 4) - same row pattern
         grid = Grid([[Cell((r, c), "red") for c in range(5)] for r in range(5)])
