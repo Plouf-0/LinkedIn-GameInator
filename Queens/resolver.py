@@ -227,6 +227,9 @@ class Grid:
 
     # DONE
     def _claim_corner(self, cells: List[Cell]) -> None:
+        if len(cells) != 3:
+            raise ValueError("Exactly 3 cells are required to claim a corner.")
+
         if cells[0].row == cells[1].row:
             # ¤ ¤
             # ¤
