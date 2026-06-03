@@ -39,7 +39,7 @@ class Cell:
     @property
     def get_color(self) -> str:
         return self.color
-    
+
     @property
     def get_value(self) -> int:
         return self.value
@@ -233,28 +233,42 @@ class Grid:
         if cells[0].row == cells[1].row:
             # ¤ ¤
             # ¤
-            if cells[0].col == cells[1].col:
-                self.grid[cells[0].row - 1][cells[0].col].block_cell()  # ↑
-                self.grid[cells[0].row][cells[0].col - 1].block_cell()  # ←
-                self.grid[cells[0].row + 1][cells[0].col + 1].block_cell()  # ↘
+            if cells[0].col == cells[2].col:
+                if cells[0].row - 1 >= 0:
+                    self.grid[cells[0].row - 1][cells[0].col].block_cell()  # ↑
+                if cells[0].col - 1 >= 0:
+                    self.grid[cells[0].row][cells[0].col - 1].block_cell()  # ←
+                if cells[0].row + 1 < len(self.grid) and cells[0].col + 1 < len(
+                    self.grid
+                ):
+                    self.grid[cells[0].row + 1][cells[0].col + 1].block_cell()  # ↘
             # ¤ ¤
             #   ¤
             else:
-                self.grid[cells[1].row - 1][cells[1].col].block_cell()  # ↑
-                self.grid[cells[1].row][cells[1].col + 1].block_cell()  # →
-                self.grid[cells[1].row + 1][cells[1].col - 1].block_cell()  # ↙
+                if cells[1].row - 1 >= 0:
+                    self.grid[cells[1].row - 1][cells[1].col].block_cell()  # ↑
+                if cells[1].col + 1 < len(self.grid):
+                    self.grid[cells[1].row][cells[1].col + 1].block_cell()  # →
+                if cells[1].row + 1 < len(self.grid) and cells[1].col - 1 >= 0:
+                    self.grid[cells[1].row + 1][cells[1].col - 1].block_cell()  # ↙
         # ¤
         # ¤ ¤
         elif cells[0].col == cells[1].col:
-            self.grid[cells[1].row + 1][cells[1].col].block_cell()  # ↓
-            self.grid[cells[1].row][cells[1].col - 1].block_cell()  # ←
-            self.grid[cells[1].row - 1][cells[1].col + 1].block_cell()  # ↗
+            if cells[1].row + 1 < len(self.grid):
+                self.grid[cells[1].row + 1][cells[1].col].block_cell()  # ↓
+            if cells[1].col - 1 >= 0:
+                self.grid[cells[1].row][cells[1].col - 1].block_cell()  # ←
+            if cells[1].row - 1 >= 0 and cells[1].col + 1 < len(self.grid):
+                self.grid[cells[1].row - 1][cells[1].col + 1].block_cell()  # ↗
         #   ¤
         # ¤ ¤
         else:
-            self.grid[cells[2].row + 1][cells[2].col].block_cell()  # ↓
-            self.grid[cells[2].row][cells[2].col + 1].block_cell()  # →
-            self.grid[cells[2].row - 1][cells[2].col - 1].block_cell()  # ↖
+            if cells[2].row + 1 < len(self.grid):
+                self.grid[cells[2].row + 1][cells[2].col].block_cell()  # ↓
+            if cells[2].col + 1 < len(self.grid):
+                self.grid[cells[2].row][cells[2].col + 1].block_cell()  # →
+            if cells[2].row - 1 >= 0 and cells[2].col - 1 >= 0:
+                self.grid[cells[2].row - 1][cells[2].col - 1].block_cell()  # ↖
 
         return
 
