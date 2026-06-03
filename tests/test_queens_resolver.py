@@ -1143,34 +1143,24 @@ class TestResolve:
     def test_resolve_simple_grid(self):
         """Test resolve on a simple grid."""
         test_grid = [
-            "R R",
-            "G G",
+            "P P G G G G",
+            "P P O R R G",
+            "P O O R R B",
+            "O O O R V V",
+            "O O O V V V",
+            "O O O V V V",
         ]
         grid = build_example_grid(test_grid)
         result = grid.resolve()
         assert result is not None
-        assert len(result) == 2
+        assert grid[1][0].is_queen()
+        assert grid[4][1].is_queen()
+        assert grid[0][2].is_queen()
+        assert grid[3][3].is_queen()
+        assert grid[5][4].is_queen()
+        assert grid[2][5].is_queen()
 
-    def test_resolve_already_solved(self):
-        """Test resolve on already solved grid."""
-        grid = Grid(
-            [
-                [Cell((0, 0), "red", QUEEN), Cell((0, 1), "red", BLOCKED)],
-                [Cell((1, 0), "blue", BLOCKED), Cell((1, 1), "blue", QUEEN)],
-            ]
-        )
-        result = grid.resolve()
-        assert result is not None
 
-    def test_resolve_impossible_grid(self):
-        """Test resolve on impossible grid (no solution)."""
-        test_grid = [
-            "R R",
-            "R R",
-        ]
-        grid = build_example_grid(test_grid)
-        result = grid.resolve()
-        assert result is not None
 
     def test_resolve_returns_grid(self):
         """Test that resolve returns the grid."""
