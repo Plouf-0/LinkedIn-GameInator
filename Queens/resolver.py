@@ -36,6 +36,14 @@ class Cell:
     def coord(self) -> Tuple[int, int]:
         return (self.row, self.col)
 
+    @property
+    def get_color(self) -> str:
+        return self.color
+    
+    @property
+    def get_value(self) -> int:
+        return self.value
+
     def make_queen(self) -> None:
         self.value = QUEEN
 
