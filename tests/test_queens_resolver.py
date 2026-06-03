@@ -668,15 +668,17 @@ class TestClaimRow:
         """Test _claim_row with cells in same row - basic functionality."""
         grid = Grid(
             [
-                [Cell((0, 0), "red"), Cell((0, 1), "red"), Cell((0, 2), "red")],
+                [Cell((0, 0), "green"), Cell((0, 1), "red", QUEEN), Cell((0, 2), "red"), Cell((0, 3), "green")],
+                [Cell((1, 0), "green"), Cell((1, 1), "red"), Cell((1, 2), "red"), Cell((1, 3), "green")],
             ]
         )
-        left = grid[0][0]
+        left = grid[0][1]
         right = grid[0][2]
         grid._claim_row(left, right)
         assert grid[0][0].is_blocked()
-        assert grid[0][1].is_blocked()
-        assert grid[0][2].is_blocked()
+        assert grid[0][3].is_blocked()
+        assert grid[1][1].is_blocked()
+        assert grid[1][2].is_blocked()
 
     def test_claim_row_swaps_left_right_with_warning(self):
         """Test _claim_row swaps left and right if needed with warning."""
@@ -718,16 +720,20 @@ class TestClaimColumn:
         """Test _claim_column with cells in same column - basic functionality."""
         grid = Grid(
             [
-                [Cell((0, 0), "red")],
-                [Cell((1, 0), "red")],
-                [Cell((2, 0), "red")],
+                [Cell((0, 0), "red"), Cell((0, 1), "red")],
+                [Cell((1, 0), "red"), Cell((1, 1), "green")],
+                [Cell((2, 0), "red"), Cell((2, 1), "green", QUEEN)],
+                [Cell((3, 0), "red"), Cell((3, 1), "green")],
+                [Cell((4, 0), "red"), Cell((4, 1), "red")],
+                [Cell((5, 0), "red"), Cell((5, 1), "red")],
             ]
         )
-        top = grid[0][0]
-        bottom = grid[2][0]
+        top = grid[1][1]
+        bottom = grid[3][1]
         grid._claim_column(top, bottom)
-        assert grid[0][0].is_blocked()
-        assert grid[1][0].is_blocked()
+        assert grid[0][1].is_blocked()
+        assert grid[4][1].is_blocked()
+        assert grid[5][1].is_blocked()
         assert grid[2][0].is_blocked()
 
     def test_claim_column_swaps_top_bottom_with_warning(self):
