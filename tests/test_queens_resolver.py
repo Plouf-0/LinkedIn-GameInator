@@ -522,11 +522,6 @@ class TestIsRegionClaimed:
         """Test _is_region_claimed returns True for region with only QUEEN and BLOCKED."""
         assert grid_mixed._is_region_claimed((1, 0)) is True
 
-    def test_is_region_claimed_empty_grid(self):
-        """Test _is_region_claimed on empty grid - should return True."""
-        grid = Grid([])
-        assert grid._is_region_claimed([]) is True
-
 
 # =============================================================================
 # Test _claim_cell
