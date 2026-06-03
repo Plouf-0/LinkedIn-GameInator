@@ -1160,7 +1160,24 @@ class TestResolve:
         assert grid[5][4].is_queen()
         assert grid[2][5].is_queen()
 
-
+    def test_resolve_simple_grid1(self):
+        """Test resolve on a simple grid."""
+        test_grid = [
+            "C O Y Y Y P P",
+            "C O V V Y B P",
+            "C O V Y Y B B",
+            "C O O Y Y Y Y",
+            "C O G Y Y Y Y",
+            "C O G Y Y Y Y",
+            "C C C C C C C",
+        ]
+        grid = build_example_grid(test_grid)
+        grid.resolve()
+        assert grid[1][3].is_queen()
+        assert grid[3][1].is_queen()
+        assert grid[4][4].is_queen()
+        assert grid[5][2].is_queen()
+        assert grid[6][0].is_queen()
 
     def test_resolve_returns_grid(self):
         """Test that resolve returns the grid."""
