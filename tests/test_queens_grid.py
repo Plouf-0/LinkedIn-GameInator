@@ -109,6 +109,15 @@ def grid_mixed():
         ]
     )
 
+@pytest.fixture
+def big_grid():
+    """Create a larger 9x9 grid with mixed colors."""
+    return Grid(
+        [
+            [Cell(r, c, f"color{(r+c)%3}") for c in range(9)]
+            for r in range(9)
+        ]
+    )
 
 # =============================================================================
 # Test Cell class
@@ -284,7 +293,7 @@ class TestGridBasics:
 
 
 # =============================================================================
-# Test _is_grid_finished
+# Test is_grid_finished
 # =============================================================================
 
 
@@ -339,54 +348,54 @@ class TestIsGridFinished:
 
 
 # =============================================================================
-# Test _safe_block
+# Test block_cell_by_coord
 # =============================================================================
 
 
-class TestSafeBlock:
-    """Tests for _safe_block method."""
+class TestBlockCellByCoord:
+    """Tests for block_cell_by_coord method."""
 
-    def test_safe_block_valid_coords(self, simple_grid_2x2: Grid):
-        """Test _safe_block with valid coordinates."""
+    def test_block_cell_by_coord_valid_coords(self, simple_grid_2x2: Grid):
+        """Test block_cell_by_coord with valid coordinates."""
         initial_value = simple_grid_2x2.grid[0][0].value
         assert initial_value == EMPTY
         simple_grid_2x2.block_cell_by_coord(0, 0)
         assert simple_grid_2x2.grid[0][0].value == BLOCKED
 
-    def test_safe_block_negative_row(self, simple_grid_2x2: Grid):
-        """Test _safe_block with negative row - should not crash."""
+    def test_block_cell_by_coord_negative_row(self, simple_grid_2x2: Grid):
+        """Test block_cell_by_coord with negative row - should not crash."""
         simple_grid_2x2.block_cell_by_coord(-1, 0)
         assert simple_grid_2x2.grid[0][0].value == EMPTY
 
-    def test_safe_block_negative_col(self, simple_grid_2x2: Grid):
-        """Test _safe_block with negative column - should not crash."""
+    def test_block_cell_by_coord_negative_col(self, simple_grid_2x2: Grid):
+        """Test block_cell_by_coord with negative column - should not crash."""
         simple_grid_2x2.block_cell_by_coord(0, -1)
         assert simple_grid_2x2.grid[0][0].value == EMPTY
 
-    def test_safe_block_row_too_large(self, simple_grid_2x2: Grid):
-        """Test _safe_block with row too large - should not crash."""
+    def test_block_cell_by_coord_row_too_large(self, simple_grid_2x2: Grid):
+        """Test block_cell_by_coord with row too large - should not crash."""
         simple_grid_2x2.block_cell_by_coord(100, 0)
         assert simple_grid_2x2.grid[0][0].value == EMPTY
 
-    def test_safe_block_col_too_large(self, simple_grid_2x2: Grid):
-        """Test _safe_block with column too large - should not crash."""
+    def test_block_cell_by_coord_col_too_large(self, simple_grid_2x2: Grid):
+        """Test block_cell_by_coord with column too large - should not crash."""
         simple_grid_2x2.block_cell_by_coord(0, 100)
         assert simple_grid_2x2.grid[0][0].value == EMPTY
 
-    def test_safe_block_queen_cell(self, simple_grid_2x2: Grid):
-        """Test _safe_block on queen cell - should not block it."""
+    def test_block_cell_by_coord_queen_cell(self, simple_grid_2x2: Grid):
+        """Test block_cell_by_coord on queen cell - should not block it."""
         simple_grid_2x2.grid[0][0].value = QUEEN
         simple_grid_2x2.block_cell_by_coord(0, 0)
         assert simple_grid_2x2.grid[0][0].value == QUEEN
 
-    def test_safe_block_already_blocked(self, simple_grid_2x2: Grid):
-        """Test _safe_block on already blocked cell."""
+    def test_block_cell_by_coord_already_blocked(self, simple_grid_2x2: Grid):
+        """Test block_cell_by_coord on already blocked cell."""
         simple_grid_2x2.grid[0][0].value = BLOCKED
         simple_grid_2x2.block_cell_by_coord(0, 0)
         assert simple_grid_2x2.grid[0][0].value == BLOCKED
 
-    def test_safe_block_multiple_calls(self, simple_grid_2x2: Grid):
-        """Test multiple _safe_block calls."""
+    def test_block_cell_by_coord_multiple_calls(self, simple_grid_2x2: Grid):
+        """Test multiple block_cell_by_coord calls."""
         simple_grid_2x2.block_cell_by_coord(0, 0)
         simple_grid_2x2.block_cell_by_coord(0, 1)
         simple_grid_2x2.block_cell_by_coord(1, 0)
@@ -396,31 +405,31 @@ class TestSafeBlock:
 
 
 # =============================================================================
-# Test _find_regions
+# Test _setup_regions
 # =============================================================================
 
 
-class TestFindRegions:
-    """Tests for _find_regions method."""
+class TestSetupRegions:
+    """Tests for _setup_regions method."""
 
-    def test_find_regions_empty_grid(self):
-        """Test _find_regions on empty grid."""
+    def test_setup_regions_empty_grid(self):
+        """Test _setup_regions on empty grid."""
         grid = Grid([])
         regions = grid.regions
         assert regions == []
 
-    def test_find_regions_single_color(self, grid_single_color: Grid):
-        """Test _find_regions with single color."""
+    def test_setup_regions_single_color(self, grid_single_color: Grid):
+        """Test _setup_regions with single color."""
         regions = grid_single_color.regions
         assert len(regions) == 1
         assert len(regions[0].cells) == 9
 
-    def test_find_regions_multiple_colors(self, simple_grid_2x2: Grid):
-        """Test _find_regions with multiple colors."""
+    def test_setup_regions_multiple_colors(self, simple_grid_2x2: Grid):
+        """Test _setup_regions with multiple colors."""
         regions = simple_grid_2x2.regions
         assert len(regions) == 4
 
-    def test_find_regions_order_preserved(self):
+    def test_setup_regions_order_preserved(self):
         """Test that region order matches color appearance order."""
         grid = Grid(
             [
@@ -433,3 +442,137 @@ class TestFindRegions:
         assert regions[0].cells[1].row == 1 and regions[0].cells[1].col == 0
         assert regions[1].cells[0].row == 0 and regions[1].cells[0].col == 1
         assert regions[2].cells[0].row == 1 and regions[2].cells[0].col == 1
+
+
+# =============================================================================
+# Test queenify_cell
+# =============================================================================
+
+
+class TestClaimCell:
+    """Tests for queenify_cell method."""
+
+    def test_queenify_cell_sets_queen(self):
+        """Test that queenify_cell sets the cell to queen."""
+        grid = Grid([[Cell(0, 0, "cyan")]])
+        grid.queenify_cell(grid[0, 0])
+        assert grid[0, 0].value == QUEEN
+
+    def test_queenify_cell_blocks_row(self):
+        """Test that queenify_cell blocks all cells in the same row."""
+        grid = Grid(
+            [
+                [Cell(0, 0, "cyan"), Cell(0, 1, "cyan"), Cell(0, 2, "cyan")],
+            ]
+        )
+        grid.queenify_cell(grid[0, 1])
+        assert grid[0, 0].value == BLOCKED
+        assert grid[0, 1].value == QUEEN
+        assert grid[0, 2].value == BLOCKED
+
+    def test_queenify_cell_blocks_column(self):
+        """Test that queenify_cell blocks all cells in the same column."""
+        grid = Grid(
+            [
+                [Cell(0, 0, "cyan")],
+                [Cell(1, 0, "cyan")],
+                [Cell(2, 0, "cyan")],
+            ]
+        )
+        grid.queenify_cell(grid[1, 0])
+        assert grid[0, 0].value == BLOCKED
+        assert grid[1, 0].value == QUEEN
+        assert grid[2, 0].value == BLOCKED
+
+    def test_queenify_cell_blocks_diagonals(self):
+        """Test that queenify_cell blocks diagonal cells."""
+        grid = Grid(
+            [
+                [Cell(0, 0, "cyan"), Cell(0, 1, "cyan"), Cell(0, 2, "cyan")],
+                [Cell(1, 0, "cyan"), Cell(1, 1, "cyan"), Cell(1, 2, "cyan")],
+                [Cell(2, 0, "cyan"), Cell(2, 1, "cyan"), Cell(2, 2, "cyan")],
+            ]
+        )
+        grid.queenify_cell(grid[1, 1])
+        assert grid[0, 0].value == BLOCKED
+        assert grid[0, 2].value == BLOCKED
+        assert grid[2, 0].value == BLOCKED
+        assert grid[2, 2].value == BLOCKED
+
+    def test_queenify_cell_already_queen(self):
+        """Test queenify_cell on already queen cell."""
+        grid = Grid([[Cell(0, 0, "cyan", QUEEN)]])
+        grid.queenify_cell(grid[0, 0])
+        assert grid[0, 0].value == QUEEN
+
+    def test_queenify_cell_in_grid(self, simple_grid_2x2: Grid):
+        """Test queenify_cell on a cell in a 2x2 grid."""
+        cell = simple_grid_2x2[0, 0]
+        simple_grid_2x2.queenify_cell(cell)
+        assert cell.value == QUEEN
+        assert simple_grid_2x2[0, 1].value == BLOCKED
+        assert simple_grid_2x2[1, 0].value == BLOCKED
+
+    def test_queenify_cell_big_grid(self, big_grid: Grid):
+        """Test queenify_cell on a cell in a larger grid."""
+        cell = big_grid[4, 4]
+        big_grid.queenify_cell(cell)
+        assert cell.value == QUEEN
+        for i in range(9):
+            if i != 4:
+                assert big_grid[i, 4].value == BLOCKED
+                assert big_grid[4, i].value == BLOCKED
+        assert big_grid[3, 3].value == BLOCKED
+        assert big_grid[3, 5].value == BLOCKED
+        assert big_grid[5, 3].value == BLOCKED
+        assert big_grid[5, 5].value == BLOCKED
+        
+
+# =============================================================================
+# Test _claim_region
+# =============================================================================
+
+
+class TestClaimRegion:
+    """Tests for _claim_region method."""
+
+    def test_claim_region_blocks_all_except_target(self):
+        """Test that _claim_region blocks all cells in region except target."""
+        grid = Grid(
+            [
+                [Cell(0, 0, "red"), Cell(0, 1, "red"), Cell(0, 2, "red")],
+            ]
+        )
+        target = grid[0, 1]
+        grid.block_region(target)
+        assert grid[0, 0].value == BLOCKED
+        assert grid[0, 1].value == BLOCKED
+        assert grid[0, 2].value == BLOCKED
+
+    def test_claim_region_with_queens(self):
+        """Test _claim_region respects existing queens."""
+        grid = Grid(
+            [
+                [Cell(0, 0, "red", QUEEN), Cell(0, 1, "red"), Cell(0, 2, "red")],
+            ]
+        )
+        target = grid[0, 1]
+        grid.block_region(target)
+        assert grid[0, 0].value == QUEEN
+        assert grid[0, 1].value == BLOCKED
+        assert grid[0, 2].value == BLOCKED
+
+    def test_claim_region_multiple_regions(self):
+        """Test _claim_region with multiple regions."""
+        grid = Grid(
+            [
+                [Cell(0, 0, "red"), Cell(0, 1, "blue")],
+                [Cell(1, 0, "red"), Cell(1, 1, "blue")],
+            ]
+        )
+        target = grid[0, 0]
+        grid.block_region(target)
+        assert grid[0, 0].value == BLOCKED
+        assert grid[1, 0].value == BLOCKED
+        assert grid[0, 1].value == EMPTY
+        assert grid[1, 1].value == EMPTY
