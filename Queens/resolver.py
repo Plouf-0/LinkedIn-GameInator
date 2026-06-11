@@ -1,9 +1,12 @@
 # Queens/resolver.py
 
+import logging
 from warnings import warn
 from typing import List, Set
 
 from .queens_grid import Cell, Grid, build_example_grid
+
+logger = logging.getLogger(__name__)
 
 # Try to import UI helpers from the same folder; prefer relative import when used as a package
 try:
