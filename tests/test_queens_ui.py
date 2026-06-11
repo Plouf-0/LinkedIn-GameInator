@@ -28,7 +28,7 @@ from Queens.ui import print_grid, print_regions, print_color_palette, EMPTY, QUE
 @pytest.fixture
 def simple_grid_1x1():
     """Create a minimal 1x1 grid with a single cell."""
-    grid_data = [[Cell((0, 0), "cyan")]]
+    grid_data = [[Cell(0, 0, "cyan")]]
     return Grid(grid_data)
 
 
@@ -36,8 +36,8 @@ def simple_grid_1x1():
 def simple_grid_2x2():
     """Create a 2x2 grid with different colors."""
     grid_data = [
-        [Cell((0, 0), "cyan"), Cell((0, 1), "bleu")],
-        [Cell((1, 0), "vert"), Cell((1, 1), "orange")],
+        [Cell(0, 0, "cyan"), Cell(0, 1, "bleu")],
+        [Cell(1, 0, "vert"), Cell(1, 1, "orange")],
     ]
     return Grid(grid_data)
 
@@ -46,9 +46,9 @@ def simple_grid_2x2():
 def grid_with_queens():
     """Create a 3x3 grid with a queen and blocked cells."""
     grid_data = [
-        [Cell((0, 0), "cyan", QUEEN), Cell((0, 1), "cyan", BLOCKED), Cell((0, 2), "cyan")],
-        [Cell((1, 0), "bleu", BLOCKED), Cell((1, 1), "bleu", QUEEN), Cell((1, 2), "bleu")],
-        [Cell((2, 0), "vert"), Cell((2, 1), "vert", BLOCKED), Cell((2, 2), "vert")],
+        [Cell(0, 0, "cyan", QUEEN), Cell(0, 1, "cyan", BLOCKED), Cell(0, 2, "cyan")],
+        [Cell(1, 0, "bleu", BLOCKED), Cell(1, 1, "bleu", QUEEN), Cell(1, 2, "bleu")],
+        [Cell(2, 0, "vert"), Cell(2, 1, "vert", BLOCKED), Cell(2, 2, "vert")],
     ]
     return Grid(grid_data)
 
@@ -71,7 +71,7 @@ def grid_all_colors():
     for r, color in enumerate(colors[:3]):
         row: list[Cell] = []
         for c in range(3):
-            row.append(Cell((r, c), color))
+            row.append(Cell(r, c, color))
         grid_data.append(row)
     return Grid(grid_data)
 
@@ -270,7 +270,7 @@ class TestPrintGrid:
         for r in range(5):
             row: list[Cell] = []
             for c in range(5):
-                row.append(Cell((r, c), "cyan"))
+                row.append(Cell(r, c, "cyan"))
             grid_data.append(row)
         grid = Grid(grid_data)
         
@@ -290,8 +290,8 @@ class TestPrintGrid:
     def test_print_grid_mixed_values(self, capsys: pytest.CaptureFixture[str]):
         """Test grid with mixed EMPTY, QUEEN, BLOCKED values."""
         grid_data = [
-            [Cell((0, 0), "cyan", EMPTY), Cell((0, 1), "cyan", QUEEN)],
-            [Cell((1, 0), "bleu", BLOCKED), Cell((1, 1), "bleu", EMPTY)],
+            [Cell(0, 0, "cyan", EMPTY), Cell(0, 1, "cyan", QUEEN)],
+            [Cell(1, 0, "bleu", BLOCKED), Cell(1, 1, "bleu", EMPTY)],
         ]
         grid = Grid(grid_data)
         
