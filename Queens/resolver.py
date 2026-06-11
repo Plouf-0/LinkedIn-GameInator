@@ -1,9 +1,9 @@
 # Queens/resolver.py
 
-import logging
 from warnings import warn
-from dataclasses import dataclass, field
-from typing import List, Tuple, Set
+from typing import List, Set
+
+from .queens_grid import Cell, Grid, build_example_grid
 
 # Try to import UI helpers from the same folder; prefer relative import when used as a package
 try:
@@ -11,148 +11,9 @@ try:
 except Exception:
     import ui  # type: ignore
 
-logger = logging.getLogger(__name__)
 
-EMPTY = 0
-QUEEN = 1
-BLOCKED = -1
-
-
-# DONE
-# Classe représentant une cellule individuelle de la grille avec sa position (ligne, colonne), sa couleur et sa valeur (EMPTY, QUEEN, BLOCKED)
-@dataclass
-class Cell:
-    # dataclass with custom __init__ to keep existing construction API
-    row: int = field(init=False)
-    col: int = field(init=False)
-    color: str = field(init=False)
-    value: int = field(default=EMPTY)
-
-    def __init__(self, coord: Tuple[int, int], color: str, value: int = EMPTY):
-        self.row, self.col = coord
-        self.color = color
-        self.value = value
-
-    @property
-    def coord(self) -> Tuple[int, int]:
-        return (self.row, self.col)
-
-    @property
-    def get_color(self) -> str:
-        return self.color
-
-    @property
-    def get_value(self) -> int:
-        return self.value
-
-    def make_queen(self) -> None:
-        self.value = QUEEN
-
-    def block_cell(self) -> None:
-        self.value = BLOCKED
-
-    def is_queen(self) -> bool:
-        return self.value == QUEEN
-
-    def is_blocked(self) -> bool:
-        return self.value == BLOCKED
-
-    def is_empty(self) -> bool:
-        return self.value == EMPTY
-
-    def __repr__(self) -> str:
-        return f"Cell({self.row},{self.col},{self.color},{self.value})"
-
-
-# DONE
-class Grid:
-    def __init__(self, grid: List[List[Cell]]):
-        self.grid: List[List[Cell]] = grid
-        self.regions: List[List[Tuple[int, int]]] = self._find_regions()
-
-    def __getitem__(self, index: int) -> List[Cell]:
-        return self.grid[index]
-
-    def __iter__(self):
-        return iter(self.grid)
-
-    # DONE
-    def _is_grid_finished(self) -> bool:
-        for row in self.grid:
-            for cell in row:
-                if cell.is_empty():
-                    return False
-        return True
-
-    # DONE
-    def _safe_block(self, r: int, c: int) -> None:
-        if 0 <= r < len(self.grid) and 0 <= c < len(self.grid[0]):
-            cell = self.grid[r][c]
-            if cell.value != QUEEN:
-                cell.block_cell()
-        return
-
-    # DONE
-    def _find_regions(self) -> List[List[Tuple[int, int]]]:
-        colors: List[str] = []
-        regions: List[List[Tuple[int, int]]] = []
-        for line in self.grid:
-            for cell in line:
-                if cell.color not in colors:
-                    colors.append(cell.color)
-                    regions.append([])
-                regions[colors.index(cell.color)].append((cell.row, cell.col))
-
-        return regions
-
-    # DONE
-    def _claim_region(self, targetCell: Cell) -> None:
-        # claim the region of the target cell
-        region = None
-        for regs in self.regions:
-            if targetCell.coord in regs:
-                region = regs
-                break
-        if region is None:
-            warn(f"No region found for cell {targetCell.coord}")
-            return
-
-        for row, col in region:
-            cell = self.grid[row][col]
-            if cell.coord != targetCell.coord and cell.is_empty():
-                cell.block_cell()
-        return
-
-    # DONE
-    def _is_region_claimed(self, target_cell: Tuple[int, int]) -> bool:
-        # check if the region of the target cell is claimed
-        region: List[Tuple[int, int]] = []
-        for regs in self.regions:
-            if target_cell in regs:
-                region = regs
-                break
-        empties: int = 0
-        cell: Tuple[int, int]
-        for cell in region:
-            if self.grid[cell[0]][cell[1]].is_empty():
-                empties += 1
-        return empties == 0
-
-    # DONE
-    def _claim_cell(self, cell: Cell) -> None:
-        cell.value = QUEEN
-        for row in range(len(self.grid)):
-            for column in range(len(self.grid[0])):
-                if row == cell.row or column == cell.col:
-                    if self.grid[row][column].value == EMPTY:
-                        self.grid[row][column].value = BLOCKED
-
-        self._safe_block(cell.row - 1, cell.col - 1)
-        self._safe_block(cell.row - 1, cell.col + 1)
-        self._safe_block(cell.row + 1, cell.col - 1)
-        self._safe_block(cell.row + 1, cell.col + 1)
-        self._claim_region(cell)
-        return
+class BruteForceResolver(Grid):
+    """Resolver that uses brute-force backtracking to solve the grid."""
 
     # DONE
     def _claim_row(self, left: Cell, right: Cell) -> None:
@@ -246,6 +107,7 @@ class Grid:
 
     # DONE
     def _claim_corner(self, cells: List[Cell]) -> None:
+        """Claim cells around the given 3 cells that form a corner that are not of the same color as the given 3 cells."""
         if len(cells) != 3:
             raise ValueError("Exactly 3 cells are required to claim a corner.")
 
@@ -326,7 +188,7 @@ class Grid:
         return
 
     # WIP
-    def resolve(self) -> List[List[Cell]]:
+    def resolve_grid(self) -> List[List[Cell]]:
 
         max_iterations = 100
 
@@ -334,30 +196,26 @@ class Grid:
         while iteration < max_iterations:
             iteration += 1
 
-            singles: List[Cell] = []
-            for region in self.regions:
-                empty_cells = [
-                    self.grid[r][c] for (r, c) in region if self.grid[r][c].is_empty()
-                ]
-                if len(empty_cells) == 1:
-                    singles.append(empty_cells[0])
-
-            duos: List[Tuple[Cell, Cell]] = [
-                (self.grid[r1][c1], self.grid[r2][c2])
+            singles: List[Cell] = [
+                region.empty_cells[0]
                 for region in self.regions
-                if len(region) == 2
-                for (r1, c1), (r2, c2) in [region]
+                if region.nb_empty_cells == 1
+            ]
+
+            duos: List[list[Cell]] = [
+                region.empty_cells
+                for region in self.regions
+                if region.nb_empty_cells == 2
             ]
 
             trios: List[List[Cell]] = [
-                [self.grid[r1][c1], self.grid[r2][c2], self.grid[r3][c3]]
+                region.empty_cells
                 for region in self.regions
-                if len(region) == 3
-                for (r1, c1), (r2, c2), (r3, c3) in [region]
+                if region.nb_empty_cells == 3
             ]
 
             for cell in singles:
-                self._claim_cell(cell)
+                self.queenify_cell(cell)
 
             for duo in duos:
                 if duo[0].row == duo[1].row:
@@ -377,86 +235,51 @@ class Grid:
                 else:
                     self._claim_corner(trio)
 
-            emptycells_regions: List[List[Cell]] = []
             # One liner/column
             for region in self.regions:
-                if self._is_region_claimed(region[0]):
+                if region.is_completed:
                     continue
-                tmp_region: List[Tuple[int, int]] = []
-                for cell in region:
-                    if self.grid[cell[0]][cell[1]].is_empty():
-                        tmp_region.append(cell)
 
-                rows: Set[int] = {cell[0] for cell in tmp_region}
-                cols: Set[int] = {cell[1] for cell in tmp_region}
+                rows: Set[int] = {cell.row for cell in region.empty_cells}
+                cols: Set[int] = {cell.col for cell in region.empty_cells}
                 if len(rows) == 1:
                     self._claim_row(
-                        self.grid[tmp_region[0][0]][tmp_region[0][1]],
-                        self.grid[tmp_region[-1][0]][tmp_region[-1][1]],
+                        self.grid[region.empty_cells[0].row][region.empty_cells[0].col],
+                        self.grid[region.empty_cells[-1].row][
+                            region.empty_cells[-1].col
+                        ],
                     )
                 elif len(cols) == 1:
                     self._claim_column(
-                        self.grid[tmp_region[0][0]][tmp_region[0][1]],
-                        self.grid[tmp_region[-1][0]][tmp_region[-1][1]],
+                        self.grid[region.empty_cells[0].row][region.empty_cells[0].col],
+                        self.grid[region.empty_cells[-1].row][
+                            region.empty_cells[-1].col
+                        ],
                     )
 
-                # regrouper les regions qui ont soit 2 lignes et x colonnes en commun soit 2 colonnes et x lignes en commun en ne regardant que les cellules vides
-                emptycells_regions.append([])
-                for cell in region:
-                    if self.grid[cell[0]][cell[1]].is_empty():
-                        emptycells_regions[-1].append(self.grid[cell[0]][cell[1]])
+            empty_cells_regions: List[Grid.Region] = [
+                region for region in self.regions
+                if region.nb_empty_cells != 0
+            ]
 
             two_rowcol_regions: List[List[Cell]] = []
-            for region in emptycells_regions:
-                rows: Set[int] = {cell.row for cell in region}
-                cols: Set[int] = {cell.col for cell in region}
+            for region in empty_cells_regions:
+                rows: Set[int] = {cell.row for cell in region.cells}
+                cols: Set[int] = {cell.col for cell in region.cells}
                 if len(rows) == 2 or len(cols) == 2:
-                    two_rowcol_regions.append(region)
+                    two_rowcol_regions.append(region.cells)
             self._claim_parallel(two_rowcol_regions)
 
-            # printGrid(self)
-
-            if self._is_grid_finished():
+            if self.is_grid_finished():
                 logger.info("Grid solved!")
                 print("Grid solved!")
                 break
+
             if iteration == max_iterations:
                 logger.info("Max iterations reached, stopping resolution.")
                 print("Max iterations reached, stopping resolution.")
 
         return self.grid
-
-
-# DONE
-def build_example_grid(testGrid: list[str]) -> Grid:
-    """Construit une grid d'exemple à partir d'une représentation ASCII.
-
-    Lettres utilisées dans cet exemple:
-    C = cyan, R = red, B = blue, O = orange, G = green
-    """
-
-    mapping = {
-        "C": "cyan",
-        "R": "red",
-        "B": "blue",
-        "O": "orange",
-        "V": "green",  # "V" for vert (green in French)
-        "Y": "yellow",
-        "P": "purple",
-        "W": "white",
-        "G": "gray",
-        "N": "black",  # "N" for noir (black in French)
-    }
-
-    grid: List[List[Cell]] = []
-    for r, line in enumerate(testGrid):
-        row: List[Cell] = []
-        for c, token in enumerate(line.split()):
-            color = mapping.get(token, "unknown")
-            row.append(Cell((r, c), color))
-        grid.append(row)
-
-    return Grid(grid)
 
 
 def QueenResolver(grid: Grid) -> None:
@@ -473,11 +296,12 @@ def QueenResolver(grid: Grid) -> None:
 
     # Use the UI module for printing
     ui.print_grid(grid)
-    grid.resolve()
+    grid.resolve_grid()
     ui.print_grid(grid)
 
 
 if __name__ == "__main__":
+
     testGrid = [
         "Y Y Y P W W W",
         "Y Y Y P W W W",
@@ -511,5 +335,6 @@ if __name__ == "__main__":
         "P R R P P P P P",
         "P P P P P P P P",
     ]
+
     example = build_example_grid(testGrid2)
     QueenResolver(example)

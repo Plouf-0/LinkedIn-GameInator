@@ -5,7 +5,7 @@ QUEEN = 1
 BLOCKED = -1
 
 if TYPE_CHECKING:
-    from .resolver import Grid
+    from .resolver import Grid, Cell
 
 
 def print_grid(grid: "Grid") -> None:
@@ -51,7 +51,7 @@ def print_grid(grid: "Grid") -> None:
             print("\033[0m", end="")
         print("\033[0m ")
 
-def print_regions(regions: List[List[Tuple[int, int]]]) -> None:
+def print_regions(regions: List[List[Cell]]) -> None:
     print("Found regions (list of coords per color):")
     for i, region in enumerate(regions):
         print(f"Region {i}: {region}")
