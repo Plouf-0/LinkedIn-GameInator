@@ -16,6 +16,7 @@ import warnings
 
 from Queens.resolver import QueenResolver, BruteForceResolver
 from Queens.queens_grid import Cell, Grid, EMPTY, QUEEN, BLOCKED, build_example_grid
+from Queens.ui import print_grid
 
 # =============================================================================
 # Fixtures for testing
@@ -974,30 +975,6 @@ class TestBlockCellByCoord:
         assert grid[0, 0].is_queen()
 
 
-class TestIsGridFinished:
-    """Tests for Grid.is_grid_finished method."""
-
-    def test_is_grid_finished_empty_grid(self):
-        """Test is_grid_finished with empty grid."""
-        grid = Grid([])
-        assert grid.is_grid_finished()
-
-    def test_is_grid_finished_all_blocked(self):
-        """Test is_grid_finished when all cells are blocked."""
-        grid = Grid([[Cell(0, 0, "red", BLOCKED), Cell(0, 1, "blue", BLOCKED)]])
-        assert grid.is_grid_finished()
-
-    def test_is_grid_finished_all_queens(self):
-        """Test is_grid_finished when all cells are queens."""
-        grid = Grid([[Cell(0, 0, "red", QUEEN), Cell(0, 1, "blue", QUEEN)]])
-        assert grid.is_grid_finished()
-
-    def test_is_grid_finished_has_empty(self):
-        """Test is_grid_finished when there are empty cells."""
-        grid = Grid([[Cell(0, 0, "red"), Cell(0, 1, "blue")]])
-        assert not grid.is_grid_finished()
-
-
 class TestBruteForceResolverImport:
     """Tests to cover import statements in resolver.py."""
 
@@ -1052,64 +1029,11 @@ class TestResolveWarning:
         # But the current logic might not hit this, so we need to mock it
         # For now, just call resolve_grid and check it doesn't crash
         with warnings.catch_warnings(record=True) as w:
+            print(w)
             warnings.simplefilter("always")
             grid.resolve_grid()
             # The warning might or might not be triggered depending on the grid state
             # This test mainly ensures resolve_grid runs without crashing
-
-
-class TestMainBlock:
-    """Tests for the main block in resolver.py."""
-
-    def test_resolver_has_main_block(self):
-        """Test that resolver.py has a __main__ block."""
-        # This just verifies the module can be imported
-        import Queens.resolver
-        assert hasattr(Queens.resolver, '__main__') is False  # __main__ is not an attribute
-        # The test passes if the import works
-
-
-class TestIterator:
-    """Tests for Grid iterator."""
-
-    def test_grid_iterator(self):
-        """Test that Grid can be iterated."""
-        grid = Grid(
-            [
-                [Cell(0, 0, "red"), Cell(0, 1, "red")],
-                [Cell(1, 0, "blue"), Cell(1, 1, "blue")],
-            ]
-        )
-        # Test iteration
-        for row in grid:
-            assert isinstance(row, list)
-            for cell in row:
-                assert isinstance(cell, Cell)
-
-
-class TestResolverMain:
-    """Tests for resolver.py __main__ block."""
-
-    def test_resolver_main_import(self):
-        """Test that resolver module can be run as main."""
-        import Queens.resolver
-        # Just verify the module loads correctly
-        assert hasattr(Queens.resolver, 'BruteForceResolver')
-        assert hasattr(Queens.resolver, 'QueenResolver')
-        assert hasattr(Queens.resolver, 'build_example_grid')
-
-
-class TestUIModule:
-    """Tests for UI module import."""
-
-    def test_ui_module_available(self):
-        """Test that UI module is available."""
-        try:
-            from Queens import ui
-            assert ui is not None
-        except ImportError:
-            # UI module might not be available, that's okay
-            pass
 
 
 class TestClaimRowSize3:
@@ -1221,3 +1145,87 @@ class TestReturnStatements:
         ])
         result2 = grid2._claim_column(grid2[0, 0], grid2[2, 0])
         assert result2 is None
+
+
+
+# =============================================================================
+# Test integration of QueenResolver with build_example_grid
+# =============================================================================
+
+class TestQueenResolverIntegration:
+    """Integration tests for QueenResolver with build_example_grid."""
+
+    def test_queen_resolver_with_example_grid1(self):
+        """Test QueenResolver with an example grid."""
+        testGrid = [
+            "Y Y Y P W W W",
+            "Y Y Y P W W W",
+            "Y Y P P P W W",
+            "R P P O P P W",
+            "R R P O P G G",
+            "R R B B B G G",
+            "R R R R B G G",
+        ]
+        grid = build_example_grid(testGrid)
+        print_grid(grid)
+        QueenResolver(grid)
+        assert grid[0, 1].is_queen()
+        assert grid[1, 5].is_queen()
+        assert grid[2, 2].is_queen()
+        assert grid[3, 0].is_queen()
+        assert grid[4, 3].is_queen()
+        assert grid[5, 6].is_queen()
+        assert grid[6, 4].is_queen()
+
+    def test_queen_resolver_with_example_grid2(self):
+        """Test QueenResolver with an example grid."""
+
+        testGrid = [
+            "P P P P P P P P P P",
+            "P P P P V P N P P P",
+            "P P P P V P N P P P",
+            "P P P B V G N P P P",
+            "P P P B V G N P P P",
+            "P P R R R R R R P P",
+            "P P C C C C C C P P",
+            "P O O O O O O O O P",
+            "P W W W W W W W W P",
+            "Y Y Y Y Y Y Y Y Y P",
+        ]
+        grid = build_example_grid(testGrid)
+        print_grid(grid)
+        QueenResolver(grid)
+        assert grid[0, 9].is_queen()
+        assert grid[1, 4].is_queen()
+        assert grid[2, 6].is_queen()
+        assert grid[3, 3].is_queen()
+        assert grid[4, 5].is_queen()
+        assert grid[5, 2].is_queen()
+        assert grid[6, 7].is_queen()
+        assert grid[7, 1].is_queen()
+        assert grid[8, 8].is_queen()
+        assert grid[9, 0].is_queen()
+
+    def test_queen_resolver_with_example_grid3(self):
+        """Test QueenResolver with an example grid."""
+        testGrid = [
+            "P P P O O O O O",
+            "P P B O O O O O",
+            "P B B O O O O O",
+            "V W W W O O O O",
+            "V W W W W O O O",
+            "V W W W W R R Y",
+            "V G G W W R R Y",
+            "V G G G W Y Y Y",
+        ]
+        grid = build_example_grid(testGrid)
+        print_grid(grid)
+        QueenResolver(grid)
+        assert grid[0, 1].is_queen()
+        assert grid[1, 6].is_queen()
+        assert grid[2, 2].is_queen()
+        assert grid[3, 0].is_queen()
+        assert grid[4, 4].is_queen()
+        assert grid[5, 7].is_queen()
+        assert grid[6, 5].is_queen()
+        assert grid[6, 3].is_queen()

@@ -346,6 +346,26 @@ class TestIsGridFinished:
         grid = Grid([[Cell(0, 0, "red", BLOCKED)]])
         assert grid.is_grid_finished() is True
 
+    def test_is_grid_finished_empty_grid(self):
+        """Test is_grid_finished with empty grid."""
+        grid = Grid([])
+        assert grid.is_grid_finished()
+
+    def test_is_grid_finished_all_blocked(self):
+        """Test is_grid_finished when all cells are blocked."""
+        grid = Grid([[Cell(0, 0, "red", BLOCKED), Cell(0, 1, "blue", BLOCKED)]])
+        assert grid.is_grid_finished()
+
+    def test_is_grid_finished_all_queens(self):
+        """Test is_grid_finished when all cells are queens."""
+        grid = Grid([[Cell(0, 0, "red", QUEEN), Cell(0, 1, "blue", QUEEN)]])
+        assert grid.is_grid_finished()
+
+    def test_is_grid_finished_has_empty(self):
+        """Test is_grid_finished when there are empty cells."""
+        grid = Grid([[Cell(0, 0, "red"), Cell(0, 1, "blue")]])
+        assert not grid.is_grid_finished()
+
 
 # =============================================================================
 # Test block_cell_by_coord
@@ -576,3 +596,26 @@ class TestClaimRegion:
         assert grid[1, 0].value == BLOCKED
         assert grid[0, 1].value == EMPTY
         assert grid[1, 1].value == EMPTY
+
+
+# =============================================================================
+# Test Grid iterator
+# =============================================================================
+
+
+class TestIterator:
+    """Tests for Grid iterator."""
+
+    def test_grid_iterator(self):
+        """Test that Grid can be iterated."""
+        grid = Grid(
+            [
+                [Cell(0, 0, "red"), Cell(0, 1, "red")],
+                [Cell(1, 0, "blue"), Cell(1, 1, "blue")],
+            ]
+        )
+        # Test iteration
+        for row in grid:
+            assert isinstance(row, list)
+            for cell in row:
+                assert isinstance(cell, Cell)
