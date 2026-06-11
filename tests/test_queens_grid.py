@@ -420,18 +420,6 @@ class TestFindRegions:
         regions = simple_grid_2x2.regions
         assert len(regions) == 4
 
-    # def test_find_regions_coordinates(self, simple_grid_2x2: Grid):
-    #     """Test that region coordinates are correct."""
-    #     regions = simple_grid_2x2.regions
-    #     cyan_region = None
-    #     for reg in regions:
-    #         if (0, 0) in reg.cells:
-    #             cyan_region = reg
-    #             break
-    #     assert cyan_region is not None
-    #     assert (0, 0) in cyan_region.cells
-    #     assert len(cyan_region) == 1
-
     def test_find_regions_order_preserved(self):
         """Test that region order matches color appearance order."""
         grid = Grid(
@@ -441,31 +429,7 @@ class TestFindRegions:
             ]
         )
         regions = grid.regions
-        assert (0, 0) in regions[0].cells or (1, 0) in regions[0].cells
-
-    # def test_find_regions_all_cells_accounted_for(self):
-    #     """Test that all cells are in some region."""
-    #     grid = Grid(
-    #         [
-    #             [Cell(0, 0, "A"), Cell(0, 1, "B")],
-    #             [Cell(1, 0, "A"), Cell(1, 1, "B")],
-    #         ]
-    #     )
-    #     regions = grid.regions
-    #     all_coords = {(r, c) for reg in regions for (r, c) in reg}
-    #     expected_coords = {(0, 0), (0, 1), (1, 0), (1, 1)}
-    #     assert all_coords == expected_coords
-
-    # def test_find_regions_no_duplicate_coords(self):
-    #     """Test that no coordinate appears in multiple regions."""
-    #     grid = Grid(
-    #         [
-    #             [Cell(0, 0, "A"), Cell(0, 1, "B")],
-    #             [Cell(1, 0, "A"), Cell(1, 1, "B")],
-    #         ]
-    #     )
-    #     regions = grid.regions
-    #     all_coords: list[tuple[int, int]] = []
-    #     for reg in regions:
-    #         all_coords.extend(reg.cells)
-    #     assert len(all_coords) == len(set(all_coords)) == 4
+        assert regions[0].cells[0].row == 0 and regions[0].cells[0].col == 0
+        assert regions[0].cells[1].row == 1 and regions[0].cells[1].col == 0
+        assert regions[1].cells[0].row == 0 and regions[1].cells[0].col == 1
+        assert regions[2].cells[0].row == 1 and regions[2].cells[0].col == 1
