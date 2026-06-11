@@ -1,11 +1,9 @@
-from typing import List, Tuple, TYPE_CHECKING
+from typing import List
+from .queens_grid import Grid, Cell
 
 EMPTY = 0
 QUEEN = 1
 BLOCKED = -1
-
-if TYPE_CHECKING:
-    from .resolver import Grid, Cell
 
 
 def print_grid(grid: "Grid") -> None:
