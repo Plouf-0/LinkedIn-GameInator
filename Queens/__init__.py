@@ -13,7 +13,7 @@ import logging
 
 from .resolver import QueenResolver
 from .queens_grid import Cell, Grid, build_example_grid
-from . import ui
+from .ui import print_grid
 
 __all__ = [
 	"Grid",
