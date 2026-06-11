@@ -11,17 +11,19 @@ from __future__ import annotations
 
 import logging
 
-from .resolver import Grid, Cell, QueenResolver
+from .resolver import QueenResolver
+from .queens_grid import Cell, Grid, build_example_grid
 from . import ui
 
 __all__ = [
 	"Grid",
 	"Cell",
+	"build_example_grid",
 	"QueenResolver",
 	"ui",
 ]
 
-__version__: str = "0.1.0"
+__version__: str = "0.2.0"
 
 # Package logger (users can configure logging as needed)
 logger = logging.getLogger(__name__)
