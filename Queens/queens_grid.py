@@ -80,14 +80,17 @@ class Grid:
         self.grid: List[List[Cell]] = grid
         self.regions: list[Grid.Region] = self._setup_regions()
 
-    def __getitem__(self, row: int, col: int) -> Cell:
-        return self.grid[row][col]
+    def __getitem__(self, coord: tuple[int, int]) -> Cell:
+        return self.grid[coord[0]][coord[1]]
 
     def __iter__(self):
         return iter(self.grid)
 
     def _get_row(self, row: int) -> list[Cell]:
         return self.grid[row]
+    
+    def _get_column(self, col: int) -> list[Cell]:
+        return [self.grid[r][col] for r in range(len(self.grid))]
 
     # DONE
     def _setup_regions(self) -> List[Grid.Region]:
