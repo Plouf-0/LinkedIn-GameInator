@@ -11,16 +11,16 @@ from __future__ import annotations
 
 import logging
 
-from .resolver import QueenResolver
-from .queens_grid import Cell, Grid, build_example_grid
 from .ui import print_grid
+from .brute_force_resolver import BruteForceResolver
+from .queens_grid import Cell, Grid, build_example_grid
 
 __all__ = [
 	"Grid",
 	"Cell",
 	"build_example_grid",
-	"QueenResolver",
-	"ui",
+	"BruteForceResolver",
+	"print_grid",
 ]
 
 __version__: str = "0.2.0"

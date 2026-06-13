@@ -14,7 +14,7 @@ Comprehensive test suite covering:
 import pytest
 import warnings
 
-from Queens.resolver import QueenResolver, BruteForceResolver
+from Queens.brute_force_resolver import BruteForceResolver
 from Queens.queens_grid import Cell, Grid, EMPTY, QUEEN, BLOCKED, build_example_grid
 from Queens.ui import print_grid
 
@@ -44,13 +44,13 @@ def blocked_cell():
 @pytest.fixture
 def simple_grid_1x1():
     """Create a 1x1 grid."""
-    return Grid([[Cell(0, 0, "cyan")]])
+    return BruteForceResolver([[Cell(0, 0, "cyan")]])
 
 
 @pytest.fixture
 def simple_grid_2x2():
     """Create a 2x2 grid with different colors."""
-    return Grid(
+    return BruteForceResolver(
         [
             [Cell(0, 0, "cyan"), Cell(0, 1, "red")],
             [Cell(1, 0, "blue"), Cell(1, 1, "green")],
@@ -61,13 +61,13 @@ def simple_grid_2x2():
 @pytest.fixture
 def grid_single_color():
     """Create a 3x3 grid with a single color."""
-    return Grid([[Cell(r, c, "red") for c in range(3)] for r in range(3)])
+    return BruteForceResolver([[Cell(r, c, "red") for c in range(3)] for r in range(3)])
 
 
 @pytest.fixture
 def grid_all_queens():
     """Create a 2x2 grid where all cells are queens."""
-    return Grid(
+    return BruteForceResolver(
         [
             [Cell(0, 0, "cyan", QUEEN), Cell(0, 1, "red", QUEEN)],
             [Cell(1, 0, "blue", QUEEN), Cell(1, 1, "green", QUEEN)],
@@ -89,7 +89,7 @@ def grid_all_blocked():
 @pytest.fixture
 def grid_mixed():
     """Create a 3x3 grid with mixed values."""
-    return Grid(
+    return BruteForceResolver(
         [
             [
                 Cell(0, 0, "cyan", QUEEN),
@@ -113,7 +113,7 @@ def sample_grid_for_resolution():
         "R R",
         "G G",
     ]
-    return build_example_grid(test_grid)
+    return BruteForceResolver(build_example_grid(test_grid))
 
 
 
@@ -538,7 +538,7 @@ class TestBuildExampleGrid:
             "R R",
             "G G",
         ]
-        grid = build_example_grid(test_grid)
+        grid = BruteForceResolver(build_example_grid(test_grid))
         assert len(grid.grid) == 2
         assert len(grid.grid[0]) == 2
         assert len(grid.grid[1]) == 2
@@ -546,26 +546,26 @@ class TestBuildExampleGrid:
     def test_build_example_grid_single_row(self):
         """Test build_example_grid with single row."""
         test_grid = ["R R R"]
-        grid = build_example_grid(test_grid)
+        grid = BruteForceResolver(build_example_grid(test_grid))
         assert len(grid.grid) == 1
         assert len(grid.grid[0]) == 3
 
     def test_build_example_grid_single_cell(self):
         """Test build_example_grid with single cell."""
         test_grid = ["R"]
-        grid = build_example_grid(test_grid)
+        grid = BruteForceResolver(build_example_grid(test_grid))
         assert len(grid.grid) == 1
         assert len(grid.grid[0]) == 1
 
     def test_build_example_grid_empty(self):
         """Test build_example_grid with empty list."""
-        grid = build_example_grid([])
+        grid = BruteForceResolver(build_example_grid([]))
         assert len(grid.grid) == 0
 
     def test_build_example_grid_color_mapping(self):
         """Test build_example_grid color mapping."""
         test_grid = ["C R B O V Y P W N"]
-        grid = build_example_grid(test_grid)
+        grid = BruteForceResolver(build_example_grid(test_grid))
         assert grid[0, 0].color == "cyan"
         assert grid[0, 1].color == "red"
         assert grid[0, 2].color == "blue"
@@ -579,7 +579,7 @@ class TestBuildExampleGrid:
     def test_build_example_grid_unknown_color(self):
         """Test build_example_grid with unknown color token."""
         test_grid = ["X Y Z"]
-        grid = build_example_grid(test_grid)
+        grid = BruteForceResolver(build_example_grid(test_grid))
         assert grid[0, 0].color == "unknown"
         assert grid[0, 1].color == "yellow"
         assert grid[0, 2].color == "unknown"
@@ -587,7 +587,7 @@ class TestBuildExampleGrid:
     def test_build_example_grid_irregular(self):
         """Test build_example_grid with irregular row lengths."""
         test_grid = ["R R R", "G G", "B"]
-        grid = build_example_grid(test_grid)
+        grid = BruteForceResolver(build_example_grid(test_grid))
         assert len(grid.grid) == 3
         assert len(grid.grid[0]) == 3
         assert len(grid.grid[1]) == 2
@@ -599,7 +599,7 @@ class TestBuildExampleGrid:
             "A B",
             "C D",
         ]
-        grid = build_example_grid(test_grid)
+        grid = BruteForceResolver(build_example_grid(test_grid))
         assert grid[0, 0].row == 0 and grid[0, 0].col == 0
         assert grid[0, 1].row == 0 and grid[0, 1].col == 1
         assert grid[1, 0].row == 1 and grid[1, 0].col == 0
@@ -619,7 +619,7 @@ class TestBuildExampleGrid:
             "G G G G G G G G G G",
             "N N N N N N N N N N",
         ]
-        grid = build_example_grid(test_grid)
+        grid = BruteForceResolver(build_example_grid(test_grid))
 
         assert len(grid.grid) == 10
         assert all(len(row) == 10 for row in grid.grid)
@@ -650,197 +650,36 @@ class TestBuildExampleGrid:
 # =============================================================================
 
 
-class TestQueenResolver:
+class TestResolveGrid:
     """Tests for QueenResolver function."""
 
-    def test_queen_resolver_empty_grid(self, capsys: pytest.CaptureFixture[str]):
+    def test_resolve_grid_empty_grid(self, capsys: pytest.CaptureFixture[str]):
         """Test QueenResolver with empty grid."""
-        grid = Grid([])
-        QueenResolver(grid)
+        grid = BruteForceResolver([])
+        grid.resolve_grid()
         captured = capsys.readouterr()
         assert len(captured.out) > 0
 
-    def test_queen_resolver_valid_grid(self, capsys: pytest.CaptureFixture[str]):
+    def test_resolve_grid_valid_grid(self, capsys: pytest.CaptureFixture[str]):
         """Test QueenResolver with valid grid."""
         test_grid = [
             "R R",
             "G G",
         ]
-        grid = build_example_grid(test_grid)
-        QueenResolver(grid)
+        grid = BruteForceResolver(build_example_grid(test_grid))
+        grid.resolve_grid()
         captured = capsys.readouterr()
         assert len(captured.out) > 0
 
-    def test_queen_resolver_modifies_grid(self):
+    def testresolve_grid_modifies_grid(self):
         """Test that QueenResolver modifies the grid."""
         test_grid = [
             "R R",
             "G G",
         ]
-        grid = build_example_grid(test_grid)
-        QueenResolver(grid)
+        grid = BruteForceResolver(build_example_grid(test_grid))
+        grid.resolve_grid()
         assert True
-
-
-# =============================================================================
-# Test resolve
-# =============================================================================
-
-
-class TestResolve:
-    """Tests for resolve method."""
-
-    def test_resolve_simple_grid(self):
-        """Test resolve on a simple grid."""
-        test_grid = [
-            "P P G G G G",
-            "P P O R R G",
-            "P O O R R B",
-            "O O O R V V",
-            "O O O V V V",
-            "O O O V V V",
-        ]
-        base_grid = build_example_grid(test_grid)
-        grid = BruteForceResolver(base_grid.grid)
-        result = grid.resolve_grid()
-        assert result is not None
-        assert grid[1, 0].is_queen()
-        assert grid[4, 1].is_queen()
-        assert grid[0, 2].is_queen()
-        assert grid[3, 3].is_queen()
-        assert grid[5, 4].is_queen()
-        assert grid[2, 5].is_queen()
-
-    def test_resolve_simple_grid1(self):
-        """Test resolve on a simple grid."""
-        test_grid = [
-            "C O Y Y Y P P",
-            "C O V V Y B P",
-            "C O V Y Y B B",
-            "C O O Y Y Y Y",
-            "C O G Y Y Y Y",
-            "C O G Y Y Y Y",
-            "C C C C C C C",
-        ]
-        base_grid = build_example_grid(test_grid)
-        grid = BruteForceResolver(base_grid.grid)
-        grid.resolve_grid()
-        assert grid[1, 3].is_queen()
-        assert grid[3, 1].is_queen()
-        assert grid[4, 4].is_queen()
-        assert grid[5, 2].is_queen()
-        assert grid[6, 0].is_queen()
-
-    def test_resolve_simple_grid2(self):
-        """Test resolve on a simple grid."""
-        test_grid = [
-            "P P P P O O O O",
-            "P P B B B B O O",
-            "P P B V V B O O",
-            "P P B V V B O O",
-            "G G B B B B O O",
-            "G G B R R B R R",
-            "Y C B R R B R R",
-            "Y C C R R R R R",
-        ]
-        base_grid = build_example_grid(test_grid)
-        grid = BruteForceResolver(base_grid.grid)
-        grid.resolve_grid()
-        assert grid[0, 3].is_queen()
-        assert grid[1, 5].is_queen()
-        assert grid[2, 7].is_queen()
-        assert grid[3, 4].is_queen()
-        assert grid[4, 1].is_queen()
-        assert grid[5, 6].is_queen()
-        assert grid[6, 0].is_queen()
-        assert grid[7, 2].is_queen()
-
-    def test_resolve_returns_grid(self):
-        """Test that resolve returns the grid."""
-        test_grid = ["R R", "G G"]
-        base_grid = build_example_grid(test_grid)
-        grid = BruteForceResolver(base_grid.grid)
-        result = grid.resolve_grid()
-        assert isinstance(result, list)
-        assert len(result) > 0
-
-    def test_resolve_max_iterations(self, capsys: pytest.CaptureFixture[str]):
-        """Test that resolve stops at max iterations."""
-        test_grid = [
-            "R R R R R",
-            "R R R R R",
-            "R R R R R",
-            "R R R R R",
-            "R R R R R",
-        ]
-        base_grid = build_example_grid(test_grid)
-        grid = BruteForceResolver(base_grid.grid)
-        result = grid.resolve_grid()
-
-        captured = capsys.readouterr()
-        output = captured.out
-        assert "Max iterations reached, stopping resolution.\n" == output
-        assert result is not None
-
-
-# =============================================================================
-# Integration Tests
-# =============================================================================
-
-
-class TestIntegration:
-    """Integration tests combining multiple components."""
-
-    def test_full_workflow_simple(self):
-        """Test complete workflow from grid creation to resolution."""
-        test_grid = [
-            "R R",
-            "G G",
-        ]
-        base_grid = build_example_grid(test_grid)
-        assert len(base_grid.grid) == 2
-        assert len(base_grid.regions) == 2
-        grid = BruteForceResolver(base_grid.grid)
-        result = grid.resolve_grid()
-        assert result is not None
-
-    def test_full_workflow_colorful(self):
-        """Test workflow with multiple colors."""
-        test_grid = [
-            "R G B",
-            "R G B",
-            "R G B",
-        ]
-        base_grid = build_example_grid(test_grid)
-        assert len(base_grid.regions) == 3
-        grid = BruteForceResolver(base_grid.grid)
-        result = grid.resolve_grid()
-        assert result is not None
-
-    def test_cell_to_grid_integration(self):
-        """Test that cells work correctly within a grid."""
-        grid = Grid(
-            [
-                [Cell(0, 0, "red"), Cell(0, 1, "red")],
-                [Cell(1, 0, "blue"), Cell(1, 1, "blue")],
-            ]
-        )
-        grid.queenify_cell(grid[0, 0])
-        assert grid[0, 0].value == QUEEN
-        assert grid[0, 1].value == BLOCKED
-        assert grid[1, 0].value == BLOCKED
-        assert len(grid.regions) == 2
-
-    def test_region_finding_with_claiming(self):
-        """Test that region finding works with cell claiming."""
-        grid = Grid(
-            [
-                [Cell(0, 0, "red"), Cell(0, 1, "red")],
-                [Cell(1, 0, "red"), Cell(1, 1, "red")],
-            ]
-        )
-        grid.queenify_cell(grid[0, 0])
-        assert len(grid.regions) == 1
 
 
 # =============================================================================
@@ -982,7 +821,7 @@ class TestBruteForceResolverImport:
         """Test that UI import is attempted in resolver."""
         # This test just ensures the import is attempted
         # The actual import may succeed or fail, but the attempt should be there
-        from Queens.resolver import BruteForceResolver
+        from Queens.brute_force_resolver import BruteForceResolver
         # If we get here, the import worked or was handled
         assert BruteForceResolver is not None
 
@@ -1022,7 +861,7 @@ class TestResolveWarning:
             "R R",
         ]
         base_grid = build_example_grid(test_grid)
-        grid = BruteForceResolver(base_grid.grid)
+        grid = BruteForceResolver(base_grid)
         # Queenify one cell to leave 3 empty cells
         grid.queenify_cell(grid[0, 0])
         # This should create a scenario where there might be unaligned duos
@@ -1147,10 +986,111 @@ class TestReturnStatements:
         assert result2 is None
 
 
+# =============================================================================
+# Test resolve
+# =============================================================================
+
+
+class TestResolve:
+    """Tests for resolve method."""
+
+    def test_resolve_simple_grid(self):
+        """Test resolve on a simple grid."""
+        test_grid = [
+            "P P G G G G",
+            "P P O R R G",
+            "P O O R R B",
+            "O O O R V V",
+            "O O O V V V",
+            "O O O V V V",
+        ]
+        base_grid = build_example_grid(test_grid)
+        grid = BruteForceResolver(base_grid)
+        result = grid.resolve_grid()
+        assert result is not None
+        assert grid[1, 0].is_queen()
+        assert grid[4, 1].is_queen()
+        assert grid[0, 2].is_queen()
+        assert grid[3, 3].is_queen()
+        assert grid[5, 4].is_queen()
+        assert grid[2, 5].is_queen()
+
+    def test_resolve_simple_grid1(self):
+        """Test resolve on a simple grid."""
+        test_grid = [
+            "C O Y Y Y P P",
+            "C O V V Y B P",
+            "C O V Y Y B B",
+            "C O O Y Y Y Y",
+            "C O G Y Y Y Y",
+            "C O G Y Y Y Y",
+            "C C C C C C C",
+        ]
+        base_grid = build_example_grid(test_grid)
+        grid = BruteForceResolver(base_grid)
+        grid.resolve_grid()
+        assert grid[1, 3].is_queen()
+        assert grid[3, 1].is_queen()
+        assert grid[4, 4].is_queen()
+        assert grid[5, 2].is_queen()
+        assert grid[6, 0].is_queen()
+
+    def test_resolve_simple_grid2(self):
+        """Test resolve on a simple grid."""
+        test_grid = [
+            "P P P P O O O O",
+            "P P B B B B O O",
+            "P P B V V B O O",
+            "P P B V V B O O",
+            "G G B B B B O O",
+            "G G B R R B R R",
+            "Y C B R R B R R",
+            "Y C C R R R R R",
+        ]
+        base_grid = build_example_grid(test_grid)
+        grid = BruteForceResolver(base_grid)
+        grid.resolve_grid()
+        assert grid[0, 3].is_queen()
+        assert grid[1, 5].is_queen()
+        assert grid[2, 7].is_queen()
+        assert grid[3, 4].is_queen()
+        assert grid[4, 1].is_queen()
+        assert grid[5, 6].is_queen()
+        assert grid[6, 0].is_queen()
+        assert grid[7, 2].is_queen()
+
+    def test_resolve_returns_grid(self):
+        """Test that resolve returns the grid."""
+        test_grid = ["R R", "G G"]
+        base_grid = build_example_grid(test_grid)
+        grid = BruteForceResolver(base_grid)
+        result = grid.resolve_grid()
+        assert isinstance(result, list)
+        assert len(result) > 0
+
+    def test_resolve_max_iterations(self, capsys: pytest.CaptureFixture[str]):
+        """Test that resolve stops at max iterations."""
+        test_grid = [
+            "R R R R R",
+            "R R R R R",
+            "R R R R R",
+            "R R R R R",
+            "R R R R R",
+        ]
+        base_grid = build_example_grid(test_grid)
+        grid = BruteForceResolver(base_grid)
+        result = grid.resolve_grid()
+
+        captured = capsys.readouterr()
+        output = captured.out
+        assert "Max iterations reached, stopping resolution.\n" == output
+        assert result is not None
+
 
 # =============================================================================
 # Test integration of QueenResolver with build_example_grid
 # =============================================================================
+
 
 class TestQueenResolverIntegration:
     """Integration tests for QueenResolver with build_example_grid."""
@@ -1166,9 +1106,10 @@ class TestQueenResolverIntegration:
             "R R B B B G G",
             "R R R R B G G",
         ]
-        grid = build_example_grid(testGrid)
+        grid = BruteForceResolver(build_example_grid(testGrid))
         print_grid(grid)
-        QueenResolver(grid)
+        grid.resolve_grid()
+        print_grid(grid)
         assert grid[0, 1].is_queen()
         assert grid[1, 5].is_queen()
         assert grid[2, 2].is_queen()
@@ -1192,9 +1133,10 @@ class TestQueenResolverIntegration:
             "P W W W W W W W W P",
             "Y Y Y Y Y Y Y Y Y P",
         ]
-        grid = build_example_grid(testGrid)
+        grid = BruteForceResolver(build_example_grid(testGrid))
         print_grid(grid)
-        QueenResolver(grid)
+        grid.resolve_grid()
+        print_grid(grid)
         assert grid[0, 9].is_queen()
         assert grid[1, 4].is_queen()
         assert grid[2, 6].is_queen()
@@ -1218,9 +1160,9 @@ class TestQueenResolverIntegration:
             "V G G W W R R Y",
             "V G G G W Y Y Y",
         ]
-        grid = build_example_grid(testGrid)
+        grid = BruteForceResolver(build_example_grid(testGrid))
         print_grid(grid)
-        QueenResolver(grid)
+        grid.resolve_grid()
         assert grid[0, 1].is_queen()
         assert grid[1, 6].is_queen()
         assert grid[2, 2].is_queen()

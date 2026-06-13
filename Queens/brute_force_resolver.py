@@ -4,7 +4,7 @@ import logging
 from warnings import warn
 from typing import List, Set
 
-from .queens_grid import Cell, Grid, build_example_grid
+from .queens_grid import Cell, Grid
 
 logger = logging.getLogger(__name__)
 
@@ -17,6 +17,9 @@ except Exception:
 
 class BruteForceResolver(Grid):
     """Resolver that uses brute-force backtracking to solve the grid."""
+
+    def __init__(self, grid: List[List[Cell]]):
+        super().__init__(grid)
 
     # DONE
     def _claim_row(self, left: Cell, right: Cell) -> None:
@@ -283,21 +286,3 @@ class BruteForceResolver(Grid):
                 print("Max iterations reached, stopping resolution.")
 
         return self.grid
-
-
-def QueenResolver(grid: Grid) -> None:
-    """Résout et affiche une grille de jeu des reines.
-
-    Fonction principale à appeler depuis le module WebScrapper.
-    Affiche la grille initiale, la résout, puis affiche le résultat.
-
-    Args:
-        grid: Objet Grid à résoudre et afficher.
-    """
-    if not grid or not grid.grid:
-        print("This is the Queens resolver module.")
-
-    # Use the UI module for printing
-    ui.print_grid(grid)
-    grid.resolve_grid()
-    ui.print_grid(grid)
