@@ -34,20 +34,36 @@ class BruteForceResolver(Grid):
         for cell in self.grid[left.row]:
 
             # if the selected cell is on the left or on the right of the region
-            if (cell.col < left.col or cell.col > right.col) and cell.is_empty() and cell.color != left.color:
+            if (
+                (cell.col < left.col or cell.col > right.col)
+                and cell.is_empty()
+                and cell.color != left.color
+            ):
                 cell.block_cell()
 
             # claim all sides of the region if size = 2
             elif size == 2 and cell.col in (left.col, right.col):
-                if cell.row != 0:
+                if (
+                    cell.row != 0
+                    and self.grid[cell.row - 1][cell.col].color != left.color
+                ):
                     self.grid[cell.row - 1][cell.col].block_cell()
-                if cell.row != len(self.grid[0]) - 1:
+                if (
+                    cell.row != len(self.grid[0]) - 1
+                    and self.grid[cell.row + 1][cell.col].color != left.color
+                ):
                     self.grid[cell.row + 1][cell.col].block_cell()
             # claim the centers if size = 3
             elif size == 3 and cell.col == left.col + 1:
-                if cell.row != 0:
+                if (
+                    cell.row != 0
+                    and self.grid[cell.row - 1][cell.col].color != left.color
+                ):
                     self.grid[cell.row - 1][cell.col].block_cell()
-                if cell.row < len(self.grid) - 1:
+                if (
+                    cell.row < len(self.grid) - 1
+                    and self.grid[cell.row + 1][cell.col].color != left.color
+                ):
                     self.grid[cell.row + 1][cell.col].block_cell()
         return
 
@@ -94,20 +110,37 @@ class BruteForceResolver(Grid):
             cell = row[top.col]
 
             # if the selected cell is on over or under the region
-            if cell.row < top.row or cell.row > bottom.row and cell.is_empty():
+            if (
+                (cell.row < top.row
+                or cell.row > bottom.row)
+                and cell.is_empty()
+                and cell.color != top.color
+            ):
                 cell.block_cell()
 
             # claim all sides of the region if size = 2
             elif size == 2 and cell.row in (top.row, bottom.row):
-                if cell.col != 0:
+                if (
+                    cell.col != 0
+                    and self.grid[cell.row][cell.col - 1].color != top.color
+                ):
                     self.grid[cell.row][cell.col - 1].block_cell()
-                if cell.col != len(self.grid[0]) - 1:
+                if (
+                    cell.col != len(self.grid[0]) - 1
+                    and self.grid[cell.row][cell.col + 1].color != top.color
+                ):
                     self.grid[cell.row][cell.col + 1].block_cell()
             # claim the centers if size = 3
             elif size == 3 and cell.row == top.row + 1:
-                if cell.col != 0:
+                if (
+                    cell.col != 0
+                    and self.grid[cell.row][cell.col - 1].color != top.color
+                ):
                     self.grid[cell.row][cell.col - 1].block_cell()
-                if cell.col < len(self.grid[0]) - 1:
+                if (
+                    cell.col < len(self.grid[0]) - 1
+                    and self.grid[cell.row][cell.col + 1].color != top.color
+                ):
                     self.grid[cell.row][cell.col + 1].block_cell()
         return
 
