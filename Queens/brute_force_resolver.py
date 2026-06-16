@@ -22,8 +22,8 @@ class BruteForceResolver(Grid):
         super().__init__(grid)
 
     # DONE
-    def _claim_row(self, left: Cell, right: Cell) -> None:
-        """Claim cells in the same row of the given left and right cells that are not of the same color as the given left and right cells."""
+    def _block_row(self, left: Cell, right: Cell) -> None:
+        """Block the cells outside of the row selected by two cells in the same region"""
         if left.row != right.row:
             raise ValueError("Left and right cells must be in the same row.")
         if left.col > right.col:
@@ -34,7 +34,7 @@ class BruteForceResolver(Grid):
         for cell in self.grid[left.row]:
 
             # if the selected cell is on the left or on the right of the region
-            if (cell.col < left.col or cell.col > right.col) and cell.is_empty():
+            if (cell.col < left.col or cell.col > right.col) and cell.is_empty() and cell.color != left.color:
                 cell.block_cell()
 
             # claim all sides of the region if size = 2
@@ -81,7 +81,7 @@ class BruteForceResolver(Grid):
         return
 
     # DONE
-    def _claim_column(self, top: Cell, bottom: Cell) -> None:
+    def _block_column(self, top: Cell, bottom: Cell) -> None:
         """Claim cells in the same column of the given top and bottom cells that are not of the same color as the given top and bottom cells."""
         if top.col != bottom.col:
             raise ValueError("Top and bottom cells must be in the same column.")
@@ -225,9 +225,9 @@ class BruteForceResolver(Grid):
 
             for duo in duos:
                 if duo[0].row == duo[1].row:
-                    self._claim_row(duo[0], duo[1])
+                    self._block_row(duo[0], duo[1])
                 elif duo[0].col == duo[1].col:
-                    self._claim_column(duo[0], duo[1])
+                    self._block_column(duo[0], duo[1])
                 else:
                     warn("Duo is not aligned in row or column.")
 
@@ -235,9 +235,9 @@ class BruteForceResolver(Grid):
                 rows = {cell.row for cell in trio}
                 cols = {cell.col for cell in trio}
                 if len(rows) == 1:
-                    self._claim_row(trio[0], trio[2])
+                    self._block_row(trio[0], trio[2])
                 elif len(cols) == 1:
-                    self._claim_column(trio[0], trio[2])
+                    self._block_column(trio[0], trio[2])
                 else:
                     self._claim_corner(trio)
 
@@ -249,14 +249,14 @@ class BruteForceResolver(Grid):
                 rows: Set[int] = {cell.row for cell in region.empty_cells}
                 cols: Set[int] = {cell.col for cell in region.empty_cells}
                 if len(rows) == 1:
-                    self._claim_row(
+                    self._block_row(
                         self.grid[region.empty_cells[0].row][region.empty_cells[0].col],
                         self.grid[region.empty_cells[-1].row][
                             region.empty_cells[-1].col
                         ],
                     )
                 elif len(cols) == 1:
-                    self._claim_column(
+                    self._block_column(
                         self.grid[region.empty_cells[0].row][region.empty_cells[0].col],
                         self.grid[region.empty_cells[-1].row][
                             region.empty_cells[-1].col
@@ -264,8 +264,7 @@ class BruteForceResolver(Grid):
                     )
 
             empty_cells_regions: List[Grid.Region] = [
-                region for region in self.regions
-                if region.nb_empty_cells != 0
+                region for region in self.regions if region.nb_empty_cells != 0
             ]
 
             two_rowcol_regions: List[List[Cell]] = []
