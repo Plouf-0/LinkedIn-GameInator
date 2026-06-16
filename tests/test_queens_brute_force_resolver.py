@@ -116,124 +116,317 @@ def sample_grid_for_resolution():
     return BruteForceResolver(build_example_grid(test_grid))
 
 
+@pytest.fixture
+def three_squares_grid():
+    grid = [
+        #0 1 2 3 4 5 6 7 8 9
+        "O O O O O O O O O O",  # 0
+        "O R R O B B B O O O",  # 1
+        "O O O O O O O O W O",  # 2
+        "O R O O O B O O W O",  # 3
+        "O R O O O B O O W O",  # 4
+        "O O O O O B O O W O",  # 5
+        "O O O O O O O O W O",  # 6
+        "O O O O O O O O O O",  # 7
+        "O W W W W W W W O O",  # 8
+        "O O O O O O O O O O",  # 9
+    ]
+    return BruteForceResolver(build_example_grid(grid))
+
+
+@pytest.fixture
+def star_grid():
+    grid = [
+        #0 1 2 3 4 5 6 7 8 9 10
+        "O O O O O O O O O O O",  # 0
+        "O O O O O R R O O O O",  # 1
+        "O O O O R R R O O O O",  # 2
+        "O O O R R R R R O O O",  # 3
+        "O R R R R R R R R O O",  # 4
+        "O R R R R R R R R R O",  # 5
+        "O O R R R R R R R R O",  # 6
+        "O O O R R R R R O O O",  # 7
+        "O O O O R R R O O O O",  # 8
+        "O O O O O R R O O O O",  # 9
+        "O O O O O O O O O O O",  # 10
+    ]
+    return BruteForceResolver(build_example_grid(grid))
+
 
 # =============================================================================
-# Test _claim_row
+# TOTEST Test _block_row
 # =============================================================================
 
 
-class TestClaimRow:
-    """Tests for _claim_row method."""
+class TestBlockRow:
+    """Tests for _block_row method."""
 
-    def test_claim_row_different_rows_raises(self):
+    # DONE
+    def test_block_row(self, three_squares_grid: BruteForceResolver):
+        """Test _block_row block row"""
+        left = three_squares_grid[1, 1]
+        right = three_squares_grid[1, 2]
+        three_squares_grid._block_row(left, right)
+        assert three_squares_grid[1, 0].is_blocked()
+        assert three_squares_grid[1, 3].is_blocked()
+        assert three_squares_grid[1, 4].is_blocked()
+        assert three_squares_grid[1, 5].is_blocked()
+        assert three_squares_grid[1, 6].is_blocked()
+        assert three_squares_grid[1, 7].is_blocked()
+        assert three_squares_grid[1, 8].is_blocked()
+        assert three_squares_grid[1, 9].is_blocked()
+
+    # DONE
+    def test_block_row_block_two_sides(self, three_squares_grid: BruteForceResolver):
+        """Test _block_row block the two upper and under cells on a 2 cell block."""
+        left = three_squares_grid[1, 1]
+        right = three_squares_grid[1, 2]
+        three_squares_grid._block_row(left, right)
+        assert three_squares_grid[0, 1].is_blocked()
+        assert three_squares_grid[0, 2].is_blocked()
+        assert three_squares_grid[2, 1].is_blocked()
+        assert three_squares_grid[2, 2].is_blocked()
+
+    # DONE
+    def test_block_row_block_three_sides(self, three_squares_grid: BruteForceResolver):
+        """Test _block_row block the two upper and under cells on a 2 cell block."""
+        left = three_squares_grid[1, 4]
+        right = three_squares_grid[1, 6]
+        three_squares_grid._block_row(left, right)
+        assert not three_squares_grid[0, 4].is_blocked()
+        assert three_squares_grid[0, 5].is_blocked()
+        assert not three_squares_grid[0, 6].is_blocked()
+
+        assert not three_squares_grid[2, 4].is_blocked()
+        assert three_squares_grid[2, 5].is_blocked()
+        assert not three_squares_grid[2, 6].is_blocked()
+
+    # DONE
+    def test_block_row_block_big_sides(self, three_squares_grid: BruteForceResolver):
+        """Test _block_row block the two upper and under cells on a 2 cell block."""
+        left = three_squares_grid[8, 1]
+        right = three_squares_grid[8, 7]
+        three_squares_grid._block_row(left, right)
+        for i in range(10):
+            assert not three_squares_grid[7, i].is_blocked()
+            assert not three_squares_grid[9, i].is_blocked()
+        assert three_squares_grid[8, 0].is_blocked()
+        assert three_squares_grid[8, 8].is_blocked()
+        assert three_squares_grid[8, 9].is_blocked()
+
+    # DONE
+    def test_block_row_not_cells_color(self, three_squares_grid: BruteForceResolver):
+        """Test _block_row don't block same color."""
+        left = three_squares_grid[8, 2]
+        right = three_squares_grid[8, 5]
+        three_squares_grid._block_row(left, right)
+        assert not three_squares_grid[8, 1].is_blocked()
+        assert not three_squares_grid[8, 6].is_blocked()
+        assert not three_squares_grid[8, 7].is_blocked()
+
+    # DONE
+    def test_block_row_not_cells_color_two_sides(self, star_grid: BruteForceResolver):
+        """Test _block_row block the two upper and under cells on a 2 cell block."""
+        left = star_grid[1, 5]
+        right = star_grid[1, 6]
+        star_grid._block_row(left, right)
+        assert star_grid[0, 5].is_blocked()
+        assert star_grid[0, 6].is_blocked()
+        assert not star_grid[2, 5].is_blocked()
+        assert not star_grid[2, 6].is_blocked()
+        left = star_grid[9, 5]
+        right = star_grid[9, 6]
+        star_grid._block_row(left, right)
+        assert not star_grid[8, 5].is_blocked()
+        assert not star_grid[8, 6].is_blocked()
+        assert star_grid[10, 5].is_blocked()
+        assert star_grid[10, 6].is_blocked()
+
+    # DONE
+    def test_block_row_not_cells_color_three_sides(
+        self, star_grid: BruteForceResolver
+    ):
+        """Test _block_row block the two upper and under cells on a 2 cell block."""
+        left = star_grid[2, 4]
+        right = star_grid[2, 6]
+        star_grid._block_row(left, right)
+        assert not star_grid[1, 4].is_blocked()
+        assert not star_grid[1, 5].is_blocked()
+        assert not star_grid[1, 6].is_blocked()
+        assert not star_grid[3, 4].is_blocked()
+        assert not star_grid[3, 5].is_blocked()
+        assert not star_grid[3, 6].is_blocked()
+        left = star_grid[8, 4]
+        right = star_grid[8, 6]
+        star_grid._block_row(left, right)
+        assert not star_grid[7, 4].is_blocked()
+        assert not star_grid[7, 5].is_blocked()
+        assert not star_grid[7, 6].is_blocked()
+        assert not star_grid[9, 4].is_blocked()
+        assert not star_grid[9, 5].is_blocked()
+        assert not star_grid[9, 6].is_blocked()
+
+    # DONE
+    def test_claim_row_different_rows_raises(
+        self, three_squares_grid: BruteForceResolver
+    ):
         """Test _claim_row raises ValueError for different rows."""
-        grid = BruteForceResolver(
-            [
-                [Cell(0, 0, "red"), Cell(0, 1, "red")],
-                [Cell(1, 0, "red"), Cell(1, 1, "red")],
-            ]
-        )
-        left = grid[0, 0]
-        right = grid[1, 1]
-        with pytest.raises(ValueError, match="same row"):
-            grid._claim_row(left, right)
+        left = three_squares_grid[0, 0]
+        right = three_squares_grid[1, 1]
+        with pytest.raises(
+            ValueError, match="Left and right cells must be in the same row."
+        ):
+            three_squares_grid._block_row(left, right)
 
-    def test_claim_row_same_row_basic(self):
-        """Test _claim_row with cells in same row - basic functionality."""
-        grid = BruteForceResolver(
-            [
-                [
-                    Cell(0, 0, "green"),
-                    Cell(0, 1, "red", QUEEN),
-                    Cell(0, 2, "red"),
-                    Cell(0, 3, "green"),
-                ],
-                [
-                    Cell(1, 0, "green"),
-                    Cell(1, 1, "red"),
-                    Cell(1, 2, "red"),
-                    Cell(1, 3, "green"),
-                ],
-            ]
-        )
-        left = grid[0, 1]
-        right = grid[0, 2]
-        grid._claim_row(left, right)
-        assert grid[0, 0].is_blocked()
-        assert grid[0, 3].is_blocked()
-        assert grid[1, 1].is_blocked()
-        assert grid[1, 2].is_blocked()
-
-    def test_claim_row_swaps_left_right_with_warning(self):
-        """Test _claim_row swaps left and right if needed with warning."""
-        grid = BruteForceResolver(
-            [
-                [Cell(0, 0, "red"), Cell(0, 1, "red"), Cell(0, 2, "red")],
-            ]
-        )
-        left = grid[0, 2]
-        right = grid[0, 0]
+    def test_block_row_swaps_left_right_with_warning(
+        self, three_squares_grid: BruteForceResolver
+    ):
+        """Test _block_row swaps left and right if needed with warning."""
+        left = three_squares_grid[0, 0]
+        right = three_squares_grid[0, 1]
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
-            grid._claim_row(left, right)
+            three_squares_grid._block_row(right, left)
             assert len(w) > 0
 
 
 # =============================================================================
-# Test _claim_column
+# TOTEST Test _block_column
 # =============================================================================
 
 
-class TestClaimColumn:
-    """Tests for _claim_column method."""
+class TestBlockColumn:
+    """Tests for _block_column method."""
 
-    def test_claim_column_different_columns_raises(self):
-        """Test _claim_column raises ValueError for different columns."""
-        grid = BruteForceResolver(
-            [
-                [Cell(0, 0, "red"), Cell(0, 1, "red")],
-                [Cell(1, 0, "red"), Cell(1, 1, "red")],
-            ]
-        )
-        top = grid[0, 0]
-        bottom = grid[1, 1]
-        with pytest.raises(ValueError, match="same column"):
-            grid._claim_column(top, bottom)
+    # DONE
+    def test_block_column(self, three_squares_grid: BruteForceResolver):
+        """Test _block_column block column"""
+        up = three_squares_grid[3, 1]
+        bottom = three_squares_grid[4, 1]
+        three_squares_grid._block_column(up, bottom)
+        assert three_squares_grid[0, 1].is_blocked()
+        assert three_squares_grid[1, 1].is_blocked()
+        assert three_squares_grid[2, 1].is_blocked()
+        assert three_squares_grid[5, 1].is_blocked()
+        assert three_squares_grid[6, 1].is_blocked()
+        assert three_squares_grid[7, 1].is_blocked()
+        assert three_squares_grid[8, 1].is_blocked()
+        assert three_squares_grid[9, 1].is_blocked()
 
-    def test_claim_column_same_column_basic(self):
-        """Test _claim_column with cells in same column - basic functionality."""
-        grid = BruteForceResolver(
-            [
-                [Cell(0, 0, "red"), Cell(0, 1, "red")],
-                [Cell(1, 0, "red"), Cell(1, 1, "green")],
-                [Cell(2, 0, "red"), Cell(2, 1, "green", QUEEN)],
-                [Cell(3, 0, "red"), Cell(3, 1, "green")],
-                [Cell(4, 0, "red"), Cell(4, 1, "red")],
-                [Cell(5, 0, "red"), Cell(5, 1, "red")],
-            ]
-        )
-        top = grid[1, 1]
-        bottom = grid[3, 1]
-        grid._claim_column(top, bottom)
-        assert grid[0, 1].is_blocked()
-        assert grid[4, 1].is_blocked()
-        assert grid[5, 1].is_blocked()
-        assert grid[2, 0].is_blocked()
+    # DONE
+    def test_block_column_block_two_sides(self, three_squares_grid: BruteForceResolver):
+        """Test _block_column block the two upper and under cells on a 2 cell block."""
+        up = three_squares_grid[3, 1]
+        bottom = three_squares_grid[4, 1]
+        three_squares_grid._block_column(up, bottom)
+        assert three_squares_grid[3, 0].is_blocked()
+        assert three_squares_grid[4, 0].is_blocked()
+        assert three_squares_grid[3, 2].is_blocked()
+        assert three_squares_grid[4, 2].is_blocked()
 
-    def test_claim_column_swaps_top_bottom_with_warning(self):
-        """Test _claim_column swaps top and bottom if needed with warning."""
-        grid = BruteForceResolver(
-            [
-                [Cell(0, 0, "red")],
-                [Cell(1, 0, "red")],
-                [Cell(2, 0, "red")],
-            ]
-        )
-        top = grid[2, 0]
-        bottom = grid[0, 0]
+    # DONE
+    def test_block_column_block_three_sides(
+        self, three_squares_grid: BruteForceResolver
+    ):
+        """Test _block_column block the two upper and under cells on a 2 cell block."""
+        up = three_squares_grid[3, 5]
+        bottom = three_squares_grid[5, 5]
+        three_squares_grid._block_column(up, bottom)
+        assert not three_squares_grid[3, 4].is_blocked()
+        assert three_squares_grid[4, 4].is_blocked()
+        assert not three_squares_grid[5, 4].is_blocked()
+        assert not three_squares_grid[3, 6].is_blocked()
+        assert three_squares_grid[4, 6].is_blocked()
+        assert not three_squares_grid[5, 6].is_blocked()
+
+    # DONE
+    def test_block_column_block_big_sides(self, three_squares_grid: BruteForceResolver):
+        """Test _block_column block the two upper and under cells on a 2 cell block."""
+        up = three_squares_grid[2, 8]
+        bottom = three_squares_grid[6, 8]
+        three_squares_grid._block_column(up, bottom)
+        for i in range(10):
+            assert not three_squares_grid[i, 7].is_blocked()
+            assert not three_squares_grid[i, 9].is_blocked()
+        assert three_squares_grid[0, 8].is_blocked()
+        assert three_squares_grid[1, 8].is_blocked()
+        assert three_squares_grid[7, 8].is_blocked()
+        assert three_squares_grid[8, 8].is_blocked()
+        assert three_squares_grid[9, 8].is_blocked()
+
+    # DONE
+    def test_block_column_not_cells_color(self, three_squares_grid: BruteForceResolver):
+        """Test _block_column don't block same color."""
+        up = three_squares_grid[3, 8]
+        bottom = three_squares_grid[5, 8]
+        three_squares_grid._block_column(up, bottom)
+        assert not three_squares_grid[2, 8].is_blocked()
+        assert not three_squares_grid[6, 8].is_blocked()
+
+    # DONE
+    def test_block_column_not_cells_color_two_sides(self, star_grid: BruteForceResolver):
+        """Test _block_column block the two upper and under cells on a 2 cell block."""
+        up = star_grid[4, 1]
+        bottom = star_grid[5, 1]
+        star_grid._block_column(up, bottom)
+        assert star_grid[4, 0].is_blocked()
+        assert star_grid[5, 0].is_blocked()
+        assert not star_grid[4, 2].is_blocked()
+        assert not star_grid[5, 2].is_blocked()
+        up = star_grid[5, 9]
+        bottom = star_grid[6, 9]
+        star_grid._block_column(up, bottom)
+        assert not star_grid[5, 8].is_blocked()
+        assert not star_grid[6, 8].is_blocked()
+        assert star_grid[5, 10].is_blocked()
+        assert star_grid[6, 10].is_blocked()
+
+    # DONE
+    def test_block_column_not_cells_color_three_sides(
+        self, star_grid: BruteForceResolver
+    ):
+        """Test _block_column block the two upper and under cells on a 2 cell block."""
+        up = star_grid[4, 2]
+        bottom = star_grid[6, 2]
+        star_grid._block_column(up, bottom)
+        assert not star_grid[4, 1].is_blocked()
+        assert not star_grid[5, 1].is_blocked()
+        assert not star_grid[6, 1].is_blocked()
+        assert not star_grid[4, 3].is_blocked()
+        assert not star_grid[5, 3].is_blocked()
+        assert not star_grid[6, 3].is_blocked()
+        up = star_grid[4, 8]
+        bottom = star_grid[6, 8]
+        star_grid._block_column(up, bottom)
+        assert not star_grid[4, 7].is_blocked()
+        assert not star_grid[5, 7].is_blocked()
+        assert not star_grid[6, 7].is_blocked()
+        assert not star_grid[4, 9].is_blocked()
+        assert not star_grid[5, 9].is_blocked()
+        assert not star_grid[6, 9].is_blocked()
+
+    # DONE
+    def test_block_column_different_rows_raises(
+        self, three_squares_grid: BruteForceResolver
+    ):
+        """Test _block_column raises ValueError for different columns."""
+        up = three_squares_grid[0, 0]
+        bottom = three_squares_grid[1, 1]
+        with pytest.raises(
+            ValueError, match="Top and bottom cells must be in the same column."
+        ):
+            three_squares_grid._block_column(up, bottom)
+
+    # DONE
+    def test_block_column_swaps_up_bottom_with_warning(
+        self, three_squares_grid: BruteForceResolver
+    ):
+        """Test _block_column swaps up and bottom if needed with warning."""
+        up = three_squares_grid[0, 0]
+        bottom = three_squares_grid[1, 0]
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
-            grid._claim_column(top, bottom)
+            three_squares_grid._block_column(bottom, up)
             assert len(w) > 0
 
 
@@ -247,7 +440,9 @@ class TestClaimCorner:
 
     def test_claim_corner_notenough_cells(self):
         """Test _claim_corner with not enough cells."""
-        grid = BruteForceResolver([[Cell(r, c, "red") for c in range(5)] for r in range(5)])
+        grid = BruteForceResolver(
+            [[Cell(r, c, "red") for c in range(5)] for r in range(5)]
+        )
         with pytest.raises(
             ValueError, match="Exactly 3 cells are required to claim a corner."
         ):
@@ -255,7 +450,9 @@ class TestClaimCorner:
 
     def test_claim_corner_in_middle_southwest(self):
         """Test _claim_corner with southwest pointing corner."""
-        grid = BruteForceResolver([[Cell(r, c, "red") for c in range(5)] for r in range(5)])
+        grid = BruteForceResolver(
+            [[Cell(r, c, "red") for c in range(5)] for r in range(5)]
+        )
         cells = [grid[1, 1], grid[2, 1], grid[2, 2]]
         grid._claim_corner(cells)
         assert (
@@ -266,7 +463,9 @@ class TestClaimCorner:
 
     def test_claim_corner_in_middle_southeast(self):
         """Test _claim_corner with southeast pointing corner."""
-        grid = BruteForceResolver([[Cell(r, c, "red") for c in range(5)] for r in range(5)])
+        grid = BruteForceResolver(
+            [[Cell(r, c, "red") for c in range(5)] for r in range(5)]
+        )
         cells = [grid[1, 2], grid[2, 1], grid[2, 2]]
         grid._claim_corner(cells)
         assert (
@@ -277,7 +476,9 @@ class TestClaimCorner:
 
     def test_claim_corner_in_middle_northwest(self):
         """Test _claim_corner with northwest pointing corner."""
-        grid = BruteForceResolver([[Cell(r, c, "red") for c in range(5)] for r in range(5)])
+        grid = BruteForceResolver(
+            [[Cell(r, c, "red") for c in range(5)] for r in range(5)]
+        )
         cells = [grid[1, 1], grid[1, 2], grid[2, 1]]
         grid._claim_corner(cells)
         assert (
@@ -288,7 +489,9 @@ class TestClaimCorner:
 
     def test_claim_corner_in_middle_northeast(self):
         """Test _claim_corner with northeast pointing corner."""
-        grid = BruteForceResolver([[Cell(r, c, "red") for c in range(5)] for r in range(5)])
+        grid = BruteForceResolver(
+            [[Cell(r, c, "red") for c in range(5)] for r in range(5)]
+        )
         cells = [grid[1, 1], grid[1, 2], grid[2, 2]]
         grid._claim_corner(cells)
         assert (
@@ -302,12 +505,18 @@ class TestClaimCorner:
         # Test all corner orientations on all four edges of the grid
 
         # Test on top edge (row 0) - same row pattern
-        grid = BruteForceResolver([[Cell(r, c, "red") for c in range(5)] for r in range(5)])
+        grid = BruteForceResolver(
+            [[Cell(r, c, "red") for c in range(5)] for r in range(5)]
+        )
         grid._claim_corner([grid[0, 1], grid[0, 2], grid[1, 1]])  # Case 2: same row
-        assert grid[1, 2].is_blocked()  # No upward from row 0, but cells[1] gets processed
+        assert grid[
+            1, 2
+        ].is_blocked()  # No upward from row 0, but cells[1] gets processed
 
         # Test on bottom edge (row 4) - same row pattern
-        grid = BruteForceResolver([[Cell(r, c, "red") for c in range(5)] for r in range(5)])
+        grid = BruteForceResolver(
+            [[Cell(r, c, "red") for c in range(5)] for r in range(5)]
+        )
         grid._claim_corner([grid[3, 1], grid[4, 1], grid[4, 2]])  # Case 2: same row
         assert (
             grid[3, 1].is_blocked()
@@ -316,7 +525,9 @@ class TestClaimCorner:
         )
 
         # Test on left edge (col 0) - same column pattern
-        grid = BruteForceResolver([[Cell(r, c, "red") for c in range(5)] for r in range(5)])
+        grid = BruteForceResolver(
+            [[Cell(r, c, "red") for c in range(5)] for r in range(5)]
+        )
         grid._claim_corner([grid[1, 0], grid[2, 0], grid[2, 1]])  # Case 3: same column
         assert (
             grid[3, 0].is_blocked()
@@ -324,8 +535,10 @@ class TestClaimCorner:
             or grid[1, 1].is_blocked()
         )
 
-        # Test on right edge (col 4) - same column pattern
-        grid = BruteForceResolver([[Cell(r, c, "red") for c in range(5)] for r in range(5)])
+        # Test on bottom edge (col 4) - same column pattern
+        grid = BruteForceResolver(
+            [[Cell(r, c, "red") for c in range(5)] for r in range(5)]
+        )
         grid._claim_corner([grid[1, 4], grid[2, 3], grid[2, 4]])  # Case 3: same column
         assert (
             grid[3, 4].is_blocked()
@@ -334,43 +547,59 @@ class TestClaimCorner:
         )
 
         # Test top-left corner of grid (0,0)
-        grid = BruteForceResolver([[Cell(r, c, "red") for c in range(5)] for r in range(5)])
+        grid = BruteForceResolver(
+            [[Cell(r, c, "red") for c in range(5)] for r in range(5)]
+        )
         grid._claim_corner([grid[0, 0], grid[0, 1], grid[1, 0]])  # Top-left corner
         # Should not crash with index errors
         assert True
 
         # Test top-right corner of grid (0,4)
-        grid = BruteForceResolver([[Cell(r, c, "red") for c in range(5)] for r in range(5)])
+        grid = BruteForceResolver(
+            [[Cell(r, c, "red") for c in range(5)] for r in range(5)]
+        )
         grid._claim_corner([grid[0, 3], grid[0, 4], grid[1, 4]])  # Top-right corner
         assert True
 
         # Test bottom-left corner of grid (4,0)
-        grid = BruteForceResolver([[Cell(r, c, "red") for c in range(5)] for r in range(5)])
+        grid = BruteForceResolver(
+            [[Cell(r, c, "red") for c in range(5)] for r in range(5)]
+        )
         grid._claim_corner([grid[3, 0], grid[4, 0], grid[4, 1]])  # Bottom-left corner
         assert True
 
         # Test bottom-right corner of grid (4,4)
-        grid = BruteForceResolver([[Cell(r, c, "red") for c in range(5)] for r in range(5)])
+        grid = BruteForceResolver(
+            [[Cell(r, c, "red") for c in range(5)] for r in range(5)]
+        )
         grid._claim_corner([grid[3, 4], grid[4, 3], grid[4, 4]])  # Bottom-right corner
         assert True
 
         # Test case 4 (else branch) on top edge
-        grid = BruteForceResolver([[Cell(r, c, "red") for c in range(5)] for r in range(5)])
+        grid = BruteForceResolver(
+            [[Cell(r, c, "red") for c in range(5)] for r in range(5)]
+        )
         grid._claim_corner([grid[0, 2], grid[1, 1], grid[1, 2]])  # Case 4: diagonal
         assert True
 
         # Test case 4 (else branch) on bottom edge
-        grid = BruteForceResolver([[Cell(r, c, "red") for c in range(5)] for r in range(5)])
+        grid = BruteForceResolver(
+            [[Cell(r, c, "red") for c in range(5)] for r in range(5)]
+        )
         grid._claim_corner([grid[3, 1], grid[4, 1], grid[4, 2]])  # Case 4: diagonal
         assert True
 
         # Test case 4 (else branch) on left edge
-        grid = BruteForceResolver([[Cell(r, c, "red") for c in range(5)] for r in range(5)])
+        grid = BruteForceResolver(
+            [[Cell(r, c, "red") for c in range(5)] for r in range(5)]
+        )
         grid._claim_corner([grid[1, 1], grid[2, 0], grid[2, 1]])  # Case 4: diagonal
         assert True
 
         # Test case 4 (else branch) on right edge
-        grid = BruteForceResolver([[Cell(r, c, "red") for c in range(5)] for r in range(5)])
+        grid = BruteForceResolver(
+            [[Cell(r, c, "red") for c in range(5)] for r in range(5)]
+        )
         grid._claim_corner([grid[1, 3], grid[2, 3], grid[2, 4]])  # Case 4: diagonal
         assert True
 
@@ -383,8 +612,8 @@ class TestClaimCorner:
 class TestClaimParallel:
     """Tests for parallel claiming methods."""
 
-    def test_claim_row_parallel_basic(self):
-        """Test _claim_row_parallel basic execution."""
+    def test_block_row_parallel_basic(self):
+        """Test _block_row_parallel basic execution."""
         grid = BruteForceResolver(
             [
                 [Cell(0, 0, "red"), Cell(0, 1, "blue"), Cell(0, 2, "yellow")],
@@ -394,12 +623,12 @@ class TestClaimParallel:
         )
         cells1 = [grid[0, 0], grid[2, 0]]
         cells2 = [grid[0, 1], grid[2, 1]]
-        grid._claim_row_parallel(cells1, cells2)
+        grid._block_row_parallel(cells1, cells2)
         assert grid[0, 2].is_blocked()
         assert grid[2, 2].is_blocked()
 
-    def test_claim_column_parallel_basic(self):
-        """Test _claim_column_parallel basic execution."""
+    def test_block_column_parallel_basic(self):
+        """Test _block_column_parallel basic execution."""
         grid = BruteForceResolver(
             [
                 [Cell(0, 0, "red"), Cell(0, 1, "red"), Cell(0, 2, "red")],
@@ -413,7 +642,7 @@ class TestClaimParallel:
         )
         cells1 = [grid[0, 0], grid[0, 2]]
         cells2 = [grid[2, 0], grid[2, 2]]
-        grid._claim_column_parallel(cells1, cells2)
+        grid._block_column_parallel(cells1, cells2)
         assert grid[1, 0].is_blocked()
         assert grid[1, 2].is_blocked()
 
@@ -822,6 +1051,7 @@ class TestBruteForceResolverImport:
         # This test just ensures the import is attempted
         # The actual import may succeed or fail, but the attempt should be there
         from Queens.brute_force_resolver import BruteForceResolver
+
         # If we get here, the import worked or was handled
         assert BruteForceResolver is not None
 
@@ -829,24 +1059,24 @@ class TestBruteForceResolverImport:
 class TestClaimRowReturn:
     """Tests to cover return statements."""
 
-    def test_claim_row_returns_none(self):
-        """Test that _claim_row returns None."""
+    def test_block_row_returns_none(self):
+        """Test that _block_row returns None."""
         grid = BruteForceResolver(
             [[Cell(0, 0, "red"), Cell(0, 1, "red"), Cell(0, 2, "red")]]
         )
-        result = grid._claim_row(grid[0, 0], grid[0, 2])
+        result = grid._block_row(grid[0, 0], grid[0, 2])
         assert result is None
 
 
 class TestClaimColumnReturn:
     """Tests to cover return statements."""
 
-    def test_claim_column_returns_none(self):
-        """Test that _claim_column returns None."""
+    def test_block_column_returns_none(self):
+        """Test that _block_column returns None."""
         grid = BruteForceResolver(
             [[Cell(0, 0, "red")], [Cell(1, 0, "red")], [Cell(2, 0, "red")]]
         )
-        result = grid._claim_column(grid[0, 0], grid[2, 0])
+        result = grid._block_column(grid[0, 0], grid[2, 0])
         assert result is None
 
 
@@ -876,30 +1106,45 @@ class TestResolveWarning:
 
 
 class TestClaimRowSize3:
-    """Tests for _claim_row with size 3."""
+    """Tests for _block_row with size 3."""
 
-    def test_claim_row_size_3_claims_centers(self):
-        """Test _claim_row with size 3 claims center cells."""
+    def test_block_row_size_3_claims_centers(self):
+        """Test _block_row with size 3 claims center cells."""
         grid = BruteForceResolver(
             [
-                [Cell(0, 0, "red"), Cell(0, 1, "red"), Cell(0, 2, "red"), Cell(0, 3, "green")],
-                [Cell(1, 0, "blue"), Cell(1, 1, "blue"), Cell(1, 2, "blue"), Cell(1, 3, "blue")],
-                [Cell(2, 0, "cyan"), Cell(2, 1, "cyan"), Cell(2, 2, "cyan"), Cell(2, 3, "cyan")],
+                [
+                    Cell(0, 0, "red"),
+                    Cell(0, 1, "red"),
+                    Cell(0, 2, "red"),
+                    Cell(0, 3, "green"),
+                ],
+                [
+                    Cell(1, 0, "blue"),
+                    Cell(1, 1, "blue"),
+                    Cell(1, 2, "blue"),
+                    Cell(1, 3, "blue"),
+                ],
+                [
+                    Cell(2, 0, "cyan"),
+                    Cell(2, 1, "cyan"),
+                    Cell(2, 2, "cyan"),
+                    Cell(2, 3, "cyan"),
+                ],
             ]
         )
         left = grid[0, 0]
         right = grid[0, 2]
-        grid._claim_row(left, right)
+        grid._block_row(left, right)
         # With size 3, should claim cells above and below the center (col 1)
         assert grid[0, 3].is_blocked()  # left side
         assert grid[1, 1].is_blocked()  # center above or below
 
 
 class TestClaimColumnSize3:
-    """Tests for _claim_column with size 3."""
+    """Tests for _block_column with size 3."""
 
-    def test_claim_column_size_3_claims_centers(self):
-        """Test _claim_column with size 3 claims center cells."""
+    def test_block_column_size_3_claims_centers(self):
+        """Test _block_column with size 3 claims center cells."""
         grid = BruteForceResolver(
             [
                 [Cell(0, 0, "red"), Cell(0, 1, "green"), Cell(0, 2, "blue")],
@@ -909,7 +1154,7 @@ class TestClaimColumnSize3:
         )
         top = grid[0, 0]
         bottom = grid[2, 0]
-        grid._claim_column(top, bottom)
+        grid._block_column(top, bottom)
         # With size 3, should claim cells left and right of the center (row 1, col 0)
         # The center is at row 1, so it should block cells at (1, -1) and (1, 1) relative to col 0
         # So it should block (1, 1) which is in bounds
@@ -948,41 +1193,49 @@ class TestResolveUnalignedDuo:
 class TestReturnStatements:
     """Tests to cover return statements in claim methods."""
 
-    def test_claim_row_all_returns(self):
-        """Test all return paths in _claim_row."""
+    def test_block_row_all_returns(self):
+        """Test all return paths in _block_row."""
         # Test size 2 with multiple rows so we don't get index errors
-        grid1 = BruteForceResolver([
-            [Cell(0, 0, "red"), Cell(0, 1, "red")],
-            [Cell(1, 0, "blue"), Cell(1, 1, "blue")],
-        ])
-        result1 = grid1._claim_row(grid1[0, 0], grid1[0, 1])
+        grid1 = BruteForceResolver(
+            [
+                [Cell(0, 0, "red"), Cell(0, 1, "red")],
+                [Cell(1, 0, "blue"), Cell(1, 1, "blue")],
+            ]
+        )
+        result1 = grid1._block_row(grid1[0, 0], grid1[0, 1])
         assert result1 is None
-        
+
         # Test size 3 with multiple rows
-        grid2 = BruteForceResolver([
-            [Cell(0, 0, "red"), Cell(0, 1, "red"), Cell(0, 2, "red")],
-            [Cell(1, 0, "blue"), Cell(1, 1, "blue"), Cell(1, 2, "blue")],
-        ])
-        result2 = grid2._claim_row(grid2[0, 0], grid2[0, 2])
+        grid2 = BruteForceResolver(
+            [
+                [Cell(0, 0, "red"), Cell(0, 1, "red"), Cell(0, 2, "red")],
+                [Cell(1, 0, "blue"), Cell(1, 1, "blue"), Cell(1, 2, "blue")],
+            ]
+        )
+        result2 = grid2._block_row(grid2[0, 0], grid2[0, 2])
         assert result2 is None
 
-    def test_claim_column_all_returns(self):
-        """Test all return paths in _claim_column."""
+    def test_block_column_all_returns(self):
+        """Test all return paths in _block_column."""
         # Test size 2 with multiple columns
-        grid1 = BruteForceResolver([
-            [Cell(0, 0, "red"), Cell(0, 1, "blue")],
-            [Cell(1, 0, "red"), Cell(1, 1, "blue")],
-        ])
-        result1 = grid1._claim_column(grid1[0, 0], grid1[1, 0])
+        grid1 = BruteForceResolver(
+            [
+                [Cell(0, 0, "red"), Cell(0, 1, "blue")],
+                [Cell(1, 0, "red"), Cell(1, 1, "blue")],
+            ]
+        )
+        result1 = grid1._block_column(grid1[0, 0], grid1[1, 0])
         assert result1 is None
-        
+
         # Test size 3 with multiple columns
-        grid2 = BruteForceResolver([
-            [Cell(0, 0, "red"), Cell(0, 1, "blue")],
-            [Cell(1, 0, "red"), Cell(1, 1, "blue")],
-            [Cell(2, 0, "red"), Cell(2, 1, "blue")],
-        ])
-        result2 = grid2._claim_column(grid2[0, 0], grid2[2, 0])
+        grid2 = BruteForceResolver(
+            [
+                [Cell(0, 0, "red"), Cell(0, 1, "blue")],
+                [Cell(1, 0, "red"), Cell(1, 1, "blue")],
+                [Cell(2, 0, "red"), Cell(2, 1, "blue")],
+            ]
+        )
+        result2 = grid2._block_column(grid2[0, 0], grid2[2, 0])
         assert result2 is None
 
 
