@@ -1,5 +1,6 @@
 # Queens/Queens_grid.py
 
+from abc import abstractmethod
 from typing import List
 from dataclasses import dataclass
 
@@ -154,13 +155,14 @@ class Grid:
                 return False
         return True
 
-    def resolve_grid(self) -> List[List[Cell]]:
+    @abstractmethod
+    def resolve_grid(self) -> List[List[Cell]]: # type: ignore
         """Placeholder for the grid-solving logic. This method should implement the algorithm to solve the grid based on the rules of the game."""
-        return self.grid
+        pass
 
 
 # DONE
-def build_example_grid(testGrid: list[str]) -> Grid:
+def build_example_grid(testGrid: list[str]) -> List[List[Cell]]:
     """Construit une grid d'exemple à partir d'une représentation ASCII.
 
     Lettres utilisées dans cet exemple:
@@ -188,4 +190,4 @@ def build_example_grid(testGrid: list[str]) -> Grid:
             row.append(Cell(r, c, color))
         grid.append(row)
 
-    return Grid(grid)
+    return grid
