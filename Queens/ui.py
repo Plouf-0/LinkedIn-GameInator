@@ -1,22 +1,22 @@
 from typing import List
-from .queens_grid import Grid, Cell
+from .queens_grid import Cell
 
 EMPTY = 0
 QUEEN = 1
 BLOCKED = -1
 
 
-def print_grid(grid: "Grid") -> None:
+def print_grid(grid: List[List[Cell]]) -> None:
     """Print the grid with ANSI colors.
 
     Expects an object with attribute `grid: List[List[Cell]]` and `Cell` having
     `.color` and `.value` attributes.
     """
     print("⟍  ", end="")
-    for i in range(len(grid.grid)):
+    for i in range(len(grid)):
         print(f" {i} ", end="")
     print()
-    for i, row in enumerate(grid.grid):
+    for i, row in enumerate(grid):
         print(f" {i} ", end="")
         for cell in row:
             if cell.color == "corail" or cell.color == "red":

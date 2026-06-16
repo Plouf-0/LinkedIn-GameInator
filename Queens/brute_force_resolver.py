@@ -4,7 +4,9 @@ import logging
 from warnings import warn
 from typing import List, Set
 
+from .ui import print_grid
 from .queens_grid import Cell, Grid
+
 
 logger = logging.getLogger(__name__)
 
@@ -316,5 +318,7 @@ class BruteForceResolver(Grid):
             if iteration == max_iterations:
                 logger.info("Max iterations reached, stopping resolution.")
                 print("Max iterations reached, stopping resolution.")
+
+            print_grid(self.grid)
 
         return self.grid

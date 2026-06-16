@@ -1359,9 +1359,9 @@ class TestQueenResolverIntegration:
             "R R R R B G G",
         ]
         grid = BruteForceResolver(build_example_grid(testGrid))
-        print_grid(grid)
+        print_grid(grid.grid)
         grid.resolve_grid()
-        print_grid(grid)
+        print_grid(grid.grid)
         assert grid[0, 1].is_queen()
         assert grid[1, 5].is_queen()
         assert grid[2, 2].is_queen()
@@ -1386,9 +1386,9 @@ class TestQueenResolverIntegration:
             "Y Y Y Y Y Y Y Y Y P",
         ]
         grid = BruteForceResolver(build_example_grid(testGrid))
-        print_grid(grid)
+        print_grid(grid.grid)
         grid.resolve_grid()
-        print_grid(grid)
+        print_grid(grid.grid)
         assert grid[0, 9].is_queen()
         assert grid[1, 4].is_queen()
         assert grid[2, 6].is_queen()
@@ -1413,7 +1413,7 @@ class TestQueenResolverIntegration:
             "V G G G W Y Y Y",
         ]
         grid = BruteForceResolver(build_example_grid(testGrid))
-        print_grid(grid)
+        print_grid(grid.grid)
         grid.resolve_grid()
         assert grid[0, 1].is_queen()
         assert grid[1, 6].is_queen()

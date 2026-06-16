@@ -117,7 +117,7 @@ def grid_from_builder():
         "R R",
         "G G",
     ]
-    return build_example_grid(test_grid)
+    return Grid(build_example_grid(test_grid))
 
 
 @pytest.fixture
@@ -204,7 +204,7 @@ class TestPrintGrid:
 
     def test_print_grid_1x1_empty(self, simple_grid_1x1: Grid, capsys: pytest.CaptureFixture[str]):
         """Test printing a minimal 1x1 grid with empty cell."""
-        print_grid(simple_grid_1x1)
+        print_grid(simple_grid_1x1.grid)
         captured = capsys.readouterr()
 
         output = captured.out
@@ -217,7 +217,7 @@ class TestPrintGrid:
 
     def test_print_grid_2x2(self, simple_grid_2x2: Grid, capsys: pytest.CaptureFixture[str]):
         """Test printing a 2x2 grid with different colors."""
-        print_grid(simple_grid_2x2)
+        print_grid(simple_grid_2x2.grid)
         captured = capsys.readouterr()
 
         output = captured.out
@@ -231,7 +231,7 @@ class TestPrintGrid:
 
     def test_print_grid_with_queen(self, grid_with_queens: Grid, capsys: pytest.CaptureFixture[str]):
         """Test printing a grid containing queen cells."""
-        print_grid(grid_with_queens)
+        print_grid(grid_with_queens.grid)
         captured = capsys.readouterr()
 
         output = captured.out
@@ -239,7 +239,7 @@ class TestPrintGrid:
 
     def test_print_grid_with_blocked(self, grid_with_queens: Grid, capsys: pytest.CaptureFixture[str]):
         """Test printing a grid containing blocked cells."""
-        print_grid(grid_with_queens)
+        print_grid(grid_with_queens.grid)
         captured = capsys.readouterr()
 
         output = captured.out
@@ -247,7 +247,7 @@ class TestPrintGrid:
 
     def test_print_grid_colors_cyan(self, simple_grid_1x1: Grid, capsys: pytest.CaptureFixture[str]):
         """Test that cyan color produces correct ANSI code."""
-        print_grid(simple_grid_1x1)
+        print_grid(simple_grid_1x1.grid)
         captured = capsys.readouterr()
 
         output = captured.out
@@ -255,7 +255,7 @@ class TestPrintGrid:
 
     def test_print_grid_colors_all(self, grid_all_colors: Grid, capsys: pytest.CaptureFixture[str]):
         """Test that all supported colors produce correct ANSI codes."""
-        print_grid(grid_all_colors)
+        print_grid(grid_all_colors.grid)
         captured = capsys.readouterr()
 
         output = captured.out
@@ -278,7 +278,7 @@ class TestPrintGrid:
 
     def test_print_grid_ansi_reset(self, simple_grid_1x1: Grid, capsys: pytest.CaptureFixture[str]):
         """Test that ANSI reset codes are present."""
-        print_grid(simple_grid_1x1)
+        print_grid(simple_grid_1x1.grid)
         captured = capsys.readouterr()
 
         output = captured.out
@@ -286,7 +286,7 @@ class TestPrintGrid:
 
     def test_print_grid_header_format(self, simple_grid_2x2: Grid, capsys: pytest.CaptureFixture[str]):
         """Test the header row format."""
-        print_grid(simple_grid_2x2)
+        print_grid(simple_grid_2x2.grid)
         captured = capsys.readouterr()
 
         output = captured.out
@@ -299,7 +299,7 @@ class TestPrintGrid:
 
     def test_print_grid_row_format(self, simple_grid_2x2: Grid, capsys: pytest.CaptureFixture[str]):
         """Test that each row starts with its index."""
-        print_grid(simple_grid_2x2)
+        print_grid(simple_grid_2x2.grid)
         captured = capsys.readouterr()
 
         output = captured.out
@@ -310,7 +310,7 @@ class TestPrintGrid:
 
     def test_print_grid_cell_separators(self, simple_grid_2x2: Grid, capsys: pytest.CaptureFixture[str]):
         """Test that cells are properly separated with spaces."""
-        print_grid(simple_grid_2x2)
+        print_grid(simple_grid_2x2.grid)
         captured = capsys.readouterr()
 
         output = captured.out
@@ -318,7 +318,7 @@ class TestPrintGrid:
 
     def test_print_grid_from_builder(self, grid_from_builder: Grid, capsys: pytest.CaptureFixture[str]):
         """Test printing a grid created with build_example_grid."""
-        print_grid(grid_from_builder)
+        print_grid(grid_from_builder.grid)
         captured = capsys.readouterr()
 
         output = captured.out
@@ -327,7 +327,7 @@ class TestPrintGrid:
 
     def test_print_grid_large_grid(self, big_grid: Grid, capsys: pytest.CaptureFixture[str]):
         """Test printing a larger grid (5x5)."""
-        print_grid(big_grid)
+        print_grid(big_grid.grid)
         captured = capsys.readouterr()
 
         output = captured.out
@@ -346,7 +346,7 @@ class TestPrintGrid:
             ]
         )
 
-        print_grid(grid)
+        print_grid(grid.grid)
         captured = capsys.readouterr()
 
         output = captured.out
@@ -357,7 +357,7 @@ class TestPrintGrid:
     def test_print_grid_empty_cell_method(self, empty_cell: Cell, capsys: pytest.CaptureFixture[str]):
         """Test printing grid with cell using is_empty method."""
         grid = Grid([[empty_cell]])
-        print_grid(grid)
+        print_grid(grid.grid)
         captured = capsys.readouterr()
 
         output = captured.out
@@ -367,7 +367,7 @@ class TestPrintGrid:
     def test_print_grid_queen_cell_method(self, queen_cell: Cell, capsys: pytest.CaptureFixture[str]):
         """Test printing grid with cell using is_queen method."""
         grid = Grid([[queen_cell]])
-        print_grid(grid)
+        print_grid(grid.grid)
         captured = capsys.readouterr()
 
         output = captured.out
@@ -377,7 +377,7 @@ class TestPrintGrid:
     def test_print_grid_blocked_cell_method(self, blocked_cell: Cell, capsys: pytest.CaptureFixture[str]):
         """Test printing grid with cell using is_blocked method."""
         grid = Grid([[blocked_cell]])
-        print_grid(grid)
+        print_grid(grid.grid)
         captured = capsys.readouterr()
 
         output = captured.out
@@ -561,7 +561,7 @@ class TestIntegration:
 
     def test_print_grid_and_regions_consistency(self, grid_from_builder: Grid, capsys: pytest.CaptureFixture[str]):
         """Test that print_grid and print_regions work with the same grid."""
-        print_grid(grid_from_builder)
+        print_grid(grid_from_builder.grid)
         captured_grid = capsys.readouterr()
 
         regions = [region.cells for region in grid_from_builder.regions]
@@ -578,9 +578,9 @@ class TestIntegration:
             "R R G",
             "B B B",
         ]
-        grid = build_example_grid(test_grid)
+        grid = Grid(build_example_grid(test_grid))
 
-        print_grid(grid)
+        print_grid(grid.grid)
         captured_grid = capsys.readouterr()
 
         regions = [region.cells for region in grid.regions]
@@ -593,7 +593,7 @@ class TestIntegration:
 
     def test_grid_with_all_methods(self, grid_mixed: Grid, capsys: pytest.CaptureFixture[str]):
         """Test that all cell methods work with print_grid."""
-        print_grid(grid_mixed)
+        print_grid(grid_mixed.grid)
         captured = capsys.readouterr()
 
         output = captured.out
@@ -607,7 +607,7 @@ class TestIntegration:
 
     def test_print_grid_with_single_color_grid(self, grid_single_color: Grid, capsys: pytest.CaptureFixture[str]):
         """Test printing a grid with single color region."""
-        print_grid(grid_single_color)
+        print_grid(grid_single_color.grid)
         captured = capsys.readouterr()
 
         output = captured.out
@@ -624,3 +624,164 @@ class TestIntegration:
         assert "Region 0:" in output
         assert len(regions) == 1
         assert len(regions[0]) == 9
+
+    def test_print_complex_example_grid(self, capsys: pytest.CaptureFixture[str]):
+        """Test printing a complex 10x10 example grid with multiple colors."""
+        # Create grid directly with French color names that match ui.py
+        grid_data: list[list[Cell]] = []
+        for r in range(10):
+            row: list[Cell] = []
+            for c in range(10):
+                # Determine color based on the pattern
+                if r == 0:
+                    color = "pourpre"
+                elif r == 1:
+                    if c == 4:
+                        color = "vert"
+                    elif c == 6:
+                        color = "black"
+                    else:
+                        color = "pourpre"
+                elif r == 2:
+                    if c == 4:
+                        color = "vert"
+                    elif c == 6:
+                        color = "black"
+                    else:
+                        color = "pourpre"
+                elif r == 3:
+                    if c == 3:
+                        color = "bleu"
+                    elif c == 4:
+                        color = "vert"
+                    elif c == 5:
+                        color = "gris"
+                    elif c == 6:
+                        color = "black"
+                    else:
+                        color = "pourpre"
+                elif r == 4:
+                    if c == 3:
+                        color = "bleu"
+                    elif c == 4:
+                        color = "vert"
+                    elif c == 5:
+                        color = "gris"
+                    elif c == 6:
+                        color = "black"
+                    else:
+                        color = "pourpre"
+                elif r == 5:
+                    if 2 <= c <= 7:
+                        color = "rouge"
+                    else:
+                        color = "pourpre"
+                elif r == 6:
+                    if 2 <= c <= 7:
+                        color = "cyan"
+                    else:
+                        color = "pourpre"
+                elif r == 7:
+                    if 1 <= c <= 8:
+                        color = "orange"
+                    else:
+                        color = "pourpre"
+                elif r == 8:
+                    if 1 <= c <= 8:
+                        color = "blanc"
+                    else:
+                        color = "pourpre"
+                elif r == 9:
+                    if c < 9:
+                        color = "jaune"
+                    else:
+                        color = "pourpre"
+                else:
+                    color = "pourpre"
+                row.append(Cell(r, c, color))
+            grid_data.append(row)
+        grid = Grid(grid_data)
+
+        print_grid(grid.grid)
+        captured = capsys.readouterr()
+
+        output = captured.out
+        lines = output.strip().split('\n')
+
+        assert len(lines) >= 11
+        assert "⟍" in lines[0]
+        for i in range(10):
+            assert f" {i} " in lines[0]
+
+        # Verify each row starts with its index
+        for row_idx in range(10):
+            assert lines[row_idx + 1].startswith(f" {row_idx} ")
+
+        # Verify all cells are empty (.) in the output
+        assert output.count(" . ") >= 90
+
+        # Verify color ANSI codes for each color present in the grid
+        # Map colors to their ANSI codes as defined in ui.py
+        color_to_ansi = {
+            "corail": "\033[1;30;41m",
+            "cyan": "\033[1;30;46m",
+            "bleu": "\033[1;30;44m",
+            "orange": "\033[1;30;43m",
+            "vert": "\033[1;30;42m",
+            "jaune": "\033[1;30;103m",
+            "lavande": "\033[1;30;45m",
+            "gris": "\033[1;30;40m",
+            "black": "\033[1;30;47m",
+        }
+
+        # Colors in our grid: pourpre, vert, black, bleu, gris, rouge, cyan, orange, blanc, jaune
+        # Note: pourpre, rouge, blanc don't have specific ANSI codes in ui.py, 
+        # they will use the default \033[0m
+        # So we check the ones that DO have codes
+        assert "\033[1;30;42m" in output  # vert (green) - rows 1,2 at col 4; rows 3,4 at col 4
+        assert "\033[1;30;47m" in output  # black - rows 1,2 at col 6; rows 3,4 at col 6
+        assert "\033[1;30;44m" in output  # bleu (blue) - rows 3,4 at col 3
+        assert "\033[1;30;40m" in output  # gris (gray) - rows 3,4 at col 5
+        assert "\033[1;30;46m" in output  # cyan - row 6 at cols 2-7
+        assert "\033[1;30;43m" in output  # orange - row 7 at cols 1-8
+        assert "\033[1;30;103m" in output  # jaune (yellow) - row 9 at cols 0-8
+
+        # Verify that colors without specific codes use default reset
+        assert "\033[0m" in output
+
+        # Verify specific rows contain expected color codes
+        # Row 1 (line 2 in output): contains vert at col 4 and black at col 6
+        assert "\033[1;30;42m" in lines[2]  # vert in row 1
+        assert "\033[1;30;47m" in lines[2]  # black in row 1
+
+        # Row 2 (line 3 in output): contains vert at col 4 and black at col 6
+        assert "\033[1;30;42m" in lines[3]  # vert in row 2
+        assert "\033[1;30;47m" in lines[3]  # black in row 2
+
+        # Row 3 (line 4 in output): contains bleu at col 3, vert at col 4, gris at col 5, black at col 6
+        assert "\033[1;30;44m" in lines[4]  # bleu in row 3
+        assert "\033[1;30;42m" in lines[4]  # vert in row 3
+        assert "\033[1;30;40m" in lines[4]  # gris in row 3
+        assert "\033[1;30;47m" in lines[4]  # black in row 3
+
+        # Row 4 (line 5 in output): contains bleu at col 3, vert at col 4, gris at col 5, black at col 6
+        assert "\033[1;30;44m" in lines[5]  # bleu in row 4
+        assert "\033[1;30;42m" in lines[5]  # vert in row 4
+        assert "\033[1;30;40m" in lines[5]  # gris in row 4
+        assert "\033[1;30;47m" in lines[5]  # black in row 4
+
+        # Row 6 (line 7 in output): contains cyan at cols 2-7 (6 cells)
+        assert lines[7].count("\033[1;30;46m") >= 6  # cyan cells in row 6
+
+        # Row 7 (line 8 in output): contains orange at cols 1-8 (8 cells)
+        assert lines[8].count("\033[1;30;43m") >= 8  # orange cells in row 7
+
+        # Row 9 (line 10 in output): contains jaune at cols 0-8 (9 cells)
+        assert lines[10].count("\033[1;30;103m") >= 9  # jaune cells in row 9
+
+        regions = [region.cells for region in grid.regions]
+        print_regions(regions)
+        captured_regions = capsys.readouterr()
+
+        assert "Found regions" in captured_regions.out
+        assert len(grid.regions) == 10
