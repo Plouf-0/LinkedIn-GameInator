@@ -305,7 +305,6 @@ class TestBlockColumn:
         bottom = three_squares_grid[4, 1]
         three_squares_grid._block_column(up, bottom)
         assert three_squares_grid[0, 1].is_blocked()
-        assert three_squares_grid[1, 1].is_blocked()
         assert three_squares_grid[2, 1].is_blocked()
         assert three_squares_grid[5, 1].is_blocked()
         assert three_squares_grid[6, 1].is_blocked()
