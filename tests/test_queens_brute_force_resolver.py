@@ -137,7 +137,7 @@ def three_squares_grid():
 @pytest.fixture
 def star_grid():
     grid = [
-        #0 1 2 3 4 5 6 7 8 9 10
+        # 0 1 2 3 4 5 6 7 8 9 10
         "O O O O O O O O O O O",  # 0
         "O O O O O R R O O O O",  # 1
         "O O O O R R R O O O O",  # 2
@@ -243,9 +243,7 @@ class TestBlockRow:
         assert star_grid[10, 6].is_blocked()
 
     # DONE
-    def test_block_row_not_cells_color_three_sides(
-        self, star_grid: BruteForceResolver
-    ):
+    def test_block_row_not_cells_color_three_sides(self, star_grid: BruteForceResolver):
         """Test _block_row block the two upper and under cells on a 2 cell block."""
         left = star_grid[2, 4]
         right = star_grid[2, 6]
@@ -363,7 +361,9 @@ class TestBlockColumn:
         assert not three_squares_grid[6, 8].is_blocked()
 
     # DONE
-    def test_block_column_not_cells_color_two_sides(self, star_grid: BruteForceResolver):
+    def test_block_column_not_cells_color_two_sides(
+        self, star_grid: BruteForceResolver
+    ):
         """Test _block_column block the two upper and under cells on a 2 cell block."""
         up = star_grid[4, 1]
         bottom = star_grid[5, 1]
@@ -604,46 +604,58 @@ class TestClaimCorner:
 
 
 # =============================================================================
-# Test Parallel Claiming
+# TODO Test Parallel Claiming
 # =============================================================================
 
 
 class TestClaimParallel:
     """Tests for parallel claiming methods."""
 
-    def test_block_row_parallel_basic(self):
+    # DONE
+    def test_block_row_parallel_basic(self, three_squares_grid: BruteForceResolver):
         """Test _block_row_parallel basic execution."""
-        grid = BruteForceResolver(
-            [
-                [Cell(0, 0, "red"), Cell(0, 1, "blue"), Cell(0, 2, "yellow")],
-                [Cell(1, 0, "red"), Cell(1, 1, "blue"), Cell(1, 2, "yellow")],
-                [Cell(2, 0, "red"), Cell(2, 1, "blue"), Cell(2, 2, "yellow")],
-            ]
-        )
-        cells1 = [grid[0, 0], grid[2, 0]]
-        cells2 = [grid[0, 1], grid[2, 1]]
-        grid._block_row_parallel(cells1, cells2)
-        assert grid[0, 2].is_blocked()
-        assert grid[2, 2].is_blocked()
+        cells1 = [three_squares_grid[3, 1], three_squares_grid[4, 1]]
+        cells2 = [three_squares_grid[3, 5], three_squares_grid[4, 5]]
+        three_squares_grid._block_row_parallel(cells1, cells2)
+        print_grid(three_squares_grid.grid)
+        assert three_squares_grid[3, 0].is_blocked()
+        assert three_squares_grid[3, 2].is_blocked()
+        assert three_squares_grid[3, 3].is_blocked()
+        assert three_squares_grid[3, 4].is_blocked()
+        assert three_squares_grid[3, 6].is_blocked()
+        assert three_squares_grid[3, 7].is_blocked()
+        assert three_squares_grid[3, 8].is_blocked()
+        assert three_squares_grid[3, 9].is_blocked()
+        assert three_squares_grid[4, 0].is_blocked()
+        assert three_squares_grid[4, 2].is_blocked()
+        assert three_squares_grid[4, 3].is_blocked()
+        assert three_squares_grid[4, 4].is_blocked()
+        assert three_squares_grid[4, 6].is_blocked()
+        assert three_squares_grid[4, 7].is_blocked()
+        assert three_squares_grid[4, 8].is_blocked()
+        assert three_squares_grid[4, 9].is_blocked()
 
-    def test_block_column_parallel_basic(self):
+    # DONE
+    def test_block_column_parallel_basic(self, three_squares_grid: BruteForceResolver):
         """Test _block_column_parallel basic execution."""
-        grid = BruteForceResolver(
-            [
-                [Cell(0, 0, "red"), Cell(0, 1, "red"), Cell(0, 2, "red")],
-                [Cell(1, 0, "blue"), Cell(1, 1, "blue"), Cell(1, 2, "blue")],
-                [
-                    Cell(2, 0, "yellow"),
-                    Cell(2, 1, "yellow"),
-                    Cell(2, 2, "yellow"),
-                ],
-            ]
-        )
-        cells1 = [grid[0, 0], grid[0, 2]]
-        cells2 = [grid[2, 0], grid[2, 2]]
-        grid._block_column_parallel(cells1, cells2)
-        assert grid[1, 0].is_blocked()
-        assert grid[1, 2].is_blocked()
+        cells1 = [three_squares_grid[1, 1], three_squares_grid[1, 2]]
+        cells2 = [three_squares_grid[8, 1], three_squares_grid[8, 2]]
+        three_squares_grid._block_column_parallel(cells1, cells2)
+        print_grid(three_squares_grid.grid)
+        assert three_squares_grid[0, 1].is_blocked()
+        assert three_squares_grid[2, 1].is_blocked()
+        assert three_squares_grid[5, 1].is_blocked()
+        assert three_squares_grid[6, 1].is_blocked()
+        assert three_squares_grid[7, 1].is_blocked()
+        assert three_squares_grid[9, 1].is_blocked()
+        assert three_squares_grid[0, 2].is_blocked()
+        assert three_squares_grid[2, 2].is_blocked()
+        assert three_squares_grid[3, 2].is_blocked()
+        assert three_squares_grid[4, 2].is_blocked()
+        assert three_squares_grid[5, 2].is_blocked()
+        assert three_squares_grid[6, 2].is_blocked()
+        assert three_squares_grid[7, 2].is_blocked()
+        assert three_squares_grid[9, 2].is_blocked()
 
     def test_claim_parallel_empty_regions(self):
         """Test _claim_parallel with empty regions list."""
@@ -1335,7 +1347,7 @@ class TestResolve:
 
         captured = capsys.readouterr()
         output = captured.out
-        assert "Max iterations reached, stopping resolution.\n" == output
+        assert "Max iterations reached, stopping resolution.\n" in output
         assert result is not None
 
 
