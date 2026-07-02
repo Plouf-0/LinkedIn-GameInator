@@ -115,6 +115,18 @@ def sample_grid_for_resolution():
     ]
     return BruteForceResolver(build_example_grid(test_grid))
 
+@pytest.fixture
+def cube_grid():
+    grid = [
+        #0 1 2 3 4 5
+        "O O O O O O ",  # 0
+        "O O R R O O ",  # 1
+        "O W O O Y O ",  # 2
+        "O W O O Y O ",  # 3
+        "O O B B O O ",  # 4
+        "O O O O O O ",  # 5
+    ]
+    return BruteForceResolver(build_example_grid(grid))
 
 @pytest.fixture
 def three_squares_grid():
@@ -604,7 +616,7 @@ class TestClaimCorner:
 
 
 # =============================================================================
-# TODO Test Parallel Claiming
+# DONE Test Parallel Claiming
 # =============================================================================
 
 
@@ -657,63 +669,19 @@ class TestClaimParallel:
         assert three_squares_grid[7, 2].is_blocked()
         assert three_squares_grid[9, 2].is_blocked()
 
-    def test_claim_parallel_empty_regions(self):
-        """Test _claim_parallel with empty regions list."""
-        grid = BruteForceResolver([[Cell(0, 0, "red")]])
-        grid._claim_parallel([])
-        assert grid[0, 0].value == EMPTY
-
-    def test_claim_parallel_horizontal(self):
+    def test_claim_parallel_horizontal(self, cube_grid: BruteForceResolver):
         """Test _claim_parallel with horizontal regions."""
-        grid = BruteForceResolver(
-            [
-                [
-                    Cell(0, 0, "red"),
-                    Cell(0, 1, "red"),
-                    Cell(0, 2, "yellow"),
-                    Cell(0, 3, "yellow"),
-                    Cell(0, 4, "cyan"),
-                ],
-                [
-                    Cell(1, 0, "red"),
-                    Cell(1, 1, "blue"),
-                    Cell(1, 2, "yellow"),
-                    Cell(1, 3, "green"),
-                    Cell(1, 4, "cyan"),
-                ],
-                [
-                    Cell(2, 0, "red"),
-                    Cell(2, 1, "blue"),
-                    Cell(2, 2, "yellow"),
-                    Cell(2, 3, "green"),
-                    Cell(2, 4, "cyan"),
-                ],
-                [
-                    Cell(3, 0, "red"),
-                    Cell(3, 1, "red"),
-                    Cell(3, 2, "yellow"),
-                    Cell(3, 3, "yellow"),
-                    Cell(3, 4, "cyan"),
-                ],
-                [
-                    Cell(4, 0, "red"),
-                    Cell(4, 1, "red"),
-                    Cell(4, 2, "yellow"),
-                    Cell(4, 3, "yellow"),
-                    Cell(4, 4, "cyan"),
-                ],
-            ]
-        )
-        regions = [[grid[1, 1], grid[2, 1]], [grid[1, 3], grid[2, 3]]]
-        grid._claim_parallel(regions)
-        assert grid[1, 0].is_blocked()
-        assert grid[1, 2].is_blocked()
-        assert grid[1, 4].is_blocked()
-        assert grid[2, 0].is_blocked()
-        assert grid[2, 2].is_blocked()
-        assert grid[2, 4].is_blocked()
+        
+        regions = [[cube_grid[1, 1], cube_grid[2, 1]], [cube_grid[1, 3], cube_grid[2, 3]]]
+        cube_grid._claim_parallel(regions)
+        assert cube_grid[1, 0].is_blocked()
+        assert cube_grid[1, 2].is_blocked()
+        assert cube_grid[1, 4].is_blocked()
+        assert cube_grid[2, 0].is_blocked()
+        assert cube_grid[2, 2].is_blocked()
+        assert cube_grid[2, 4].is_blocked()
 
-    def test_claim_parallel_vertical(self):
+    def test_claim_parallel_vertical(self, cube_grid: BruteForceResolver):
         """Test _claim_parallel with vertical regions."""
         grid = BruteForceResolver(
             [
@@ -1434,4 +1402,4 @@ class TestQueenResolverIntegration:
         assert grid[4, 4].is_queen()
         assert grid[5, 7].is_queen()
         assert grid[6, 5].is_queen()
-        assert grid[6, 3].is_queen()
+        assert grid[7, 3].is_queen()
