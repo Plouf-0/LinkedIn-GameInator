@@ -70,8 +70,21 @@ class BruteForceResolver(Grid):
         return
 
     # DONE
-    def _claim_row_parallel(self, cells1: List[Cell], cells2: List[Cell]) -> None:
-        """Claim cells in the same row of the cells1 and cells2 that are not of the same color as the given parallel regions."""
+    def _block_row_parallel(self, cells1: List[Cell], cells2: List[Cell]) -> None:
+        """
+        Block cells in the same row of the cells1 and cells2 that are not of the same color as the given parallel regions.
+
+        Example :
+        ```
+        cells1 = [cell[1, 1], cell[2, 1]]
+        cells2 = [cell[1, 5], cell[2, 5]]
+        grid._block_row_parallel(cells1, cells2)
+        0 . . . . . . .
+        1 X R X X X W X
+        2 X R X X X W X
+        3 . . . . . . .
+        ```
+        """
         color1 = cells1[0].color
         color2 = cells2[0].color
         rows: Set[int] = {cell.row for cell in cells1}
@@ -84,8 +97,23 @@ class BruteForceResolver(Grid):
         return
 
     # DONE
-    def _claim_column_parallel(self, cells1: List[Cell], cells2: List[Cell]) -> None:
-        """Claim cells in the same column of the cells1 and cells2 that are not of the same color as the given parallel regions."""
+    def _block_column_parallel(self, cells1: List[Cell], cells2: List[Cell]) -> None:
+        """Block cells in the same column of the cells1 and cells2 that are not of the same color as the given parallel regions.
+
+        Example :
+        ```
+        cells1 = [cell[1, 1], cell[1, 2]]
+        cells2 = [cell[4, 1], cell[4, 2]]
+        grid._block_row_parallel(cells1, cells2)
+        0 1 2 3
+        . X X .
+        . . . .
+        . X X .
+        . X X .
+        . . . .
+        . X X .
+        ```
+        """
         color1 = cells1[0].color
         color2 = cells2[0].color
         cols: Set[int] = {cell.col for cell in cells1}
