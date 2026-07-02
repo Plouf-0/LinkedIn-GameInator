@@ -324,10 +324,11 @@ class BruteForceResolver(Grid):
                     self._block_row(trio[0], trio[2])
                 elif len(cols) == 1:
                     self._block_column(trio[0], trio[2])
-                else:
+                elif len(rows) == 2 and len(cols) == 2:
                     self._claim_corner(trio)
 
-            # One liner/column
+            two_row_regions: List[Grid.Region] = []
+            two_col_regions: List[Grid.Region] = []
             for region in self.regions:
                 if region.is_completed:
                     continue
@@ -349,17 +350,28 @@ class BruteForceResolver(Grid):
                         ],
                     )
 
-            empty_cells_regions: List[Grid.Region] = [
-                region for region in self.regions if region.nb_empty_cells != 0
-            ]
+                if len(rows) == 2:
+                    two_row_regions.append(region)
+                if len(cols) == 2:
+                    two_col_regions.append(region)
 
-            two_rowcol_regions: List[List[Cell]] = []
-            for region in empty_cells_regions:
-                rows: Set[int] = {cell.row for cell in region.cells}
-                cols: Set[int] = {cell.col for cell in region.cells}
-                if len(rows) == 2 or len(cols) == 2:
-                    two_rowcol_regions.append(region.cells)
-            self._claim_parallel(two_rowcol_regions)
+            for region in two_row_regions:
+                rows: Set[int] = {cell.row for cell in region.empty_cells}
+                for other_region in two_row_regions:
+                    if region == other_region:
+                        continue
+                    other_rows: Set[int] = {cell.row for cell in other_region.empty_cells}
+                    if rows == other_rows:
+                        self._block_row_parallel([region.empty_cells[0], region.empty_cells[-1]], [other_region.empty_cells[0], other_region.empty_cells[-1]])
+
+            for region in two_col_regions:
+                cols: Set[int] = {cell.col for cell in region.empty_cells}
+                for other_region in two_col_regions:
+                    if region == other_region:
+                        continue
+                    other_cols: Set[int] = {cell.col for cell in other_region.empty_cells}
+                    if cols == other_cols:
+                        self._block_column_parallel([region.empty_cells[0], region.empty_cells[-1]], [other_region.empty_cells[0], other_region.empty_cells[-1]])
 
             if self.is_grid_finished():
                 logger.info("Grid solved!")
