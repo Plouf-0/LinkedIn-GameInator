@@ -7,7 +7,6 @@ from typing import List, Set
 from .ui import print_grid
 from .queens_grid import Cell, Grid
 
-
 logger = logging.getLogger(__name__)
 
 # Try to import UI helpers from the same folder; prefer relative import when used as a package
@@ -25,7 +24,18 @@ class BruteForceResolver(Grid):
 
     # DONE
     def _block_row(self, left: Cell, right: Cell) -> None:
-        """Block the cells outside of the row selected by two cells in the same region"""
+        """Block the cells outside of the row selected by two cells in the same region
+
+        Example :
+        ```
+        grid._block_row(grid[1, 2], grid[1, 5])
+        0 . . . . . . . .
+        1 X X R R R R X X
+        2 . . . . . . . .
+        ```
+        Note :
+        Special case for size 2 and 3.
+        """
         if left.row != right.row:
             raise ValueError("Left and right cells must be in the same row.")
         if left.col > right.col:
@@ -71,8 +81,7 @@ class BruteForceResolver(Grid):
 
     # DONE
     def _block_row_parallel(self, cells1: List[Cell], cells2: List[Cell]) -> None:
-        """
-        Block cells in the same row of the cells1 and cells2 that are not of the same color as the given parallel regions.
+        """Block cells in the same row of the cells1 and cells2 that are not of the same color as the given parallel regions.
 
         Example :
         ```
@@ -80,8 +89,8 @@ class BruteForceResolver(Grid):
         cells2 = [cell[1, 5], cell[2, 5]]
         grid._block_row_parallel(cells1, cells2)
         0 . . . . . . .
-        1 X R X X X W X
-        2 X R X X X W X
+        1 X R X X X B X
+        2 X R X X X B X
         3 . . . . . . .
         ```
         """
@@ -104,13 +113,13 @@ class BruteForceResolver(Grid):
         ```
         cells1 = [cell[1, 1], cell[1, 2]]
         cells2 = [cell[4, 1], cell[4, 2]]
-        grid._block_row_parallel(cells1, cells2)
+        grid._block_column_parallel(cells1, cells2)
         0 1 2 3
         . X X .
-        . . . .
+        . R R .
         . X X .
         . X X .
-        . . . .
+        . B B .
         . X X .
         ```
         """
@@ -128,7 +137,22 @@ class BruteForceResolver(Grid):
 
     # DONE
     def _block_column(self, top: Cell, bottom: Cell) -> None:
-        """Claim cells in the same column of the given top and bottom cells that are not of the same color as the given top and bottom cells."""
+        """Block cells in the same column of the given top and bottom cells that are not of the same color as the given top and bottom cells.
+
+        Example :
+        ```
+        grid._block_column(grid[2, 1], grid[3, 1])
+        0 1 2
+        . X .
+        . X .
+        . R .
+        . R .
+        . X .
+        . X .
+        ```
+        Note :
+        Special case for size 2 and 3.
+        """
         if top.col != bottom.col:
             raise ValueError("Top and bottom cells must be in the same column.")
         if top.row > bottom.row:
@@ -141,8 +165,7 @@ class BruteForceResolver(Grid):
 
             # if the selected cell is on over or under the region
             if (
-                (cell.row < top.row
-                or cell.row > bottom.row)
+                (cell.row < top.row or cell.row > bottom.row)
                 and cell.is_empty()
                 and cell.color != top.color
             ):
