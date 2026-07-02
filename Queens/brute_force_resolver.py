@@ -214,7 +214,7 @@ class BruteForceResolver(Grid):
                 rows1 = {cell.row for cell in vertical_region1}
                 rows2 = {cell.row for cell in vertical_region2}
                 if rows1 == rows2:
-                    self._claim_row_parallel(vertical_region1, vertical_region2)
+                    self._block_row_parallel(vertical_region1, vertical_region2)
 
         for horizontal_region_index in range(len(horizontal_regions)):
             for horizontal_region_index2 in range(
@@ -225,7 +225,7 @@ class BruteForceResolver(Grid):
                 cols1 = {cell.col for cell in horizontal_region1}
                 cols2 = {cell.col for cell in horizontal_region2}
                 if cols1 == cols2:
-                    self._claim_column_parallel(horizontal_region1, horizontal_region2)
+                    self._block_column_parallel(horizontal_region1, horizontal_region2)
         return
 
     # WIP
