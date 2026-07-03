@@ -7,7 +7,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.remote.webdriver import WebDriver
 from typing import Callable, Any, cast
 
-from Queens_api import queens_api
+from queens_api import queens_api
 
 
 def main():
@@ -93,7 +93,6 @@ def main():
         print("Resolver not yet implemented")
     elif "Queens" in driver.title:
         queens_api(driver)
-        # print("Resolver not yet implemented")
     elif "Crossclimb" in driver.title:
         print("Resolver not yet implemented")
     elif "Pinpoint" in driver.title:
@@ -101,8 +100,6 @@ def main():
     else:
         print("Game not recognised")
         driver.close()
-
-    # TODO Come back to the games window
 
     # For testing purpose
     # while True:
