@@ -6,7 +6,7 @@ from pathlib import Path
 
 sys.path.append(str(Path(__file__).parent.parent))
 
-from Queens.resolver import Cell, Grid, QUEEN
+from Queens.brute_force_resolver import BruteForceResolver, Cell, Grid
 from Queens.ui import print_grid
 
 from typing import List
@@ -16,15 +16,16 @@ from selenium.webdriver.remote.webelement import WebElement
 
 # The time to wait between placing queens in the HTML, in seconds.
 # Adjust as needed.
-TIME_TO_RESOLVE = 4
+TIME_TO_RESOLVE = 2
 
 
 def queens_api(driver: webdriver.Firefox) -> None:
     assert "Queens" in driver.title
 
-    grid = create_grid_from_html(driver)
-    grid.resolve()
-    print_grid(grid)
+    grid = BruteForceResolver(create_grid_from_html(driver))
+    print_grid(grid.grid)
+    grid.resolve_grid()
+    print_grid(grid.grid)
     put_queens_in_html(driver, grid)
 
     while True:
@@ -32,7 +33,7 @@ def queens_api(driver: webdriver.Firefox) -> None:
     return
 
 
-def create_grid_from_html(driver: webdriver.Firefox) -> Grid:
+def create_grid_from_html(driver: webdriver.Firefox) -> List[List[Cell]]:
     grid: List[List[Cell]] = []
 
     divs: list[WebElement] = driver.find_elements(By.CSS_SELECTOR, "div[aria-label]")
@@ -49,19 +50,19 @@ def create_grid_from_html(driver: webdriver.Firefox) -> Grid:
 
             while len(grid) <= row:
                 grid.append([])
-            grid[row].append(Cell((row, column), color))
-            grid[row].sort(key=lambda c: c.coord[1])  # type: ignore
+            grid[row].append(Cell(row, column, color))
+            grid[row].sort(key=lambda c: c.col)  # type: ignore
 
-    return Grid(grid)
+    return grid
 
 
 def put_queens_in_html(driver: webdriver.Firefox, grid: Grid) -> None:
     for row in grid.grid:
         for cell in row:
-            if cell.value == QUEEN:
+            if cell.is_queen():
                 div = driver.find_element(
                     By.CSS_SELECTOR,
-                    f"div[aria-label*='ligne {cell.coord[0]+1}, colonne {cell.coord[1]+1}']",
+                    f"div[aria-label*='ligne {cell.row+1}, colonne {cell.col+1}']",
                 )
                 div.click()
                 div.click()
