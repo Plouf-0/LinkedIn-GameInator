@@ -21,6 +21,7 @@ from Queens.queens_grid import (
     QUEEN,
     BLOCKED,
     convert_color,
+    build_example_grid,
 )
 
 # =============================================================================
@@ -110,15 +111,12 @@ def grid_mixed():
         ]
     )
 
+
 @pytest.fixture
 def big_grid():
     """Create a larger 9x9 grid with mixed colors."""
-    return Grid(
-        [
-            [Cell(r, c, f"color{(r+c)%3}") for c in range(9)]
-            for r in range(9)
-        ]
-    )
+    return Grid([[Cell(r, c, f"color{(r+c)%3}") for c in range(9)] for r in range(9)])
+
 
 # =============================================================================
 # Test Cell class
@@ -547,7 +545,7 @@ class TestClaimCell:
         assert big_grid[3, 5].value == BLOCKED
         assert big_grid[5, 3].value == BLOCKED
         assert big_grid[5, 5].value == BLOCKED
-        
+
 
 # =============================================================================
 # Test _claim_region
@@ -670,3 +668,48 @@ class TestColorConversion:
     def test_convert_color_empty_string(self):
         """Test convert_color with empty string."""
         assert len(convert_color("")) == 0
+
+
+# =============================================================================
+# Test Build Example Grid
+# =============================================================================
+
+
+class TestBuildExampleGrid:
+    """Tests for build_example_grid function."""
+
+    def test_build_example_grid_all_colors(self):
+        """Test build_example_grid with all supported colors."""
+        tokens = [
+            "bleu",
+            "corail",
+            "gris",
+            "beige",
+            "orange",
+            "lavande",
+            "rose",
+            "vert",
+            "white",
+            "jaune",
+        ]
+        grid = build_example_grid([" ".join(tokens)])
+
+        assert len(grid) == 1
+        assert len(grid[0]) == len(tokens)
+        assert [cell.color for cell in grid[0]] == [
+            "B",
+            "C",
+            "G",
+            "N",
+            "O",
+            "P",
+            "R",
+            "V",
+            "W",
+            "Y",
+        ]
+
+    def test_build_example_grid_invalid_color_raises_value_error(self):
+        """Test build_example_grid raises ValueError for invalid color token."""
+        with pytest.raises(ValueError):
+            build_example_grid(["red invalid_color blue"])
