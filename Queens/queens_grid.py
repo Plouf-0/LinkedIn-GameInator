@@ -8,6 +8,25 @@ EMPTY = 0
 QUEEN = 1
 BLOCKED = -1
 
+COLORS = {
+    "B": ["bleu", "blue"],
+    "C": ["corail", "red"],
+    "G": ["gris", "gray"],
+    "N": ["beige", "black"],
+    "O": ["orange"],
+    "P": ["lavande", "purple"],
+    "R": ["rose"],
+    "V": ["vert", "green"],
+    "W": ["white"],
+    "Y": ["jaune", "yellow"],
+    }
+
+COLOR_TO_INITIAL = {
+        color: initial
+        for initial, colors in COLORS.items()
+        for color in colors
+    }
+
 
 # DONE
 @dataclass
@@ -160,6 +179,18 @@ class Grid:
         """Placeholder for the grid-solving logic. This method should implement the algorithm to solve the grid based on the rules of the game."""
         pass
 
+
+def convert_color(value: str) -> str:
+    """Convert a color name or initial to its corresponding list of color names."""
+    normalized_value: str = value.strip().lower()
+
+    if len(normalized_value) == 1:
+        normalized_value = normalized_value.upper()
+        color: list[str] = COLORS.get(normalized_value, [])
+        return color[0] if len(color) > 0 else ""
+
+    initial = COLOR_TO_INITIAL.get(normalized_value)
+    return initial if initial else ""
 
 # DONE
 def build_example_grid(testGrid: list[str]) -> List[List[Cell]]:
