@@ -194,30 +194,15 @@ def convert_color(value: str) -> str:
 
 # DONE
 def build_example_grid(testGrid: list[str]) -> List[List[Cell]]:
-    """Construit une grid d'exemple à partir d'une représentation ASCII.
-
-    Lettres utilisées dans cet exemple:
-    C = cyan, R = red, B = blue, O = orange, G = green
-    """
-
-    mapping = {
-        "C": "cyan",
-        "R": "red",
-        "B": "blue",
-        "O": "orange",
-        "V": "green",  # "V" for vert (green in French)
-        "Y": "yellow",
-        "P": "purple",
-        "W": "white",
-        "G": "gray",
-        "N": "black",  # "N" for noir (black in French)
-    }
+    """Build a grid of Cell objects from a list of strings representing the grid layout."""
 
     grid: List[List[Cell]] = []
     for r, line in enumerate(testGrid):
         row: List[Cell] = []
         for c, token in enumerate(line.split()):
-            color = mapping.get(token, "unknown")
+            color = convert_color(token)
+            if not color:
+                raise ValueError(f"Invalid color token '{token}' at row {r}, column {c}")
             row.append(Cell(r, c, color))
         grid.append(row)
 
