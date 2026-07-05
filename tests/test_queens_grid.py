@@ -20,6 +20,7 @@ from Queens.queens_grid import (
     EMPTY,
     QUEEN,
     BLOCKED,
+    convert_color,
 )
 
 # =============================================================================
@@ -619,3 +620,53 @@ class TestIterator:
             assert isinstance(row, list)
             for cell in row:
                 assert isinstance(cell, Cell)
+
+
+# =============================================================================
+# Test Color Conversion
+# =============================================================================
+
+
+class TestColorConversion:
+    """Tests for color conversion methods."""
+
+    def test_convert_color_to_single_letter(self):
+        """Test convert_color with color."""
+        assert convert_color("blue") is "B"
+        assert convert_color("bleu") is "B"
+        assert convert_color("corail") is "C"
+        assert convert_color("red") is "C"
+        assert convert_color("gray") is "G"
+        assert convert_color("gris") is "G"
+        assert convert_color("black") is "N"
+        assert convert_color("beige") is "N"
+        assert convert_color("orange") is "O"
+        assert convert_color("purple") is "P"
+        assert convert_color("lavande") is "P"
+        assert convert_color("rose") is "R"
+        assert convert_color("green") is "V"
+        assert convert_color("vert") is "V"
+        assert convert_color("white") is "W"
+        assert convert_color("yellow") is "Y"
+        assert convert_color("jaune") is "Y"
+
+    def test_convert_single_letter_to_color(self):
+        """Test convert_color with single letter."""
+        assert convert_color("B") is "bleu"
+        assert convert_color("C") is "corail"
+        assert convert_color("G") is "gris"
+        assert convert_color("N") is "beige"
+        assert convert_color("O") is "orange"
+        assert convert_color("P") is "lavande"
+        assert convert_color("R") is "rose"
+        assert convert_color("V") is "vert"
+        assert convert_color("W") is "white"
+        assert convert_color("Y") is "jaune"
+
+    def test_convert_color_invalid(self):
+        """Test convert_color with invalid input."""
+        assert len(convert_color("blouge")) == 0
+
+    def test_convert_color_empty_string(self):
+        """Test convert_color with empty string."""
+        assert len(convert_color("")) == 0
