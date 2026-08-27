@@ -11,9 +11,9 @@ from __future__ import annotations
 
 import logging
 
-from .brute_force_resolver import BruteForceResolver
-from .queens_grid import Cell, Grid, build_example_grid
-from .ui import print_grid
+from Queens.brute_force_resolver import BruteForceResolver
+from Queens.queens_grid import Cell, Grid, build_example_grid
+from Queens.ui import print_grid
 
 __all__ = [
     "Grid",

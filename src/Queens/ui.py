@@ -1,7 +1,7 @@
 from datetime import date as dt
 from pathlib import Path
 
-from .queens_grid import Cell, convert_color
+from Queens.queens_grid import Cell, convert_color
 
 EMPTY = 0
 QUEEN = 1

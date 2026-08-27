@@ -3,8 +3,8 @@
 import logging
 from warnings import warn
 
-from .queens_grid import Cell, Grid
-from .ui import print_grid
+from Queens.queens_grid import Cell, Grid
+from Queens.ui import print_grid
 
 logger = logging.getLogger(__name__)
 
