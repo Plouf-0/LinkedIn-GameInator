@@ -7,7 +7,7 @@ EMPTY = 0
 QUEEN = 1
 BLOCKED = -1
 
-ARCHIVE_PATH = "Queens\\Archive"
+ARCHIVE_PATH = Path(__file__).parent / "Archive"
 
 
 def print_grid(grid: list[list[Cell]]) -> None:

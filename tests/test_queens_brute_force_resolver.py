@@ -593,14 +593,18 @@ class TestClaimParallel:
     def test_claim_parallel_horizontal(self, cube_grid: BruteForceResolver):
         """Test _claim_parallel with horizontal regions."""
 
-        regions = [[cube_grid[1, 1], cube_grid[2, 1]], [cube_grid[1, 3], cube_grid[2, 3]]]
+        # The R region (row 1, cols 2-3) and B region (row 4, cols 2-3) are the
+        # actual horizontal (same row, 2 distinct cols) regions in cube_grid.
+        regions = [[cube_grid[1, 2], cube_grid[1, 3]], [cube_grid[4, 2], cube_grid[4, 3]]]
         cube_grid._claim_parallel(regions)
-        assert cube_grid[1, 0].is_blocked()
-        assert cube_grid[1, 2].is_blocked()
-        assert cube_grid[1, 4].is_blocked()
-        assert cube_grid[2, 0].is_blocked()
+        assert cube_grid[0, 2].is_blocked()
+        assert cube_grid[0, 3].is_blocked()
         assert cube_grid[2, 2].is_blocked()
-        assert cube_grid[2, 4].is_blocked()
+        assert cube_grid[2, 3].is_blocked()
+        assert cube_grid[3, 2].is_blocked()
+        assert cube_grid[3, 3].is_blocked()
+        assert cube_grid[5, 2].is_blocked()
+        assert cube_grid[5, 3].is_blocked()
 
     def test_claim_parallel_vertical(self, cube_grid: BruteForceResolver):
         """Test _claim_parallel with vertical regions."""
@@ -695,15 +699,15 @@ class TestBuildExampleGrid:
         """Test build_example_grid color mapping."""
         test_grid = ["C R B O V Y P W N"]
         grid = BruteForceResolver(build_example_grid(test_grid))
-        assert grid[0, 0].color == "cyan"
-        assert grid[0, 1].color == "red"
-        assert grid[0, 2].color == "blue"
+        assert grid[0, 0].color == "corail"
+        assert grid[0, 1].color == "rose"
+        assert grid[0, 2].color == "bleu"
         assert grid[0, 3].color == "orange"
-        assert grid[0, 4].color == "green"
-        assert grid[0, 5].color == "yellow"
-        assert grid[0, 6].color == "purple"
+        assert grid[0, 4].color == "vert"
+        assert grid[0, 5].color == "jaune"
+        assert grid[0, 6].color == "lavande"
         assert grid[0, 7].color == "white"
-        assert grid[0, 8].color == "black"
+        assert grid[0, 8].color == "beige"
 
     def test_build_example_grid_unknown_color(self):
         """Test build_example_grid with unknown color token."""
@@ -725,8 +729,8 @@ class TestBuildExampleGrid:
     def test_build_example_grid_preserves_coordinates(self):
         """Test that build_example_grid preserves row and column indices."""
         test_grid = [
-            "A B",
-            "C D",
+            "B C",
+            "G N",
         ]
         grid = BruteForceResolver(build_example_grid(test_grid))
         assert grid[0, 0].row == 0 and grid[0, 0].col == 0
@@ -754,16 +758,16 @@ class TestBuildExampleGrid:
         assert all(len(row) == 10 for row in grid.grid)
 
         expected_colors = [
-            "cyan",
-            "red",
-            "blue",
+            "corail",
+            "rose",
+            "bleu",
             "orange",
-            "green",
-            "yellow",
-            "purple",
+            "vert",
+            "jaune",
+            "lavande",
             "white",
-            "gray",
-            "black",
+            "gris",
+            "beige",
         ]
         for row_idx, expected_color in enumerate(expected_colors):
             for cell in grid.grid[row_idx]:
