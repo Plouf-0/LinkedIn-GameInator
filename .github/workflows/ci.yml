@@ -33,7 +33,7 @@ jobs:
       - name: Type check (mypy)
         run: uv run mypy .
 
-    tests:
+  tests:
     name: Tests
     runs-on: ubuntu-latest
     needs: quality
