@@ -97,15 +97,17 @@ def main():
         print("Resolver not yet implemented")
     elif "Pinpoint" in driver.title:
         print("Resolver not yet implemented")
+    elif "Wend" in driver.title:
+            print("Resolver not yet implemented")
     else:
         print("Game not recognised")
-        driver.close()
+        driver.quit()
 
     # For testing purpose
     # while True:
     #     pass
 
-    driver.close()
+    driver.quit()
     return
 
 
