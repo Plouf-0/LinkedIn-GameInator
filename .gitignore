@@ -1,5 +1,40 @@
-.vscode
-*/__pycache__
-.coverage
+# Python bytecode / cache
+**/__pycache__/
+*.py[cod]
 
-*/Archive/2*
+# Packaging / build artifacts
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+.venv/
+venv/
+
+# Test / coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Type checkers / linters
+.mypy_cache/
+.dmypy.json
+.ruff_cache/
+
+# Env files (secrets, LinkedIn creds, API keys, ...)
+.env
+.env.*
+
+# Selenium / webdriver artifacts
+geckodriver.log
+*.log
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Project-specific: dated Queens archive files
+**/Archive/2*
