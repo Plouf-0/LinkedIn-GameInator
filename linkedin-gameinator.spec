@@ -3,10 +3,10 @@
 
 a = Analysis(
     ['src/WebScrapper/LinkedIn-Gameinator.py'],
-    pathex=[],
+    pathex=['src', 'src/WebScrapper'],
     binaries=[],
     datas=[],
-    hiddenimports=[],
+    hiddenimports=['selenium.webdriver.firefox.webdriver'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
