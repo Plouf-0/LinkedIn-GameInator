@@ -102,7 +102,7 @@ jobs:
         run: uv add --dev pyinstaller
 
       - name: Build de l'exécutable
-        run: uv run pyinstaller --onefile --name ${{ matrix.artifact_name }} src/Queens/ui.py
+        run: uv run pyinstaller --onefile --name ${{ matrix.artifact_name }} --paths src --paths src/WebScrapper --hidden-import selenium.webdriver.firefox.webdriver "src/WebScrapper/LinkedIn-Gameinator.py"
 
       - name: Upload de l'artifact
         uses: actions/upload-artifact@v4
