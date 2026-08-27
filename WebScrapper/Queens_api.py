@@ -7,7 +7,7 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent))
 
 from Queens.brute_force_resolver import BruteForceResolver, Cell, Grid
-from Queens.ui import print_grid
+from Queens.ui import achive_queens_grid, print_grid
 
 from typing import List
 from selenium import webdriver
@@ -16,7 +16,7 @@ from selenium.webdriver.remote.webelement import WebElement
 
 # The time to wait between placing queens in the HTML, in seconds.
 # Adjust as needed.
-TIME_TO_RESOLVE = 2
+TIME_TO_RESOLVE = 4
 
 
 def queens_api(driver: webdriver.Firefox) -> None:
@@ -53,8 +53,9 @@ def create_grid_from_html(driver: webdriver.Firefox) -> List[List[Cell]]:
             grid[row].append(Cell(row, column, color))
             grid[row].sort(key=lambda c: c.col)  # type: ignore
 
-    return grid
+    achive_queens_grid(grid)
 
+    return grid
 
 def put_queens_in_html(driver: webdriver.Firefox, grid: Grid) -> None:
     for row in grid.grid:
