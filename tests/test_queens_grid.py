@@ -8,20 +8,16 @@ Comprehensive test suite covering:
 
 # pyright: reportPrivateUsage=false
 
-import sys
 import pytest
-from pathlib import Path
-
-sys.path.append(str(Path(__file__).parent.parent))
 
 from Queens.queens_grid import (
-    Cell,
-    Grid,
+    BLOCKED,
     EMPTY,
     QUEEN,
-    BLOCKED,
-    convert_color,
+    Cell,
+    Grid,
     build_example_grid,
+    convert_color,
 )
 
 # =============================================================================
@@ -115,7 +111,7 @@ def grid_mixed():
 @pytest.fixture
 def big_grid():
     """Create a larger 9x9 grid with mixed colors."""
-    return Grid([[Cell(r, c, f"color{(r+c)%3}") for c in range(9)] for r in range(9)])
+    return Grid([[Cell(r, c, f"color{(r + c) % 3}") for c in range(9)] for r in range(9)])
 
 
 # =============================================================================
@@ -630,36 +626,36 @@ class TestColorConversion:
 
     def test_convert_color_to_single_letter(self):
         """Test convert_color with color."""
-        assert convert_color("blue") is "B"
-        assert convert_color("bleu") is "B"
-        assert convert_color("corail") is "C"
-        assert convert_color("red") is "C"
-        assert convert_color("gray") is "G"
-        assert convert_color("gris") is "G"
-        assert convert_color("black") is "N"
-        assert convert_color("beige") is "N"
-        assert convert_color("orange") is "O"
-        assert convert_color("purple") is "P"
-        assert convert_color("lavande") is "P"
-        assert convert_color("rose") is "R"
-        assert convert_color("green") is "V"
-        assert convert_color("vert") is "V"
-        assert convert_color("white") is "W"
-        assert convert_color("yellow") is "Y"
-        assert convert_color("jaune") is "Y"
+        assert convert_color("blue") == "B"
+        assert convert_color("bleu") == "B"
+        assert convert_color("corail") == "C"
+        assert convert_color("red") == "C"
+        assert convert_color("gray") == "G"
+        assert convert_color("gris") == "G"
+        assert convert_color("black") == "N"
+        assert convert_color("beige") == "N"
+        assert convert_color("orange") == "O"
+        assert convert_color("purple") == "P"
+        assert convert_color("lavande") == "P"
+        assert convert_color("rose") == "R"
+        assert convert_color("green") == "V"
+        assert convert_color("vert") == "V"
+        assert convert_color("white") == "W"
+        assert convert_color("yellow") == "Y"
+        assert convert_color("jaune") == "Y"
 
     def test_convert_single_letter_to_color(self):
         """Test convert_color with single letter."""
-        assert convert_color("B") is "bleu"
-        assert convert_color("C") is "corail"
-        assert convert_color("G") is "gris"
-        assert convert_color("N") is "beige"
-        assert convert_color("O") is "orange"
-        assert convert_color("P") is "lavande"
-        assert convert_color("R") is "rose"
-        assert convert_color("V") is "vert"
-        assert convert_color("W") is "white"
-        assert convert_color("Y") is "jaune"
+        assert convert_color("B") == "bleu"
+        assert convert_color("C") == "corail"
+        assert convert_color("G") == "gris"
+        assert convert_color("N") == "beige"
+        assert convert_color("O") == "orange"
+        assert convert_color("P") == "lavande"
+        assert convert_color("R") == "rose"
+        assert convert_color("V") == "vert"
+        assert convert_color("W") == "white"
+        assert convert_color("Y") == "jaune"
 
     def test_convert_color_invalid(self):
         """Test convert_color with invalid input."""

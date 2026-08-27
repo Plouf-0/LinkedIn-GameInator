@@ -1,17 +1,18 @@
-#WebScrapper/LinkedInWebdriver.py
+# WebScrapper/LinkedInWebdriver.py
 
+from collections.abc import Callable
+from typing import Any, cast
+
+from Queens_api import queens_api
 from selenium import webdriver
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.wait import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.remote.webdriver import WebDriver
-from typing import Callable, Any, cast
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.wait import WebDriverWait
 
-from queens_api import queens_api
 
-
-def main():
-
+def main() -> None:
     login_url = "https://www.linkedin.com/uas/login?session_redirect=%2Fgames%2F&fromSignIn=true&trk=games_nav-header-signin"
 
     # DONE Open LinkedIn login window with redirection
@@ -28,15 +29,14 @@ def main():
         # Hide alternate-signin-container
         try:
             WebDriverWait(driver, time_to_wait_page_loaded).until(
-                EC.presence_of_element_located(
-                    (By.CLASS_NAME, "alternate-signin-container")
-                )
+                EC.presence_of_element_located((By.CLASS_NAME, "alternate-signin-container"))
             )
-        except:
-            raise Exception("alternate-signin-container not found")
+        except TimeoutException as e:
+            raise Exception("alternate-signin-container not found") from e
         else:
             exec_script(  # type: ignore
-                "(document.getElementsByClassName('alternate-signin-container'))[0].setAttribute('style', 'visibility: hidden');"
+                "(document.getElementsByClassName('alternate-signin-container'))[0] \
+                .setAttribute('style', 'visibility: hidden');"
             )
 
         # Hide credential_picker_container
@@ -44,11 +44,12 @@ def main():
             WebDriverWait(driver, time_to_wait_page_loaded).until(
                 EC.presence_of_element_located((By.ID, "credential_picker_container"))
             )
-        except:
-            raise Exception("credential_picker_container not found")
+        except TimeoutException as e:
+            raise Exception("credential_picker_container not found") from e
         else:
             exec_script(  # type: ignore
-                "document.getElementById('credential_picker_container').setAttribute('style', 'visibility: hidden');"
+                "document.getElementById('credential_picker_container') \
+                .setAttribute('style', 'visibility: hidden');"
             )
     except Exception as e:
         print(e)
@@ -63,7 +64,7 @@ def main():
         WebDriverWait(driver, time_to_wait_user_login).until(
             EC.presence_of_element_located((By.CLASS_NAME, "msg-overlay-list-bubble"))
         )
-    except:
+    except TimeoutException:
         print("User did not login")
         driver.close()
 
@@ -77,7 +78,7 @@ def main():
         WebDriverWait(driver, time_to_wait_game_selected).until(
             EC.presence_of_element_located((By.ID, "clock-small"))
         )
-    except:
+    except TimeoutException:
         print("User did not select a game")
         driver.close()
 
@@ -98,7 +99,7 @@ def main():
     elif "Pinpoint" in driver.title:
         print("Resolver not yet implemented")
     elif "Wend" in driver.title:
-            print("Resolver not yet implemented")
+        print("Resolver not yet implemented")
     else:
         print("Game not recognised")
         driver.quit()

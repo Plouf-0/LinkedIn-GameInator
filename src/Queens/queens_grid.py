@@ -1,7 +1,7 @@
 # Queens/Queens_grid.py
 
-from abc import abstractmethod
-from typing import List
+from __future__ import annotations
+
 from dataclasses import dataclass
 
 EMPTY = 0
@@ -19,13 +19,9 @@ COLORS = {
     "V": ["vert", "green"],
     "W": ["white"],
     "Y": ["jaune", "yellow"],
-    }
+}
 
-COLOR_TO_INITIAL = {
-        color: initial
-        for initial, colors in COLORS.items()
-        for color in colors
-    }
+COLOR_TO_INITIAL = {color: initial for initial, colors in COLORS.items() for color in colors}
 
 
 # DONE
@@ -73,14 +69,14 @@ class Grid:
         """Represents a group of cells sharing the same color within a grid."""
 
         cells: list[Cell]
-        grid: "Grid"
+        grid: Grid
 
         @property
         def color(self) -> str:
             return self.cells[0].color
 
         @property
-        def empty_cells(self) -> List[Cell]:
+        def empty_cells(self) -> list[Cell]:
             return [cell for cell in self.cells if cell.is_empty()]
 
         @property
@@ -96,8 +92,8 @@ class Grid:
                 if cell.is_empty():
                     cell.block_cell()
 
-    def __init__(self, grid: List[List[Cell]]):
-        self.grid: List[List[Cell]] = grid
+    def __init__(self, grid: list[list[Cell]]):
+        self.grid: list[list[Cell]] = grid
         self.regions: list[Grid.Region] = self._setup_regions()
 
     def __getitem__(self, coord: tuple[int, int]) -> Cell:
@@ -108,15 +104,15 @@ class Grid:
 
     def _get_row(self, row: int) -> list[Cell]:
         return self.grid[row]
-    
+
     def _get_column(self, col: int) -> list[Cell]:
         return [self.grid[r][col] for r in range(len(self.grid))]
 
     # DONE
-    def _setup_regions(self) -> List[Grid.Region]:
+    def _setup_regions(self) -> list[Grid.Region]:
         """Identify unique colors in the grid and group cells into regions based on their color"""
-        colors: List[str] = []
-        regions: List[Grid.Region] = []
+        colors: list[str] = []
+        regions: list[Grid.Region] = []
         for line in self.grid:
             for cell in line:
                 if cell.color not in colors:
@@ -174,10 +170,10 @@ class Grid:
                 return False
         return True
 
-    @abstractmethod
-    def resolve_grid(self) -> List[List[Cell]]: # type: ignore
-        """Placeholder for the grid-solving logic. This method should implement the algorithm to solve the grid based on the rules of the game."""
-        pass
+    def resolve_grid(self) -> list[list[Cell]]:
+        """Placeholder for the grid-solving logic. This method should implement the algorithm
+        to solve the grid based on the rules of the game."""
+        raise NotImplementedError
 
 
 def convert_color(value: str) -> str:
@@ -192,13 +188,14 @@ def convert_color(value: str) -> str:
     initial = COLOR_TO_INITIAL.get(normalized_value)
     return initial if initial else ""
 
+
 # DONE
-def build_example_grid(testGrid: list[str]) -> List[List[Cell]]:
+def build_example_grid(testGrid: list[str]) -> list[list[Cell]]:
     """Build a grid of Cell objects from a list of strings representing the grid layout."""
 
-    grid: List[List[Cell]] = []
+    grid: list[list[Cell]] = []
     for r, line in enumerate(testGrid):
-        row: List[Cell] = []
+        row: list[Cell] = []
         for c, token in enumerate(line.split()):
             color = convert_color(token)
             if not color:

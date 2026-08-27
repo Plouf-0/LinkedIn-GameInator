@@ -6,13 +6,13 @@ from pathlib import Path
 
 sys.path.append(str(Path(__file__).parent.parent))
 
-from Queens.brute_force_resolver import BruteForceResolver, Cell, Grid
-from Queens.ui import achive_queens_grid, print_grid
 
-from typing import List
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
+
+from Queens.brute_force_resolver import BruteForceResolver, Cell, Grid
+from Queens.ui import achive_queens_grid, print_grid
 
 # The time to wait between placing queens in the HTML, in seconds.
 # Adjust as needed.
@@ -33,8 +33,8 @@ def queens_api(driver: webdriver.Firefox) -> None:
     return
 
 
-def create_grid_from_html(driver: webdriver.Firefox) -> List[List[Cell]]:
-    grid: List[List[Cell]] = []
+def create_grid_from_html(driver: webdriver.Firefox) -> list[list[Cell]]:
+    grid: list[list[Cell]] = []
 
     divs: list[WebElement] = driver.find_elements(By.CSS_SELECTOR, "div[aria-label]")
     div: WebElement
@@ -42,7 +42,6 @@ def create_grid_from_html(driver: webdriver.Firefox) -> List[List[Cell]]:
     for div in divs:
         label = div.get_attribute("aria-label")  # type: ignore
         if "couleur" in label:
-
             parts = label.split(", ")
             color = parts[0].split("couleur ")[1].split(" ")[0]
             row = int(parts[1].split("ligne ")[1]) - 1
@@ -57,13 +56,14 @@ def create_grid_from_html(driver: webdriver.Firefox) -> List[List[Cell]]:
 
     return grid
 
+
 def put_queens_in_html(driver: webdriver.Firefox, grid: Grid) -> None:
     for row in grid.grid:
         for cell in row:
             if cell.is_queen():
                 div = driver.find_element(
                     By.CSS_SELECTOR,
-                    f"div[aria-label*='ligne {cell.row+1}, colonne {cell.col+1}']",
+                    f"div[aria-label*='ligne {cell.row + 1}, colonne {cell.col + 1}']",
                 )
                 div.click()
                 div.click()

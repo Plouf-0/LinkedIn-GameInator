@@ -2,24 +2,23 @@
 
 import logging
 from warnings import warn
-from typing import List, Set
 
-from .ui import print_grid
 from .queens_grid import Cell, Grid
+from .ui import print_grid
 
 logger = logging.getLogger(__name__)
 
 # Try to import UI helpers from the same folder; prefer relative import when used as a package
 try:
-    from . import ui  # type: ignore
+    pass  # type: ignore
 except Exception:
-    import ui  # type: ignore
+    pass  # type: ignore
 
 
 class BruteForceResolver(Grid):
     """Resolver that uses brute-force backtracking to solve the grid."""
 
-    def __init__(self, grid: List[List[Cell]]):
+    def __init__(self, grid: list[list[Cell]]):
         super().__init__(grid)
 
     # DONE
@@ -40,11 +39,10 @@ class BruteForceResolver(Grid):
             raise ValueError("Left and right cells must be in the same row.")
         if left.col > right.col:
             left, right = right, left
-            warn("Left and right cells were swapped to maintain order.")
+            warn("Left and right cells were swapped to maintain order.", stacklevel=2)
         size = abs(left.col - right.col) + 1
 
         for cell in self.grid[left.row]:
-
             # if the selected cell is on the left or on the right of the region
             if (
                 (cell.col < left.col or cell.col > right.col)
@@ -55,10 +53,7 @@ class BruteForceResolver(Grid):
 
             # claim all sides of the region if size = 2
             elif size == 2 and cell.col in (left.col, right.col):
-                if (
-                    cell.row != 0
-                    and self.grid[cell.row - 1][cell.col].color != left.color
-                ):
+                if cell.row != 0 and self.grid[cell.row - 1][cell.col].color != left.color:
                     self.grid[cell.row - 1][cell.col].block_cell()
                 if (
                     cell.row != len(self.grid[0]) - 1
@@ -67,10 +62,7 @@ class BruteForceResolver(Grid):
                     self.grid[cell.row + 1][cell.col].block_cell()
             # claim the centers if size = 3
             elif size == 3 and cell.col == left.col + 1:
-                if (
-                    cell.row != 0
-                    and self.grid[cell.row - 1][cell.col].color != left.color
-                ):
+                if cell.row != 0 and self.grid[cell.row - 1][cell.col].color != left.color:
                     self.grid[cell.row - 1][cell.col].block_cell()
                 if (
                     cell.row < len(self.grid) - 1
@@ -80,8 +72,9 @@ class BruteForceResolver(Grid):
         return
 
     # DONE
-    def _block_row_parallel(self, cells1: List[Cell], cells2: List[Cell]) -> None:
-        """Block cells in the same row of the cells1 and cells2 that are not of the same color as the given parallel regions.
+    def _block_row_parallel(self, cells1: list[Cell], cells2: list[Cell]) -> None:
+        """Block cells in the same row of the cells1 and cells2
+        that are not of the same color as the given parallel regions.
 
         Example :
         ```
@@ -96,7 +89,7 @@ class BruteForceResolver(Grid):
         """
         color1 = cells1[0].color
         color2 = cells2[0].color
-        rows: Set[int] = {cell.row for cell in cells1}
+        rows: set[int] = {cell.row for cell in cells1}
 
         for row in rows:
             for cell in self.grid[row]:
@@ -106,8 +99,9 @@ class BruteForceResolver(Grid):
         return
 
     # DONE
-    def _block_column_parallel(self, cells1: List[Cell], cells2: List[Cell]) -> None:
-        """Block cells in the same column of the cells1 and cells2 that are not of the same color as the given parallel regions.
+    def _block_column_parallel(self, cells1: list[Cell], cells2: list[Cell]) -> None:
+        """Block cells in the same column of the cells1 and cells2
+        that are not of the same color as the given parallel regions.
 
         Example :
         ```
@@ -125,7 +119,7 @@ class BruteForceResolver(Grid):
         """
         color1 = cells1[0].color
         color2 = cells2[0].color
-        cols: Set[int] = {cell.col for cell in cells1}
+        cols: set[int] = {cell.col for cell in cells1}
 
         for col in cols:
             for cell in self.grid:
@@ -137,7 +131,8 @@ class BruteForceResolver(Grid):
 
     # DONE
     def _block_column(self, top: Cell, bottom: Cell) -> None:
-        """Block cells in the same column of the given top and bottom cells that are not of the same color as the given top and bottom cells.
+        """Block cells in the same column of the given top and bottom cells
+        that are not of the same color as the given top and bottom cells.
 
         Example :
         ```
@@ -157,7 +152,7 @@ class BruteForceResolver(Grid):
             raise ValueError("Top and bottom cells must be in the same column.")
         if top.row > bottom.row:
             top, bottom = bottom, top
-            warn("Top and bottom cells were swapped to maintain order.")
+            warn("Top and bottom cells were swapped to maintain order.", stacklevel=2)
         size = abs(top.row - bottom.row) + 1
 
         for row in self.grid:
@@ -173,10 +168,7 @@ class BruteForceResolver(Grid):
 
             # claim all sides of the region if size = 2
             elif size == 2 and cell.row in (top.row, bottom.row):
-                if (
-                    cell.col != 0
-                    and self.grid[cell.row][cell.col - 1].color != top.color
-                ):
+                if cell.col != 0 and self.grid[cell.row][cell.col - 1].color != top.color:
                     self.grid[cell.row][cell.col - 1].block_cell()
                 if (
                     cell.col != len(self.grid[0]) - 1
@@ -185,10 +177,7 @@ class BruteForceResolver(Grid):
                     self.grid[cell.row][cell.col + 1].block_cell()
             # claim the centers if size = 3
             elif size == 3 and cell.row == top.row + 1:
-                if (
-                    cell.col != 0
-                    and self.grid[cell.row][cell.col - 1].color != top.color
-                ):
+                if cell.col != 0 and self.grid[cell.row][cell.col - 1].color != top.color:
                     self.grid[cell.row][cell.col - 1].block_cell()
                 if (
                     cell.col < len(self.grid[0]) - 1
@@ -198,8 +187,9 @@ class BruteForceResolver(Grid):
         return
 
     # DONE
-    def _claim_corner(self, cells: List[Cell]) -> None:
-        """Claim cells around the given 3 cells that form a corner that are not of the same color as the given 3 cells."""
+    def _claim_corner(self, cells: list[Cell]) -> None:
+        """Claim cells around the given 3 cells that form a corner
+        that are not of the same color as the given 3 cells."""
         if len(cells) != 3:
             raise ValueError("Exactly 3 cells are required to claim a corner.")
 
@@ -211,9 +201,7 @@ class BruteForceResolver(Grid):
                     self.grid[cells[0].row - 1][cells[0].col].block_cell()  # ↑
                 if cells[0].col - 1 >= 0:
                     self.grid[cells[0].row][cells[0].col - 1].block_cell()  # ←
-                if cells[0].row + 1 < len(self.grid) and cells[0].col + 1 < len(
-                    self.grid
-                ):
+                if cells[0].row + 1 < len(self.grid) and cells[0].col + 1 < len(self.grid):
                     self.grid[cells[0].row + 1][cells[0].col + 1].block_cell()  # ↘
             # ¤ ¤
             #   ¤
@@ -245,21 +233,20 @@ class BruteForceResolver(Grid):
         return
 
     # WIP first version for 2 empty-cells regions
-    def _claim_parallel(self, regions: List[List[Cell]]) -> None:
-        """Claim cells in the same row or column of the given parallel regions that are not of the same color as the given parallel regions."""
-        horizontal_regions: List[List[Cell]] = []
-        vertical_regions: List[List[Cell]] = []
+    def _claim_parallel(self, regions: list[list[Cell]]) -> None:
+        """Claim cells in the same row or column of the given parallel regions
+        that are not of the same color as the given parallel regions."""
+        horizontal_regions: list[list[Cell]] = []
+        vertical_regions: list[list[Cell]] = []
         for region in regions:
-            rows: Set[int] = {cell.row for cell in region}
-            cols: Set[int] = {cell.col for cell in region}
+            rows: set[int] = {cell.row for cell in region}
+            cols: set[int] = {cell.col for cell in region}
             if len(rows) == 2:
                 vertical_regions.append(region)
             if len(cols) == 2:
                 horizontal_regions.append(region)
         for vertical_region_index in range(len(vertical_regions)):
-            for vertical_region_index2 in range(
-                vertical_region_index + 1, len(vertical_regions)
-            ):
+            for vertical_region_index2 in range(vertical_region_index + 1, len(vertical_regions)):
                 vertical_region1 = vertical_regions[vertical_region_index]
                 vertical_region2 = vertical_regions[vertical_region_index2]
                 rows1 = {cell.row for cell in vertical_region1}
@@ -280,30 +267,23 @@ class BruteForceResolver(Grid):
         return
 
     # WIP
-    def resolve_grid(self) -> List[List[Cell]]:
-
+    def resolve_grid(self) -> list[list[Cell]]:
         max_iterations = 100
 
         iteration = 0
         while iteration < max_iterations:
             iteration += 1
 
-            singles: List[Cell] = [
-                region.empty_cells[0]
-                for region in self.regions
-                if region.nb_empty_cells == 1
+            singles: list[Cell] = [
+                region.empty_cells[0] for region in self.regions if region.nb_empty_cells == 1
             ]
 
-            duos: List[list[Cell]] = [
-                region.empty_cells
-                for region in self.regions
-                if region.nb_empty_cells == 2
+            duos: list[list[Cell]] = [
+                region.empty_cells for region in self.regions if region.nb_empty_cells == 2
             ]
 
-            trios: List[List[Cell]] = [
-                region.empty_cells
-                for region in self.regions
-                if region.nb_empty_cells == 3
+            trios: list[list[Cell]] = [
+                region.empty_cells for region in self.regions if region.nb_empty_cells == 3
             ]
 
             for cell in singles:
@@ -315,11 +295,11 @@ class BruteForceResolver(Grid):
                 elif duo[0].col == duo[1].col:
                     self._block_column(duo[0], duo[1])
                 else:
-                    warn("Duo is not aligned in row or column.")
+                    warn("Duo is not aligned in row or column.", stacklevel=2)
 
             for trio in trios:
-                rows = {cell.row for cell in trio}
-                cols = {cell.col for cell in trio}
+                rows: set[int] = {cell.row for cell in trio}
+                cols: set[int] = {cell.col for cell in trio}
                 if len(rows) == 1:
                     self._block_row(trio[0], trio[2])
                 elif len(cols) == 1:
@@ -327,27 +307,23 @@ class BruteForceResolver(Grid):
                 elif len(rows) == 2 and len(cols) == 2:
                     self._claim_corner(trio)
 
-            two_row_regions: List[Grid.Region] = []
-            two_col_regions: List[Grid.Region] = []
+            two_row_regions: list[Grid.Region] = []
+            two_col_regions: list[Grid.Region] = []
             for region in self.regions:
                 if region.is_completed:
                     continue
 
-                rows: Set[int] = {cell.row for cell in region.empty_cells}
-                cols: Set[int] = {cell.col for cell in region.empty_cells}
+                rows = {cell.row for cell in region.empty_cells}
+                cols = {cell.col for cell in region.empty_cells}
                 if len(rows) == 1:
                     self._block_row(
                         self.grid[region.empty_cells[0].row][region.empty_cells[0].col],
-                        self.grid[region.empty_cells[-1].row][
-                            region.empty_cells[-1].col
-                        ],
+                        self.grid[region.empty_cells[-1].row][region.empty_cells[-1].col],
                     )
                 elif len(cols) == 1:
                     self._block_column(
                         self.grid[region.empty_cells[0].row][region.empty_cells[0].col],
-                        self.grid[region.empty_cells[-1].row][
-                            region.empty_cells[-1].col
-                        ],
+                        self.grid[region.empty_cells[-1].row][region.empty_cells[-1].col],
                     )
 
                 if len(rows) == 2:
@@ -356,22 +332,28 @@ class BruteForceResolver(Grid):
                     two_col_regions.append(region)
 
             for region in two_row_regions:
-                rows: Set[int] = {cell.row for cell in region.empty_cells}
+                rows = {cell.row for cell in region.empty_cells}
                 for other_region in two_row_regions:
                     if region == other_region:
                         continue
-                    other_rows: Set[int] = {cell.row for cell in other_region.empty_cells}
+                    other_rows: set[int] = {cell.row for cell in other_region.empty_cells}
                     if rows == other_rows:
-                        self._block_row_parallel([region.empty_cells[0], region.empty_cells[-1]], [other_region.empty_cells[0], other_region.empty_cells[-1]])
+                        self._block_row_parallel(
+                            [region.empty_cells[0], region.empty_cells[-1]],
+                            [other_region.empty_cells[0], other_region.empty_cells[-1]],
+                        )
 
             for region in two_col_regions:
-                cols: Set[int] = {cell.col for cell in region.empty_cells}
+                cols = {cell.col for cell in region.empty_cells}
                 for other_region in two_col_regions:
                     if region == other_region:
                         continue
-                    other_cols: Set[int] = {cell.col for cell in other_region.empty_cells}
+                    other_cols: set[int] = {cell.col for cell in other_region.empty_cells}
                     if cols == other_cols:
-                        self._block_column_parallel([region.empty_cells[0], region.empty_cells[-1]], [other_region.empty_cells[0], other_region.empty_cells[-1]])
+                        self._block_column_parallel(
+                            [region.empty_cells[0], region.empty_cells[-1]],
+                            [other_region.empty_cells[0], other_region.empty_cells[-1]],
+                        )
 
             if self.is_grid_finished():
                 logger.info("Grid solved!")

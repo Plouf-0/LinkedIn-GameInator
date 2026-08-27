@@ -1,7 +1,7 @@
-from typing import List
-from .queens_grid import Cell, convert_color
-from pathlib import Path
 from datetime import date as dt
+from pathlib import Path
+
+from .queens_grid import Cell, convert_color
 
 EMPTY = 0
 QUEEN = 1
@@ -10,7 +10,7 @@ BLOCKED = -1
 ARCHIVE_PATH = "Queens\\Archive"
 
 
-def print_grid(grid: List[List[Cell]]) -> None:
+def print_grid(grid: list[list[Cell]]) -> None:
     """Print the grid with ANSI colors.
 
     Expects an object with attribute `grid: List[List[Cell]]` and `Cell` having
@@ -54,7 +54,7 @@ def print_grid(grid: List[List[Cell]]) -> None:
         print("\033[0m ")
 
 
-def print_regions(regions: List[List[Cell]]) -> None:
+def print_regions(regions: list[list[Cell]]) -> None:
     print("Found regions (list of coords per color):")
     for i, region in enumerate(regions):
         print(f"Region {i}: {region}")
@@ -87,7 +87,7 @@ def find_or_create_archive(filename: str) -> bool:
         return True
 
 
-def achive_queens_grid(grid: List[List[Cell]], opt_filename: str = "") -> None:
+def achive_queens_grid(grid: list[list[Cell]], opt_filename: str = "") -> None:
     """Archive the current state of the grid to a text file."""
     today: str = str(dt.today())
 
