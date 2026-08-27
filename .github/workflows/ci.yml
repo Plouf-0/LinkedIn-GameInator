@@ -35,6 +35,7 @@ jobs:
     name: Tests
     runs-on: ubuntu-latest
     needs: quality
+    fail-fast: false
     strategy:
       matrix:
         python-version: ["3.11", "3.12", "3.13"]
