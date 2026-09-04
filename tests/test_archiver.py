@@ -33,7 +33,6 @@ class _ConcreteArchiver(Archiver):
 
 
 class TestArchiver:
-
     def test_setup_archive_main_dir(self):
         """Test setup_archive_main_dir"""
         localappdata: str | None = os.getenv("LOCALAPPDATA")
@@ -72,9 +71,7 @@ class TestArchiver:
         archiver_instance._archive_name = "test_archive"
         archiver_instance._setup_game_archive()
 
-        assert os.path.exists(
-            os.path.join(localappdata, "LinkedIn-Gameinator", "test_archive")
-        )
+        assert os.path.exists(os.path.join(localappdata, "LinkedIn-Gameinator", "test_archive"))
 
 
 # =============================================================================
@@ -83,7 +80,6 @@ class TestArchiver:
 
 
 class TestCreateArchive:
-
     def test_create_archive(self):
         """Test that create_archive runs without error."""
         archive_instance = QueensArchiver()
@@ -92,9 +88,7 @@ class TestCreateArchive:
         localappdata: str | None = os.getenv("LOCALAPPDATA")
         assert localappdata is not None, "LOCALAPPDATA environment variable is not set."
 
-        assert os.path.exists(
-            os.path.join(localappdata, "LinkedIn-Gameinator", "Queens")
-        )
+        assert os.path.exists(os.path.join(localappdata, "LinkedIn-Gameinator", "Queens"))
 
         path = Path(
             os.path.join(
@@ -128,10 +122,7 @@ class TestCreateArchive:
         path.unlink()
 
         assert len(lines) == 5
-        assert (
-            lines[0]
-            == "Archive of the LinkedIn's game Queens on the day of test_archive"
-        )
+        assert lines[0] == "Archive of the LinkedIn's game Queens on the day of test_archive"
         assert lines[1] == "Today's grid size is 2x10."
         assert lines[2] == ""
         assert lines[3] == "B C G N O P R V W Y"

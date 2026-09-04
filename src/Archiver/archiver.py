@@ -3,7 +3,6 @@ from abc import ABC, abstractmethod
 
 
 class Archiver(ABC):
-
     def __init__(self, archive_name: str = "") -> None:
         """Initialize the Archiver class."""
         self._main_archive_path: str = ""
@@ -12,7 +11,6 @@ class Archiver(ABC):
 
         if archive_name != "":
             self._setup_game_archive()
-
 
     def _setup_archive_main_dir(self) -> None:
         """Set up the main archive directory in the user's LOCALAPPDATA folder."""

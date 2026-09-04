@@ -18,15 +18,11 @@ class QueensArchiver(Archiver):
         """Implement the game archiving logic for the Queens game."""
         grid = cast("list[list[Cell]]", args[0])
         opt_filename = (
-            cast(str, args[1])
-            if len(args) > 1
-            else cast(str, kwargs.get("opt_filename", ""))
+            cast(str, args[1]) if len(args) > 1 else cast(str, kwargs.get("opt_filename", ""))
         )
         self._archive_queens_grid(grid, opt_filename)
 
-    def _archive_queens_grid(
-        self, grid: list[list[Cell]], opt_filename: str = ""
-    ) -> None:
+    def _archive_queens_grid(self, grid: list[list[Cell]], opt_filename: str = "") -> None:
         """Archive the current state of the grid to a text file."""
         today: str = str(dt.today())
 
@@ -57,9 +53,7 @@ class QueensArchiver(Archiver):
 
         if not path.exists():
             with open(path, "w", encoding="utf-8") as f:
-                f.write(
-                    f"Archive of the LinkedIn's game Queens on the day of {filename}\n"
-                )
+                f.write(f"Archive of the LinkedIn's game Queens on the day of {filename}\n")
             return False
         else:
             print("File already exists.")

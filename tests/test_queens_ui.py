@@ -207,9 +207,7 @@ class TestConstants:
 class TestPrintGrid:
     """Tests for print_grid function."""
 
-    def test_print_grid_1x1_empty(
-        self, simple_grid_1x1: Grid, capsys: pytest.CaptureFixture[str]
-    ):
+    def test_print_grid_1x1_empty(self, simple_grid_1x1: Grid, capsys: pytest.CaptureFixture[str]):
         """Test printing a minimal 1x1 grid with empty cell."""
         print_grid(simple_grid_1x1.grid)
         captured = capsys.readouterr()
@@ -222,9 +220,7 @@ class TestPrintGrid:
         assert lines[1].startswith(" 0 ")
         assert "." in lines[1]
 
-    def test_print_grid_2x2(
-        self, simple_grid_2x2: Grid, capsys: pytest.CaptureFixture[str]
-    ):
+    def test_print_grid_2x2(self, simple_grid_2x2: Grid, capsys: pytest.CaptureFixture[str]):
         """Test printing a 2x2 grid with different colors."""
         print_grid(simple_grid_2x2.grid)
         captured = capsys.readouterr()
@@ -268,9 +264,7 @@ class TestPrintGrid:
         output = captured.out
         assert "\033[1;30;46m" in output
 
-    def test_print_grid_colors_all(
-        self, grid_all_colors: Grid, capsys: pytest.CaptureFixture[str]
-    ):
+    def test_print_grid_colors_all(self, grid_all_colors: Grid, capsys: pytest.CaptureFixture[str]):
         """Test that all supported colors produce correct ANSI codes."""
         print_grid(grid_all_colors.grid)
         captured = capsys.readouterr()
@@ -293,9 +287,7 @@ class TestPrintGrid:
             if color in [c.color for row in grid_all_colors.grid for c in row]:
                 assert code in output, f"Color code for {color} not found in output"
 
-    def test_print_grid_ansi_reset(
-        self, simple_grid_1x1: Grid, capsys: pytest.CaptureFixture[str]
-    ):
+    def test_print_grid_ansi_reset(self, simple_grid_1x1: Grid, capsys: pytest.CaptureFixture[str]):
         """Test that ANSI reset codes are present."""
         print_grid(simple_grid_1x1.grid)
         captured = capsys.readouterr()
@@ -318,9 +310,7 @@ class TestPrintGrid:
         assert " 0 " in header
         assert " 1 " in header
 
-    def test_print_grid_row_format(
-        self, simple_grid_2x2: Grid, capsys: pytest.CaptureFixture[str]
-    ):
+    def test_print_grid_row_format(self, simple_grid_2x2: Grid, capsys: pytest.CaptureFixture[str]):
         """Test that each row starts with its index."""
         print_grid(simple_grid_2x2.grid)
         captured = capsys.readouterr()
@@ -352,9 +342,7 @@ class TestPrintGrid:
         assert len(output) > 0
         assert "⟍" in output
 
-    def test_print_grid_large_grid(
-        self, big_grid: Grid, capsys: pytest.CaptureFixture[str]
-    ):
+    def test_print_grid_large_grid(self, big_grid: Grid, capsys: pytest.CaptureFixture[str]):
         """Test printing a larger grid (5x5)."""
         print_grid(big_grid.grid)
         captured = capsys.readouterr()
@@ -464,9 +452,7 @@ class TestPrintRegions:
         assert "Region 2" in output
         assert "Region 3" in output
 
-    def test_print_regions_format(
-        self, simple_grid_2x2: Grid, capsys: pytest.CaptureFixture[str]
-    ):
+    def test_print_regions_format(self, simple_grid_2x2: Grid, capsys: pytest.CaptureFixture[str]):
         """Test the format of region output."""
         regions = [region.cells for region in simple_grid_2x2.regions]
         print_regions(regions)
@@ -556,9 +542,7 @@ class TestPrintColorPalette:
 
         assert len(captured.out) > 0
 
-    def test_print_color_palette_has_ansi_codes(
-        self, capsys: pytest.CaptureFixture[str]
-    ):
+    def test_print_color_palette_has_ansi_codes(self, capsys: pytest.CaptureFixture[str]):
         """Test that print_color_palette outputs ANSI color codes."""
         print_color_palette()
         captured = capsys.readouterr()
@@ -566,9 +550,7 @@ class TestPrintColorPalette:
         output = captured.out
         assert "\033[" in output
 
-    def test_print_color_palette_covers_all_styles(
-        self, capsys: pytest.CaptureFixture[str]
-    ):
+    def test_print_color_palette_covers_all_styles(self, capsys: pytest.CaptureFixture[str]):
         """Test that both normal and bold styles are present."""
         print_color_palette()
         captured = capsys.readouterr()
@@ -577,9 +559,7 @@ class TestPrintColorPalette:
         assert "0;3" in output or "0;30" in output
         assert "1;3" in output or "1;30" in output
 
-    def test_print_color_palette_covers_fg_colors(
-        self, capsys: pytest.CaptureFixture[str]
-    ):
+    def test_print_color_palette_covers_fg_colors(self, capsys: pytest.CaptureFixture[str]):
         """Test that foreground colors 30-37 are present."""
         print_color_palette()
         captured = capsys.readouterr()
@@ -588,9 +568,7 @@ class TestPrintColorPalette:
         for fg in range(30, 38):
             assert f"{fg};4" in output, f"Foreground color {fg} not found"
 
-    def test_print_color_palette_covers_bg_colors(
-        self, capsys: pytest.CaptureFixture[str]
-    ):
+    def test_print_color_palette_covers_bg_colors(self, capsys: pytest.CaptureFixture[str]):
         """Test that background colors 40-47 are present."""
         print_color_palette()
         captured = capsys.readouterr()
@@ -650,9 +628,7 @@ class TestIntegration:
         assert "Found regions" in captured_regions.out
         assert len(grid.regions) == 3
 
-    def test_grid_with_all_methods(
-        self, grid_mixed: Grid, capsys: pytest.CaptureFixture[str]
-    ):
+    def test_grid_with_all_methods(self, grid_mixed: Grid, capsys: pytest.CaptureFixture[str]):
         """Test that all cell methods work with print_grid."""
         print_grid(grid_mixed.grid)
         captured = capsys.readouterr()
@@ -789,9 +765,7 @@ class TestIntegration:
         # Note: pourpre, rouge, blanc don't have specific ANSI codes in ui.py,
         # they will use the default \033[0m
         # So we check the ones that DO have codes
-        assert (
-            "\033[1;30;42m" in output
-        )  # vert (green) - rows 1,2 at col 4; rows 3,4 at col 4
+        assert "\033[1;30;42m" in output  # vert (green) - rows 1,2 at col 4; rows 3,4 at col 4
         assert "\033[1;30;47m" in output  # black - rows 1,2 at col 6; rows 3,4 at col 6
         assert "\033[1;30;44m" in output  # bleu (blue) - rows 3,4 at col 3
         assert "\033[1;30;40m" in output  # gris (gray) - rows 3,4 at col 5
@@ -840,6 +814,3 @@ class TestIntegration:
 
         assert "Found regions" in captured_regions.out
         assert len(grid.regions) == 10
-
-
-

@@ -4,6 +4,7 @@ EMPTY = 0
 QUEEN = 1
 BLOCKED = -1
 
+
 def print_grid(grid: list[list[Cell]]) -> None:
     """Print the grid with ANSI colors.
 
