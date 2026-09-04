@@ -102,11 +102,7 @@ def main() -> None:
         print("Resolver not yet implemented")
     else:
         print("Game not recognised")
-        driver.quit()
-
-    # For testing purpose
-    # while True:
-    #     pass
+        # driver.quit()
 
     driver.quit()
     return
