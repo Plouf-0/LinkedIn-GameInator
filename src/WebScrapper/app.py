@@ -1,5 +1,5 @@
 # WebScrapper/LinkedInWebdriver.py
-
+import os
 from collections.abc import Callable
 from typing import Any, cast
 
@@ -13,6 +13,14 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 
 def main() -> None:
+
+    localappdata: str | None = os.getenv("LOCALAPPDATA")
+    if localappdata is None:
+        raise Exception("LOCALAPPDATA environment variable not found")
+
+    if not os.path.exists(localappdata + "/LinkedIn-Gameinator"):
+        os.makedirs(localappdata + "/LinkedIn-Gameinator")
+
     login_url = "https://www.linkedin.com/uas/login?session_redirect=%2Fgames%2F&fromSignIn=true&trk=games_nav-header-signin"
 
     # DONE Open LinkedIn login window with redirection
