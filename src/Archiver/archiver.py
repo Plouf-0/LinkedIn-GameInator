@@ -1,7 +1,8 @@
 import os
+from abc import ABC, abstractmethod
 
 
-class Archiver:
+class Archiver(ABC):
 
     def __init__(self, archive_name: str = "") -> None:
         """Initialize the Archiver class."""
@@ -36,7 +37,6 @@ class Archiver:
         if not os.path.exists(self._archive_game_path):
             os.makedirs(self._archive_game_path)
 
-    def archive_game(self) -> None:
-        """Placeholder for the game archiving logic. This method should implement the algorithm
-        to archive the grid based each of the game."""
-        raise NotImplementedError
+    @abstractmethod
+    def archive_game(self, *args: object, **kwargs: object) -> None:
+        """Implement the game archiving logic to archive the grid based on the game."""
