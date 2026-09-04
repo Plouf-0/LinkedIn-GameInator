@@ -1,3 +1,4 @@
+import os
 from datetime import date as dt
 from pathlib import Path
 
@@ -7,7 +8,7 @@ EMPTY = 0
 QUEEN = 1
 BLOCKED = -1
 
-ARCHIVE_PATH = Path(__file__).parent / "Archive"
+ARCHIVE_PATH = os.path.join("Queens", "archive")
 
 
 def print_grid(grid: list[list[Cell]]) -> None:
@@ -71,12 +72,12 @@ def print_color_palette() -> None:
     return
 
 
-def find_or_create_archive(filename: str) -> bool:
-    """Find the archive file with the given name in the current directory.
+def create_archive(filename: str) -> bool:
+    """Create archive if doesn't exists.
 
     Output: True if the file already exists, False if it was created.
     """
-    path = Path(f"{ARCHIVE_PATH}/{filename}_Queens.txt")
+    path = Path(os.path.join(ARCHIVE_PATH, "Queens" f"{filename}_Queens.txt"))
 
     if not path.exists():
         with open(path, "w", encoding="utf-8") as f:
@@ -93,11 +94,11 @@ def achive_queens_grid(grid: list[list[Cell]], opt_filename: str = "") -> None:
 
     if opt_filename == "":
         path = Path(f"{ARCHIVE_PATH}/{today}_Queens.txt")
-        if find_or_create_archive(today):
+        if create_archive(today):
             return
     else:
         path = Path(f"{ARCHIVE_PATH}/{opt_filename}_Queens.txt")
-        if find_or_create_archive(opt_filename):
+        if create_archive(opt_filename):
             return
 
     with open(path, "a", encoding="utf-8") as f:
