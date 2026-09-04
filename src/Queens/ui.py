@@ -1,15 +1,8 @@
-import os
-from datetime import date as dt
-from pathlib import Path
-
-from Queens.queens_grid import Cell, convert_color
+from Queens.queens_grid import Cell
 
 EMPTY = 0
 QUEEN = 1
 BLOCKED = -1
-
-ARCHIVE_PATH = os.path.join("Queens", "archive")
-
 
 def print_grid(grid: list[list[Cell]]) -> None:
     """Print the grid with ANSI colors.
@@ -69,43 +62,4 @@ def print_color_palette() -> None:
                 print(f"\033[{code}m {code} \033[0m", end=" ")
             print()  # Newline after each row
         print()  # Extra newline between normal and bold
-    return
-
-
-def create_archive(filename: str) -> bool:
-    """Create archive if doesn't exists.
-
-    Output: True if the file already exists, False if it was created.
-    """
-    path = Path(os.path.join(ARCHIVE_PATH, "Queens" f"{filename}_Queens.txt"))
-
-    if not path.exists():
-        with open(path, "w", encoding="utf-8") as f:
-            f.write(f"Archive of the LinkedIn's game Queens on the day of {filename}\n")
-        return False
-    else:
-        print("File already exists.")
-        return True
-
-
-def achive_queens_grid(grid: list[list[Cell]], opt_filename: str = "") -> None:
-    """Archive the current state of the grid to a text file."""
-    today: str = str(dt.today())
-
-    if opt_filename == "":
-        path = Path(f"{ARCHIVE_PATH}/{today}_Queens.txt")
-        if create_archive(today):
-            return
-    else:
-        path = Path(f"{ARCHIVE_PATH}/{opt_filename}_Queens.txt")
-        if create_archive(opt_filename):
-            return
-
-    with open(path, "a", encoding="utf-8") as f:
-        f.write(f"Today's grid size is {len(grid)}x{len(grid[0])}.\n\n")
-        for r in grid:
-            row: str = ""
-            for cell in r:
-                row += convert_color(cell.color) + " "
-            f.write(row.strip() + "\n")
     return
