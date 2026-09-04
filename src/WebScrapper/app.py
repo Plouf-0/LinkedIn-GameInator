@@ -6,7 +6,6 @@ from typing import Any, cast
 from selenium import webdriver
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
-from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
@@ -25,7 +24,7 @@ def main() -> None:
     login_url = "https://www.linkedin.com/uas/login?session_redirect=%2Fgames%2F&fromSignIn=true&trk=games_nav-header-signin"
 
     # DONE Open LinkedIn login window with redirection
-    driver: WebDriver = webdriver.Firefox()
+    driver: webdriver.Firefox = webdriver.Firefox()
     driver.get(login_url)
     assert "LinkedIn" in driver.title
 
