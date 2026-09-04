@@ -12,7 +12,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 
 from Queens.brute_force_resolver import BruteForceResolver, Cell, Grid
-from Queens.ui import achive_queens_grid, print_grid
+from Queens.queens_archiver import QueensArchiver
+from Queens.ui import print_grid
 
 # The time to wait between placing queens in the HTML, in seconds.
 # Adjust as needed.
@@ -52,7 +53,7 @@ def create_grid_from_html(driver: webdriver.Firefox) -> list[list[Cell]]:
             grid[row].append(Cell(row, column, color))
             grid[row].sort(key=lambda c: c.col)  # type: ignore
 
-    achive_queens_grid(grid)
+    QueensArchiver().archive_game(grid)
 
     return grid
 
