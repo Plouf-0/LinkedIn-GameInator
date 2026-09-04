@@ -3,13 +3,14 @@ import os
 from collections.abc import Callable
 from typing import Any, cast
 
-from WebScrapper.Queens_api import queens_api
 from selenium import webdriver
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
+
+from WebScrapper.Queens_api import queens_api
 
 
 def main() -> None:
