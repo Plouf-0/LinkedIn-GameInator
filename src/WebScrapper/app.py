@@ -3,7 +3,7 @@ import os
 from collections.abc import Callable
 from typing import Any, cast
 
-from Queens_api import queens_api
+from WebScrapper.Queens_api import queens_api
 from selenium import webdriver
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
