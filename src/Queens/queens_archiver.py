@@ -8,17 +8,25 @@ from Queens.queens_grid import Cell, convert_color
 
 
 class QueensArchiver(Archiver):
-    def __init__(self, ) -> None:
+    def __init__(
+        self,
+    ) -> None:
         """Initialize the QueensArchiver class."""
         super().__init__("Queens")
 
     def archive_game(self, *args: object, **kwargs: object) -> None:
         """Implement the game archiving logic for the Queens game."""
         grid = cast("list[list[Cell]]", args[0])
-        opt_filename = cast(str, args[1]) if len(args) > 1 else cast(str, kwargs.get("opt_filename", ""))
+        opt_filename = (
+            cast(str, args[1])
+            if len(args) > 1
+            else cast(str, kwargs.get("opt_filename", ""))
+        )
         self._archive_queens_grid(grid, opt_filename)
 
-    def _archive_queens_grid(self, grid: list[list[Cell]], opt_filename: str = "") -> None:
+    def _archive_queens_grid(
+        self, grid: list[list[Cell]], opt_filename: str = ""
+    ) -> None:
         """Archive the current state of the grid to a text file."""
         today: str = str(dt.today())
 

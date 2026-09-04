@@ -11,11 +11,9 @@ Comprehensive test suite covering:
 
 # pyright: reportPrivateUsage=false
 
-from pathlib import Path
-import warnings
 import os
-
-import pytest
+import warnings
+from pathlib import Path
 
 from Archiver import Archiver
 from Queens.queens_archiver import QueensArchiver
@@ -33,6 +31,7 @@ class _ConcreteArchiver(Archiver):
 # TOTEST Test setup_archive_main_dir
 # =============================================================================
 
+
 class TestArchiver:
 
     def test_setup_archive_main_dir(self):
@@ -40,11 +39,15 @@ class TestArchiver:
         localappdata: str | None = os.getenv("LOCALAPPDATA")
 
         if localappdata is None:
-            warnings.warn("LOCALAPPDATA environment variable not found. Skipping test.")
+            warnings.warn(
+                "LOCALAPPDATA environment variable not found. Skipping test.",
+                stacklevel=2,
+            )
             return
 
         if os.path.exists(localappdata + "/LinkedIn-Gameinator"):
-            warnings.warn("Directory already exists. Skipping test.")
+            warnings.warn("Directory already exists. Skipping test.", stacklevel=2)
+            return
 
         else:
             archiver_instance = _ConcreteArchiver()
@@ -59,7 +62,10 @@ class TestArchiver:
         localappdata: str | None = os.getenv("LOCALAPPDATA")
 
         if localappdata is None:
-            warnings.warn("LOCALAPPDATA environment variable not found. Skipping test.")
+            warnings.warn(
+                "LOCALAPPDATA environment variable not found. Skipping test.",
+                stacklevel=2,
+            )
             return
 
         archiver_instance = _ConcreteArchiver()
@@ -69,6 +75,7 @@ class TestArchiver:
         assert os.path.exists(
             os.path.join(localappdata, "LinkedIn-Gameinator", "test_archive")
         )
+
 
 # =============================================================================
 # Test Create archive
