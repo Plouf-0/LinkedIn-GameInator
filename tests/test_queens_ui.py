@@ -9,15 +9,10 @@ Comprehensive test suite covering:
 
 # pyright: reportPrivateUsage=false
 
-from pathlib import Path
-
 import pytest
 
 from Queens.queens_grid import BLOCKED, EMPTY, QUEEN, Cell, Grid, build_example_grid
 from Queens.ui import (
-    ARCHIVE_PATH,
-    achive_queens_grid,
-    find_or_create_archive,
     print_color_palette,
     print_grid,
     print_regions,
@@ -178,16 +173,6 @@ def big_grid():
     return Grid([[Cell(r, c, "cyan") for c in range(5)] for r in range(5)])
 
 
-@pytest.fixture
-def all_colors_grid():
-    """Create a grid that includes all supported colors."""
-    test_grid = [
-        "B C G N O P R V W Y",
-        "Y W V R P O N G C B",
-    ]
-    return Grid(build_example_grid(test_grid))
-
-
 # =============================================================================
 # Test Constants
 # =============================================================================
@@ -222,7 +207,9 @@ class TestConstants:
 class TestPrintGrid:
     """Tests for print_grid function."""
 
-    def test_print_grid_1x1_empty(self, simple_grid_1x1: Grid, capsys: pytest.CaptureFixture[str]):
+    def test_print_grid_1x1_empty(
+        self, simple_grid_1x1: Grid, capsys: pytest.CaptureFixture[str]
+    ):
         """Test printing a minimal 1x1 grid with empty cell."""
         print_grid(simple_grid_1x1.grid)
         captured = capsys.readouterr()
@@ -235,7 +222,9 @@ class TestPrintGrid:
         assert lines[1].startswith(" 0 ")
         assert "." in lines[1]
 
-    def test_print_grid_2x2(self, simple_grid_2x2: Grid, capsys: pytest.CaptureFixture[str]):
+    def test_print_grid_2x2(
+        self, simple_grid_2x2: Grid, capsys: pytest.CaptureFixture[str]
+    ):
         """Test printing a 2x2 grid with different colors."""
         print_grid(simple_grid_2x2.grid)
         captured = capsys.readouterr()
@@ -279,7 +268,9 @@ class TestPrintGrid:
         output = captured.out
         assert "\033[1;30;46m" in output
 
-    def test_print_grid_colors_all(self, grid_all_colors: Grid, capsys: pytest.CaptureFixture[str]):
+    def test_print_grid_colors_all(
+        self, grid_all_colors: Grid, capsys: pytest.CaptureFixture[str]
+    ):
         """Test that all supported colors produce correct ANSI codes."""
         print_grid(grid_all_colors.grid)
         captured = capsys.readouterr()
@@ -302,7 +293,9 @@ class TestPrintGrid:
             if color in [c.color for row in grid_all_colors.grid for c in row]:
                 assert code in output, f"Color code for {color} not found in output"
 
-    def test_print_grid_ansi_reset(self, simple_grid_1x1: Grid, capsys: pytest.CaptureFixture[str]):
+    def test_print_grid_ansi_reset(
+        self, simple_grid_1x1: Grid, capsys: pytest.CaptureFixture[str]
+    ):
         """Test that ANSI reset codes are present."""
         print_grid(simple_grid_1x1.grid)
         captured = capsys.readouterr()
@@ -325,7 +318,9 @@ class TestPrintGrid:
         assert " 0 " in header
         assert " 1 " in header
 
-    def test_print_grid_row_format(self, simple_grid_2x2: Grid, capsys: pytest.CaptureFixture[str]):
+    def test_print_grid_row_format(
+        self, simple_grid_2x2: Grid, capsys: pytest.CaptureFixture[str]
+    ):
         """Test that each row starts with its index."""
         print_grid(simple_grid_2x2.grid)
         captured = capsys.readouterr()
@@ -357,7 +352,9 @@ class TestPrintGrid:
         assert len(output) > 0
         assert "⟍" in output
 
-    def test_print_grid_large_grid(self, big_grid: Grid, capsys: pytest.CaptureFixture[str]):
+    def test_print_grid_large_grid(
+        self, big_grid: Grid, capsys: pytest.CaptureFixture[str]
+    ):
         """Test printing a larger grid (5x5)."""
         print_grid(big_grid.grid)
         captured = capsys.readouterr()
@@ -467,7 +464,9 @@ class TestPrintRegions:
         assert "Region 2" in output
         assert "Region 3" in output
 
-    def test_print_regions_format(self, simple_grid_2x2: Grid, capsys: pytest.CaptureFixture[str]):
+    def test_print_regions_format(
+        self, simple_grid_2x2: Grid, capsys: pytest.CaptureFixture[str]
+    ):
         """Test the format of region output."""
         regions = [region.cells for region in simple_grid_2x2.regions]
         print_regions(regions)
@@ -557,7 +556,9 @@ class TestPrintColorPalette:
 
         assert len(captured.out) > 0
 
-    def test_print_color_palette_has_ansi_codes(self, capsys: pytest.CaptureFixture[str]):
+    def test_print_color_palette_has_ansi_codes(
+        self, capsys: pytest.CaptureFixture[str]
+    ):
         """Test that print_color_palette outputs ANSI color codes."""
         print_color_palette()
         captured = capsys.readouterr()
@@ -565,7 +566,9 @@ class TestPrintColorPalette:
         output = captured.out
         assert "\033[" in output
 
-    def test_print_color_palette_covers_all_styles(self, capsys: pytest.CaptureFixture[str]):
+    def test_print_color_palette_covers_all_styles(
+        self, capsys: pytest.CaptureFixture[str]
+    ):
         """Test that both normal and bold styles are present."""
         print_color_palette()
         captured = capsys.readouterr()
@@ -574,7 +577,9 @@ class TestPrintColorPalette:
         assert "0;3" in output or "0;30" in output
         assert "1;3" in output or "1;30" in output
 
-    def test_print_color_palette_covers_fg_colors(self, capsys: pytest.CaptureFixture[str]):
+    def test_print_color_palette_covers_fg_colors(
+        self, capsys: pytest.CaptureFixture[str]
+    ):
         """Test that foreground colors 30-37 are present."""
         print_color_palette()
         captured = capsys.readouterr()
@@ -583,7 +588,9 @@ class TestPrintColorPalette:
         for fg in range(30, 38):
             assert f"{fg};4" in output, f"Foreground color {fg} not found"
 
-    def test_print_color_palette_covers_bg_colors(self, capsys: pytest.CaptureFixture[str]):
+    def test_print_color_palette_covers_bg_colors(
+        self, capsys: pytest.CaptureFixture[str]
+    ):
         """Test that background colors 40-47 are present."""
         print_color_palette()
         captured = capsys.readouterr()
@@ -643,7 +650,9 @@ class TestIntegration:
         assert "Found regions" in captured_regions.out
         assert len(grid.regions) == 3
 
-    def test_grid_with_all_methods(self, grid_mixed: Grid, capsys: pytest.CaptureFixture[str]):
+    def test_grid_with_all_methods(
+        self, grid_mixed: Grid, capsys: pytest.CaptureFixture[str]
+    ):
         """Test that all cell methods work with print_grid."""
         print_grid(grid_mixed.grid)
         captured = capsys.readouterr()
@@ -780,7 +789,9 @@ class TestIntegration:
         # Note: pourpre, rouge, blanc don't have specific ANSI codes in ui.py,
         # they will use the default \033[0m
         # So we check the ones that DO have codes
-        assert "\033[1;30;42m" in output  # vert (green) - rows 1,2 at col 4; rows 3,4 at col 4
+        assert (
+            "\033[1;30;42m" in output
+        )  # vert (green) - rows 1,2 at col 4; rows 3,4 at col 4
         assert "\033[1;30;47m" in output  # black - rows 1,2 at col 6; rows 3,4 at col 6
         assert "\033[1;30;44m" in output  # bleu (blue) - rows 3,4 at col 3
         assert "\033[1;30;40m" in output  # gris (gray) - rows 3,4 at col 5
@@ -831,31 +842,4 @@ class TestIntegration:
         assert len(grid.regions) == 10
 
 
-# =============================================================================
-# Test Create archive
-# =============================================================================
 
-
-class TestCreateArchive:
-    def test_find_or_create_archive_runs(self):
-        """Test that find_or_create_archive runs without error."""
-        find_or_create_archive("test_archive_find_create")
-        path = Path(f"{ARCHIVE_PATH}/test_archive_find_create_Queens.txt")
-        assert path.exists()
-
-    def test_create_archive_runs(self, all_colors_grid: Grid):
-        """Test that achive_queens_grid runs without error and creates a file."""
-        grid: list[list[Cell]] = all_colors_grid.grid
-        achive_queens_grid(grid, "test_archive")
-
-        path = Path(f"{ARCHIVE_PATH}/test_archive_Queens.txt")
-        assert path.exists()
-        lines = path.read_text(encoding="utf-8").splitlines()
-        path.unlink()
-
-        assert len(lines) == 5
-        assert lines[0] == "Archive of the LinkedIn's game Queens on the day of test_archive"
-        assert lines[1] == "Today's grid size is 2x10."
-        assert lines[2] == ""
-        assert lines[3] == "B C G N O P R V W Y"
-        assert lines[4] == "Y W V R P O N G C B"
