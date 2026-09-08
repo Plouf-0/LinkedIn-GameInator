@@ -38,9 +38,7 @@ def main() -> None:
         # Hide alternate-signin-container
         try:
             WebDriverWait(driver, time_to_wait_page_loaded).until(
-                EC.presence_of_element_located(
-                    (By.CLASS_NAME, "alternate-signin-container")
-                )
+                EC.presence_of_element_located((By.CLASS_NAME, "alternate-signin-container"))
             )
         except TimeoutException as e:
             raise Exception("alternate-signin-container not found") from e
@@ -58,8 +56,10 @@ def main() -> None:
         except TimeoutException as e:
             raise Exception("credential_picker_container not found") from e
         else:
-            exec_script("document.getElementById('credential_picker_container') \
-                .setAttribute('style', 'visibility: hidden');")  # type: ignore
+            exec_script(
+                "document.getElementById('credential_picker_container') \
+                .setAttribute('style', 'visibility: hidden');"
+            )  # type: ignore
     except Exception as e:
         print(e)
         print("Problème pour cacher les logins google")
@@ -81,7 +81,6 @@ def main() -> None:
 
     # DONE Detect which game is lunched and if game not resolved, call the game's resolver
     while True:
-
         print("Now select a game to complete")
 
         time_to_wait_game_selected = 600  # 600s = 10 mins

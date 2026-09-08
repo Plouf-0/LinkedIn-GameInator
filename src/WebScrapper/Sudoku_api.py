@@ -33,9 +33,7 @@ def create_grid_from_html(driver: webdriver.Firefox) -> list[list[int]]:
 
     sudoku_grid_div: WebElement = driver.find_element(By.CLASS_NAME, "sudoku-grid")
     sudoku_grid_div_size: str = sudoku_grid_div.get_attribute("style")  # type: ignore
-    cols_total: int = int(
-        sudoku_grid_div_size.split("--cols: ")[1].split()[0].rstrip(";")
-    )
+    cols_total: int = int(sudoku_grid_div_size.split("--cols: ")[1].split()[0].rstrip(";"))
 
     cells: list[WebElement] = driver.find_elements(By.CLASS_NAME, "sudoku-cell")
     cell: WebElement
