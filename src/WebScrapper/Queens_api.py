@@ -29,8 +29,6 @@ def queens_api(driver: webdriver.Firefox) -> None:
     print_grid(grid.grid)
     put_queens_in_html(driver, grid)
 
-    while True:
-        pass
     return
 
 
