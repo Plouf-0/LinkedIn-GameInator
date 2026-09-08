@@ -11,6 +11,8 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 from WebScrapper.Queens_api import queens_api
 
+from WebScrapper.Sudoku_api import sudoku_api
+
 
 def main() -> None:
 
@@ -37,7 +39,9 @@ def main() -> None:
         # Hide alternate-signin-container
         try:
             WebDriverWait(driver, time_to_wait_page_loaded).until(
-                EC.presence_of_element_located((By.CLASS_NAME, "alternate-signin-container"))
+                EC.presence_of_element_located(
+                    (By.CLASS_NAME, "alternate-signin-container")
+                )
             )
         except TimeoutException as e:
             raise Exception("alternate-signin-container not found") from e
@@ -55,10 +59,8 @@ def main() -> None:
         except TimeoutException as e:
             raise Exception("credential_picker_container not found") from e
         else:
-            exec_script(  # type: ignore
-                "document.getElementById('credential_picker_container') \
-                .setAttribute('style', 'visibility: hidden');"
-            )
+            exec_script("document.getElementById('credential_picker_container') \
+                .setAttribute('style', 'visibility: hidden');")  # type: ignore
     except Exception as e:
         print(e)
         print("Problème pour cacher les logins google")
@@ -79,41 +81,39 @@ def main() -> None:
     print("User logged in")
 
     # DONE Detect which game is lunched and if game not resolved, call the game's resolver
-    print("Now select a game to complete")
+    while True:
 
-    time_to_wait_game_selected = 600  # 600s = 10 mins
-    try:
-        WebDriverWait(driver, time_to_wait_game_selected).until(
-            EC.presence_of_element_located((By.ID, "clock-small"))
-        )
-    except TimeoutException:
-        print("User did not select a game")
-        driver.close()
+        print("Now select a game to complete")
 
-    print("game selected: " + driver.title)
+        time_to_wait_game_selected = 600  # 600s = 10 mins
+        try:
+            WebDriverWait(driver, time_to_wait_game_selected).until(
+                EC.presence_of_element_located((By.ID, "clock-small"))
+            )
+        except TimeoutException:
+            print("User did not select a game")
+            driver.close()
 
-    if "Patches" in driver.title:
-        print("Resolver not yet implemented")
-    elif "Zip" in driver.title:
-        print("Resolver not yet implemented")
-    elif "Mini Sudoku" in driver.title:
-        print("Resolver not yet implemented")
-    elif "Tango" in driver.title:
-        print("Resolver not yet implemented")
-    elif "Queens" in driver.title:
-        queens_api(driver)
-    elif "Crossclimb" in driver.title:
-        print("Resolver not yet implemented")
-    elif "Pinpoint" in driver.title:
-        print("Resolver not yet implemented")
-    elif "Wend" in driver.title:
-        print("Resolver not yet implemented")
-    else:
-        print("Game not recognised")
-        # driver.quit()
+        print("game selected: " + driver.title)
 
-    driver.quit()
-    return
+        if "Patches" in driver.title:
+            print("Resolver not yet implemented")
+        elif "Zip" in driver.title:
+            print("Resolver not yet implemented")
+        elif "Mini Sudoku" in driver.title:
+            sudoku_api(driver)
+        elif "Tango" in driver.title:
+            print("Resolver not yet implemented")
+        elif "Queens" in driver.title:
+            queens_api(driver)
+        elif "Crossclimb" in driver.title:
+            print("Resolver not yet implemented")
+        elif "Pinpoint" in driver.title:
+            print("Resolver not yet implemented")
+        elif "Wend" in driver.title:
+            print("Resolver not yet implemented")
+        else:
+            print("Game not recognised")
 
 
 if __name__ == "__main__":
