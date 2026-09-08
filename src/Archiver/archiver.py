@@ -1,5 +1,15 @@
 import os
+import sys
 from abc import ABC, abstractmethod
+
+
+def get_app_data_dir() -> str:
+    """Return the per-user application data directory for the current OS."""
+    if sys.platform == "win32":
+        return os.getenv("LOCALAPPDATA") or os.path.expanduser(r"~\AppData\Local")
+    if sys.platform == "darwin":
+        return os.path.expanduser("~/Library/Application Support")
+    return os.getenv("XDG_DATA_HOME") or os.path.expanduser("~/.local/share")
 
 
 class Archiver(ABC):
@@ -13,13 +23,9 @@ class Archiver(ABC):
             self._setup_game_archive()
 
     def _setup_archive_main_dir(self) -> None:
-        """Set up the main archive directory in the user's LOCALAPPDATA folder."""
+        """Set up the main archive directory in the user's app data folder."""
 
-        localappdata: str | None = os.getenv("LOCALAPPDATA")
-        if localappdata is None:
-            raise Exception("LOCALAPPDATA environment variable not found")
-
-        self._main_archive_path = os.path.join(localappdata, "LinkedIn-Gameinator")
+        self._main_archive_path = os.path.join(get_app_data_dir(), "LinkedIn-Gameinator")
 
         if not os.path.exists(self._main_archive_path):
             os.makedirs(self._main_archive_path)

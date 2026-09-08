@@ -9,18 +9,16 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
+from Archiver.archiver import get_app_data_dir
 from WebScrapper.Queens_api import queens_api
 from WebScrapper.Sudoku_api import sudoku_api
 
 
 def main() -> None:
 
-    localappdata: str | None = os.getenv("LOCALAPPDATA")
-    if localappdata is None:
-        raise Exception("LOCALAPPDATA environment variable not found")
-
-    if not os.path.exists(localappdata + "/LinkedIn-Gameinator"):
-        os.makedirs(localappdata + "/LinkedIn-Gameinator")
+    app_data_dir = os.path.join(get_app_data_dir(), "LinkedIn-Gameinator")
+    if not os.path.exists(app_data_dir):
+        os.makedirs(app_data_dir)
 
     login_url = "https://www.linkedin.com/uas/login?session_redirect=%2Fgames%2F&fromSignIn=true&trk=games_nav-header-signin"
 

@@ -12,10 +12,10 @@ Comprehensive test suite covering:
 # pyright: reportPrivateUsage=false
 
 import os
-import warnings
 from pathlib import Path
 
 from Archiver import Archiver
+from Archiver.archiver import get_app_data_dir
 from Queens.queens_archiver import QueensArchiver
 from Queens.queens_grid import Cell, Grid
 
@@ -35,43 +35,24 @@ class _ConcreteArchiver(Archiver):
 class TestArchiver:
     def test_setup_archive_main_dir(self):
         """Test setup_archive_main_dir"""
-        localappdata: str | None = os.getenv("LOCALAPPDATA")
+        app_data_dir = get_app_data_dir()
 
-        if localappdata is None:
-            warnings.warn(
-                "LOCALAPPDATA environment variable not found. Skipping test.",
-                stacklevel=2,
-            )
-            return
-
-        if os.path.exists(localappdata + "/LinkedIn-Gameinator"):
-            warnings.warn("Directory already exists. Skipping test.", stacklevel=2)
-            return
-
-        else:
-            archiver_instance = _ConcreteArchiver()
-            archiver_instance._setup_archive_main_dir()
-            assert archiver_instance._main_archive_path == os.path.join(
-                localappdata, "LinkedIn-Gameinator"
-            )
-            assert os.path.exists(os.path.join(localappdata, "LinkedIn-Gameinator"))
+        archiver_instance = _ConcreteArchiver()
+        archiver_instance._setup_archive_main_dir()
+        assert archiver_instance._main_archive_path == os.path.join(
+            app_data_dir, "LinkedIn-Gameinator"
+        )
+        assert os.path.exists(os.path.join(app_data_dir, "LinkedIn-Gameinator"))
 
     def test_setup_game_archive(self):
         """Test setup_game_archive"""
-        localappdata: str | None = os.getenv("LOCALAPPDATA")
-
-        if localappdata is None:
-            warnings.warn(
-                "LOCALAPPDATA environment variable not found. Skipping test.",
-                stacklevel=2,
-            )
-            return
+        app_data_dir = get_app_data_dir()
 
         archiver_instance = _ConcreteArchiver()
         archiver_instance._archive_name = "test_archive"
         archiver_instance._setup_game_archive()
 
-        assert os.path.exists(os.path.join(localappdata, "LinkedIn-Gameinator", "test_archive"))
+        assert os.path.exists(os.path.join(app_data_dir, "LinkedIn-Gameinator", "test_archive"))
 
 
 # =============================================================================
@@ -85,14 +66,12 @@ class TestCreateArchive:
         archive_instance = QueensArchiver()
         archive_instance._create_archive("test_archive_find_create")
 
-        localappdata: str | None = os.getenv("LOCALAPPDATA")
-        assert localappdata is not None, "LOCALAPPDATA environment variable is not set."
-
-        assert os.path.exists(os.path.join(localappdata, "LinkedIn-Gameinator", "Queens"))
+        app_data_dir = get_app_data_dir()
+        assert os.path.exists(os.path.join(app_data_dir, "LinkedIn-Gameinator", "Queens"))
 
         path = Path(
             os.path.join(
-                localappdata,
+                app_data_dir,
                 "LinkedIn-Gameinator",
                 "Queens",
                 "test_archive_find_create_Queens.txt",
@@ -106,12 +85,11 @@ class TestCreateArchive:
         archive_instance = QueensArchiver()
         archive_instance._archive_queens_grid(grid, "test_archive")
 
-        localappdata: str | None = os.getenv("LOCALAPPDATA")
-        assert localappdata is not None, "LOCALAPPDATA environment variable is not set."
+        app_data_dir = get_app_data_dir()
 
         path = Path(
             os.path.join(
-                localappdata,
+                app_data_dir,
                 "LinkedIn-Gameinator",
                 "Queens",
                 "test_archive_Queens.txt",
