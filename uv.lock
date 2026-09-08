@@ -372,6 +372,7 @@ dependencies = [
     { name = "pycparser" },
     { name = "pygments" },
     { name = "pysocks" },
+    { name = "pyswip" },
     { name = "pytest" },
     { name = "pytest-cov" },
     { name = "requests" },
@@ -417,6 +418,7 @@ requires-dist = [
     { name = "pycparser", specifier = "==3.0" },
     { name = "pygments", specifier = "==2.20.0" },
     { name = "pysocks", specifier = "==1.7.1" },
+    { name = "pyswip", specifier = ">=0.3.3" },
     { name = "pytest", specifier = "==9.0.3" },
     { name = "pytest-cov", specifier = "==7.1.0" },
     { name = "requests", specifier = "==2.34.2" },
@@ -655,6 +657,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/bd/11/293dd436aea955d45fc4e8a35b6ae7270f5b8e00b53cf6c024c83b657a11/PySocks-1.7.1.tar.gz", hash = "sha256:3f8804571ebe159c380ac6de37643bb4685970655d3bba243530d6558b799aa0", size = 284429, upload-time = "2019-09-20T02:07:35.714Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/8d/59/b4572118e098ac8e46e399a1dd0f2d85403ce8bbaad9ec79373ed6badaf9/PySocks-1.7.1-py3-none-any.whl", hash = "sha256:2725bd0a9925919b9b51739eea5f9e2bae91e83288108a9ad338b2e3a4435ee5", size = 16725, upload-time = "2019-09-20T02:06:22.938Z" },
+]
+
+[[package]]
+name = "pyswip"
+version = "0.3.3"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/ff/75/96b326387af00edd34c7cca121ce98c10062d7b8dc5ec73324727997f678/pyswip-0.3.3.tar.gz", hash = "sha256:745cc6d86046a4cf9ba775a76f00d97f7d9129f7517515228391d7399bc4fe3d", size = 35963, upload-time = "2025-06-23T00:07:11.433Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b5/2b/c3bfc5a53714f7fb1b092aadb95277f133ce8c605f411f8888ca7ba340dd/pyswip-0.3.3-py3-none-any.whl", hash = "sha256:abddc4729917e3631e4a516e16211cbee93d4b701700eb116d6c3e8228ec3052", size = 36095, upload-time = "2025-06-23T00:07:09.282Z" },
 ]
 
 [[package]]

@@ -23,6 +23,7 @@ dependencies = [
     "pycparser==3.0",
     "pygments==2.20.0",
     "pysocks==1.7.1",
+    "pyswip>=0.3.3",
     "pytest==9.0.3",
     "pytest-cov==7.1.0",
     "requests==2.34.2",
