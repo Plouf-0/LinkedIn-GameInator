@@ -8,7 +8,7 @@ def _is_valid_solution(grid: list[list[int]], rows_per_area: int) -> bool:
     cols_per_area = 3
 
     rows_ok = all(sorted(row) == list(range(1, size + 1)) for row in grid)
-    cols_ok = all(sorted(col) == list(range(1, size + 1)) for col in zip(*grid))
+    cols_ok = all(sorted(col) == list(range(1, size + 1)) for col in zip(*grid, strict=True))
     boxes_ok = all(
         sorted(
             grid[box_row + r][box_col + c]

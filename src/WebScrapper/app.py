@@ -10,7 +10,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
 from WebScrapper.Queens_api import queens_api
-
 from WebScrapper.Sudoku_api import sudoku_api
 
 
