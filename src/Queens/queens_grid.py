@@ -29,7 +29,6 @@ COLORS = {
 COLOR_TO_INITIAL = {color: initial for initial, colors in COLORS.items() for color in colors}
 
 
-# DONE
 @dataclass
 class Cell:
     """Represents a grid cell with coordinates, color, and occupancy state.
@@ -71,7 +70,6 @@ class Cell:
         return f"Cell({self.row},{self.col},{self.color},{self.value})"
 
 
-# DONE
 class Grid:
     """Represents a grid of colored regions and supports queen placement and blocking operations."""
 
@@ -127,7 +125,6 @@ class Grid:
     def _get_column(self, col: int) -> list[Cell]:
         return [self.grid[r][col] for r in range(len(self.grid))]
 
-    # DONE
     def _setup_regions(self) -> list[Grid.Region]:
         """Identify unique colors in the grid and group cells into regions based on their color"""
         regions: list[Grid.Region] = []
@@ -141,7 +138,6 @@ class Grid:
                 region.cells.append(cell)
         return regions
 
-    # DONE
     def get_region_by_cell(self, cell: Cell) -> Grid.Region:
         """Find the region that contains the given cell.
 
@@ -152,14 +148,12 @@ class Grid:
             raise ValueError(f"Cell {cell} not found in any region")
         return region
 
-    # DONE
     def block_region(self, targetCell: Cell) -> None:
         """Claim the region of the target cell"""
         region: Grid.Region = self.get_region_by_cell(targetCell)
         region.block_all_cells()
         return
 
-    # DONE
     def block_cell_by_coord(self, r: int, c: int) -> None:
         """Block the cell at (r, c) if it's within bounds and not already a queen"""
         if 0 <= r < len(self.grid) and 0 <= c < len(self.grid[0]):
@@ -168,7 +162,6 @@ class Grid:
                 cell.block_cell()
         return
 
-    # DONE
     def queenify_cell(self, cell: Cell) -> None:
         """Claim the cell as a queen and block all cells in the same row, column, and diagonals"""
         cell.make_queen()
@@ -184,7 +177,6 @@ class Grid:
         self.block_region(cell)
         return
 
-    # DONE
     def is_grid_finished(self) -> bool:
         """Check if all regions in the grid are completed (i.e., no empty cells remain).
 
@@ -244,7 +236,6 @@ def convert_color(value: str) -> str:
     return initial if initial else ""
 
 
-# DONE
 def build_example_grid(testGrid: list[str]) -> list[list[Cell]]:
     """Build a grid of Cell objects from a list of strings representing the grid layout."""
 

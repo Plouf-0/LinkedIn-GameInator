@@ -170,14 +170,13 @@ def star_grid():
 
 
 # =============================================================================
-# TOTEST Test _block_row
+# Test _block_row
 # =============================================================================
 
 
 class TestBlockRow:
     """Tests for _block_row method."""
 
-    # DONE
     def test_block_row(self, three_squares_grid: BruteForceResolver):
         """Test _block_row block row"""
         left = three_squares_grid[1, 1]
@@ -192,7 +191,6 @@ class TestBlockRow:
         assert three_squares_grid[1, 8].is_blocked()
         assert three_squares_grid[1, 9].is_blocked()
 
-    # DONE
     def test_block_row_block_two_sides(self, three_squares_grid: BruteForceResolver):
         """Test _block_row block the two upper and under cells on a 2 cell block."""
         left = three_squares_grid[1, 1]
@@ -203,7 +201,6 @@ class TestBlockRow:
         assert three_squares_grid[2, 1].is_blocked()
         assert three_squares_grid[2, 2].is_blocked()
 
-    # DONE
     def test_block_row_block_three_sides(self, three_squares_grid: BruteForceResolver):
         """Test _block_row block the two upper and under cells on a 2 cell block."""
         left = three_squares_grid[1, 4]
@@ -217,7 +214,6 @@ class TestBlockRow:
         assert three_squares_grid[2, 5].is_blocked()
         assert not three_squares_grid[2, 6].is_blocked()
 
-    # DONE
     def test_block_row_block_big_sides(self, three_squares_grid: BruteForceResolver):
         """Test _block_row block the two upper and under cells on a 2 cell block."""
         left = three_squares_grid[8, 1]
@@ -230,7 +226,6 @@ class TestBlockRow:
         assert three_squares_grid[8, 8].is_blocked()
         assert three_squares_grid[8, 9].is_blocked()
 
-    # DONE
     def test_block_row_not_cells_color(self, three_squares_grid: BruteForceResolver):
         """Test _block_row don't block same color."""
         left = three_squares_grid[8, 2]
@@ -240,7 +235,6 @@ class TestBlockRow:
         assert not three_squares_grid[8, 6].is_blocked()
         assert not three_squares_grid[8, 7].is_blocked()
 
-    # DONE
     def test_block_row_not_cells_color_two_sides(self, star_grid: BruteForceResolver):
         """Test _block_row block the two upper and under cells on a 2 cell block."""
         left = star_grid[1, 5]
@@ -258,7 +252,6 @@ class TestBlockRow:
         assert star_grid[10, 5].is_blocked()
         assert star_grid[10, 6].is_blocked()
 
-    # DONE
     def test_block_row_not_cells_color_three_sides(self, star_grid: BruteForceResolver):
         """Test _block_row block the two upper and under cells on a 2 cell block."""
         left = star_grid[2, 4]
@@ -280,7 +273,6 @@ class TestBlockRow:
         assert not star_grid[9, 5].is_blocked()
         assert not star_grid[9, 6].is_blocked()
 
-    # DONE
     def test_claim_row_different_rows_raises(self, three_squares_grid: BruteForceResolver):
         """Test _claim_row raises ValueError for different rows."""
         left = three_squares_grid[0, 0]
@@ -299,14 +291,13 @@ class TestBlockRow:
 
 
 # =============================================================================
-# TOTEST Test _block_column
+# Test _block_column
 # =============================================================================
 
 
 class TestBlockColumn:
     """Tests for _block_column method."""
 
-    # DONE
     def test_block_column(self, three_squares_grid: BruteForceResolver):
         """Test _block_column block column"""
         up = three_squares_grid[3, 1]
@@ -320,7 +311,6 @@ class TestBlockColumn:
         assert three_squares_grid[8, 1].is_blocked()
         assert three_squares_grid[9, 1].is_blocked()
 
-    # DONE
     def test_block_column_block_two_sides(self, three_squares_grid: BruteForceResolver):
         """Test _block_column block the two upper and under cells on a 2 cell block."""
         up = three_squares_grid[3, 1]
@@ -331,7 +321,6 @@ class TestBlockColumn:
         assert three_squares_grid[3, 2].is_blocked()
         assert three_squares_grid[4, 2].is_blocked()
 
-    # DONE
     def test_block_column_block_three_sides(self, three_squares_grid: BruteForceResolver):
         """Test _block_column block the two upper and under cells on a 2 cell block."""
         up = three_squares_grid[3, 5]
@@ -344,7 +333,6 @@ class TestBlockColumn:
         assert three_squares_grid[4, 6].is_blocked()
         assert not three_squares_grid[5, 6].is_blocked()
 
-    # DONE
     def test_block_column_block_big_sides(self, three_squares_grid: BruteForceResolver):
         """Test _block_column block the two upper and under cells on a 2 cell block."""
         up = three_squares_grid[2, 8]
@@ -359,7 +347,6 @@ class TestBlockColumn:
         assert three_squares_grid[8, 8].is_blocked()
         assert three_squares_grid[9, 8].is_blocked()
 
-    # DONE
     def test_block_column_not_cells_color(self, three_squares_grid: BruteForceResolver):
         """Test _block_column don't block same color."""
         up = three_squares_grid[3, 8]
@@ -368,7 +355,6 @@ class TestBlockColumn:
         assert not three_squares_grid[2, 8].is_blocked()
         assert not three_squares_grid[6, 8].is_blocked()
 
-    # DONE
     def test_block_column_not_cells_color_two_sides(self, star_grid: BruteForceResolver):
         """Test _block_column block the two upper and under cells on a 2 cell block."""
         up = star_grid[4, 1]
@@ -386,7 +372,6 @@ class TestBlockColumn:
         assert star_grid[5, 10].is_blocked()
         assert star_grid[6, 10].is_blocked()
 
-    # DONE
     def test_block_column_not_cells_color_three_sides(self, star_grid: BruteForceResolver):
         """Test _block_column block the two upper and under cells on a 2 cell block."""
         up = star_grid[4, 2]
@@ -408,7 +393,6 @@ class TestBlockColumn:
         assert not star_grid[5, 9].is_blocked()
         assert not star_grid[6, 9].is_blocked()
 
-    # DONE
     def test_block_column_different_rows_raises(self, three_squares_grid: BruteForceResolver):
         """Test _block_column raises ValueError for different columns."""
         up = three_squares_grid[0, 0]
@@ -416,7 +400,6 @@ class TestBlockColumn:
         with pytest.raises(ValueError, match="Top and bottom cells must be in the same column."):
             three_squares_grid._block_column(up, bottom)
 
-    # DONE
     def test_block_column_swaps_up_bottom_with_warning(
         self, three_squares_grid: BruteForceResolver
     ):
@@ -538,14 +521,13 @@ class TestClaimCorner:
 
 
 # =============================================================================
-# DONE Test Parallel Claiming
+# Test Parallel Claiming
 # =============================================================================
 
 
 class TestClaimParallel:
     """Tests for parallel claiming methods."""
 
-    # DONE
     def test_block_row_parallel_basic(self, three_squares_grid: BruteForceResolver):
         """Test _block_row_parallel basic execution."""
         cells1 = [three_squares_grid[3, 1], three_squares_grid[4, 1]]
@@ -569,7 +551,6 @@ class TestClaimParallel:
         assert three_squares_grid[4, 8].is_blocked()
         assert three_squares_grid[4, 9].is_blocked()
 
-    # DONE
     def test_block_column_parallel_basic(self, three_squares_grid: BruteForceResolver):
         """Test _block_column_parallel basic execution."""
         cells1 = [three_squares_grid[1, 1], three_squares_grid[1, 2]]

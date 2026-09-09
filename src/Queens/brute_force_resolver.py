@@ -26,7 +26,6 @@ class BruteForceResolver(Grid):
     def __init__(self, grid: list[list[Cell]]):
         super().__init__(grid)
 
-    # DONE
     def _block_row(self, left: Cell, right: Cell) -> None:
         """Block the cells outside of the row selected by two cells in the same region
 
@@ -76,7 +75,6 @@ class BruteForceResolver(Grid):
                     self.grid[cell.row + 1][cell.col].block_cell()
         return
 
-    # DONE
     def _block_row_parallel(self, cells1: list[Cell], cells2: list[Cell]) -> None:
         """Block cells in the same row of the cells1 and cells2
         that are not of the same color as the given parallel regions.
@@ -102,7 +100,6 @@ class BruteForceResolver(Grid):
                     cell.block_cell()
         return
 
-    # DONE
     def _block_column_parallel(self, cells1: list[Cell], cells2: list[Cell]) -> None:
         """Block cells in the same column of the cells1 and cells2
         that are not of the same color as the given parallel regions.
@@ -132,7 +129,6 @@ class BruteForceResolver(Grid):
                     target_cell.block_cell()
         return
 
-    # DONE
     def _block_column(self, top: Cell, bottom: Cell) -> None:
         """Block cells in the same column of the given top and bottom cells
         that are not of the same color as the given top and bottom cells.
@@ -189,7 +185,6 @@ class BruteForceResolver(Grid):
                     self.grid[cell.row][cell.col + 1].block_cell()
         return
 
-    # DONE
     def _claim_corner(self, cells: list[Cell]) -> None:
         """Claim cells around the given 3 cells that form a corner
         that are not of the same color as the given 3 cells."""
@@ -235,7 +230,6 @@ class BruteForceResolver(Grid):
                 self.grid[cells[2].row - 1][cells[2].col - 1].block_cell()  # ↖
         return
 
-    # WIP first version for 2 empty-cells regions
     def _claim_parallel(self, regions: list[list[Cell]]) -> None:
         """Claim cells in the same row or column of the given parallel regions
         that are not of the same color as the given parallel regions."""
