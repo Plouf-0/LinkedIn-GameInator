@@ -41,9 +41,15 @@ def _setup_bundled_swipl() -> None:
         library = os.path.join(bundle, sorted(matches)[0])
 
     # pyswip returns these two straight away when both are set, skipping its
-    # platform guesswork entirely.
-    os.environ.setdefault("SWI_HOME_DIR", home)
-    os.environ.setdefault("LIBSWIPL_PATH", library)
+    # platform guesswork entirely. The bundle wins over whatever the machine
+    # already has: a stale SWI_HOME_DIR left by a system installation would
+    # otherwise silently take priority over the SWI-Prolog we shipped.
+    # USE_SYSTEM_SWIPL=1 opts out, for debugging against a local install.
+    if os.environ.get("USE_SYSTEM_SWIPL") == "1":
+        return
+
+    os.environ["SWI_HOME_DIR"] = home
+    os.environ["LIBSWIPL_PATH"] = library
 
     if sys.platform == "win32" and hasattr(os, "add_dll_directory"):
         # libswipl.dll pulls in libgcc/libgmp/zlib from the same directory.

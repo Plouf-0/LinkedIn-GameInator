@@ -45,11 +45,49 @@ class SwiplNotFound(RuntimeError):
     """Raised when no SWI-Prolog installation can be inspected."""
 
 
+def find_swipl() -> str | None:
+    """Locate the `swipl` executable, PATH first then the usual places.
+
+    Not relying on PATH alone matters on Windows, where an installer may not
+    have refreshed the environment of the running shell.
+    """
+    found = shutil.which("swipl")
+    if found:
+        return found
+
+    candidates: list[Path] = []
+    if sys.platform == "win32":
+        # Same registry key pyswip reads, so we agree on the installation.
+        try:
+            import winreg
+
+            with winreg.OpenKeyEx(winreg.HKEY_LOCAL_MACHINE, r"Software\SWI\Prolog") as key:
+                home, _ = winreg.QueryValueEx(key, "home")
+                candidates.append(Path(home) / "bin" / "swipl.exe")
+        except (ImportError, OSError):
+            pass
+        candidates += [
+            Path(r"C:\Program Files\swipl\bin\swipl.exe"),
+            Path(r"C:\Program Files (x86)\swipl\bin\swipl.exe"),
+        ]
+    else:
+        candidates += [
+            Path("/usr/lib/swi-prolog/bin/swipl"),
+            Path("/usr/local/bin/swipl"),
+            Path("/opt/homebrew/bin/swipl"),
+        ]
+
+    for candidate in candidates:
+        if candidate.is_file():
+            return str(candidate)
+    return None
+
+
 def runtime_variables() -> dict[str, str]:
     """Return the variables reported by `swipl --dump-runtime-variables`."""
-    swipl = shutil.which("swipl")
+    swipl = find_swipl()
     if swipl is None:
-        raise SwiplNotFound("`swipl` is not on the PATH; install SWI-Prolog before building.")
+        raise SwiplNotFound("`swipl` could not be found; install SWI-Prolog before building.")
 
     output = subprocess.run(
         [swipl, "--dump-runtime-variables"],

@@ -117,10 +117,12 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: choco install swi-prolog -y
 
+      # GITHUB_PATH attend un chemin Windows natif : un chemin MSYS
+      # (/c/Program Files/...) y est ignore silencieusement.
       - name: Ajouter SWI-Prolog au PATH - Windows
         if: matrix.os == 'windows-latest'
-        shell: bash
-        run: echo "/c/Program Files/swipl/bin" >> "$GITHUB_PATH"
+        shell: pwsh
+        run: Add-Content -Path $env:GITHUB_PATH -Value 'C:\Program Files\swipl\bin'
 
       - name: Installer les dépendances
         run: uv sync --locked --dev
@@ -128,6 +130,8 @@ jobs:
       # Le .spec embarque SWI-Prolog dans l'exécutable, pour que le résolveur
       # Sudoku fonctionne sur une machine qui ne l'a pas installé.
       - name: Build de l'exécutable
+        env:
+          REQUIRE_BUNDLED_SWIPL: "1"
         run: uv run pyinstaller --noconfirm --clean linkedin-gameinator.spec
 
       # Vérifie l'artefact lui-même : sans ça, un exe qui ne démarre pas ou qui

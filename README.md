@@ -123,10 +123,16 @@ dist/linkedin-gameinator --self-test
 The spec collects the SWI-Prolog found on the build machine (via
 `swipl --dump-runtime-variables`) and copies its home into the bundle, minus
 the documentation, demos and xpce; a runtime hook then points `SWI_HOME_DIR`
-and `LIBSWIPL_PATH` at it before `pyswip` is imported. Building without
-SWI-Prolog installed still produces a working executable, just one that cannot
-solve Sudoku. SWI-Prolog is redistributed under its own licence, a copy of
-which travels in the bundle.
+and `LIBSWIPL_PATH` at it before `pyswip` is imported. The bundled copy takes
+priority over any installation on the machine running the executable; set
+`USE_SYSTEM_SWIPL=1` to debug against a local one instead.
+
+Building without SWI-Prolog installed still produces a working executable, just
+one that cannot solve Sudoku. Set `REQUIRE_BUNDLED_SWIPL=1` to turn that into a
+build failure, which is what CI does so a release cannot ship unbundled.
+
+SWI-Prolog is redistributed under its own licence, a copy of which travels in
+the bundle.
 
 ### Layout
 
