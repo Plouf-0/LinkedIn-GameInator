@@ -13,14 +13,20 @@ logger = logging.getLogger(__name__)
 # limit only guards against a rule that would never reach a fixed point.
 MAX_ITERATIONS = 100
 
+# Upper bound on the number of guesses the backtracking search may make. A
+# LinkedIn board has at most a handful of regions, so a real puzzle settles in
+# far fewer nodes; the budget only stops a pathological grid from hanging.
+MAX_SEARCH_NODES = 20_000
+
 
 class BruteForceResolver(Grid):
-    """Resolver that solves the grid by iterated constraint propagation.
+    """Resolver that combines constraint propagation with backtracking.
 
-    It applies the usual Queens deductions (single-cell regions, aligned pairs
-    and triples, corners, parallel regions) until nothing changes. It does not
-    backtrack, so a grid that requires a guess is left unfinished rather than
-    solved -- check `is_solution_valid()` before trusting the result.
+    It first applies the usual Queens deductions (single-cell regions, aligned
+    pairs and triples, corners, parallel regions) until nothing changes. Where
+    that stalls, it guesses a queen in the most constrained region and recurses,
+    undoing the guess if it leads nowhere. Check `is_solution_valid()` to know
+    whether the returned grid is actually solved.
     """
 
     def __init__(self, grid: list[list[Cell]]):
@@ -263,13 +269,16 @@ class BruteForceResolver(Grid):
                     self._block_column_parallel(horizontal_region1, horizontal_region2)
         return
 
-    def resolve_grid(self) -> list[list[Cell]]:
-        """Run constraint propagation until the grid stops changing.
+    def _propagate(self) -> None:
+        """Apply every deduction rule until the grid stops changing.
 
-        Returns the grid, solved or not; call `is_solution_valid()` to know
-        which. Progress is reported through the module logger, not printed.
+        Propagation is monotonic -- a cell only ever goes from empty to queen or
+        blocked -- so a pass that changes nothing means a fixed point has been
+        reached and further passes would be wasted work.
         """
         for iteration in range(1, MAX_ITERATIONS + 1):
+            before = self._snapshot()
+
             singles: list[Cell] = [
                 region.empty_cells[0] for region in self.regions if region.nb_empty_cells == 1
             ]
@@ -351,21 +360,71 @@ class BruteForceResolver(Grid):
                             [other_region.empty_cells[0], other_region.empty_cells[-1]],
                         )
 
-            if self.is_grid_finished():
-                if self.is_solution_valid():
-                    logger.info("Grid solved in %d iteration(s).", iteration)
-                else:
-                    logger.warning(
-                        "Propagation converged in %d iteration(s) but the result "
-                        "is not a valid solution.",
-                        iteration,
-                    )
-                break
+            if self.is_grid_finished() or self._snapshot() == before:
+                logger.debug("Propagation reached a fixed point in %d pass(es).", iteration)
+                return
 
             if logger.isEnabledFor(logging.DEBUG):
-                logger.debug("State after iteration %d:", iteration)
+                logger.debug("State after pass %d:", iteration)
                 print_grid(self.grid)
         else:
-            logger.warning("Max iterations (%d) reached, stopping resolution.", MAX_ITERATIONS)
+            logger.warning("Max propagation passes (%d) reached.", MAX_ITERATIONS)
+
+    def _snapshot(self) -> list[int]:
+        """Capture the state of every cell, cheaply enough to do it per search node."""
+        return [cell.value for row in self.grid for cell in row]
+
+    def _restore(self, snapshot: list[int]) -> None:
+        """Put every cell back to the state captured by `_snapshot`."""
+        cells = (cell for row in self.grid for cell in row)
+        for cell, value in zip(cells, snapshot, strict=True):
+            cell.value = value
+
+    def _search(self, budget: list[int]) -> bool:
+        """Propagate, then guess a queen for the most constrained region.
+
+        `budget` is a single-element list holding the number of nodes still
+        allowed, so that the count is shared across the whole recursion.
+        """
+        self._propagate()
+
+        if self.is_solution_valid():
+            return True
+
+        open_regions = [region for region in self.regions if not region.is_completed]
+        if not open_regions or any(region.is_dead for region in self.regions):
+            return False
+
+        budget[0] -= 1
+        if budget[0] <= 0:
+            return False
+
+        # Guessing in the region with the fewest options keeps the tree narrow.
+        region = min(open_regions, key=lambda r: r.nb_empty_cells)
+        snapshot = self._snapshot()
+        for cell in region.empty_cells:
+            self.queenify_cell(cell)
+            if self._search(budget):
+                return True
+            self._restore(snapshot)
+        return False
+
+    def resolve_grid(self) -> list[list[Cell]]:
+        """Solve the grid by constraint propagation, guessing where it stalls.
+
+        Returns the grid, solved or not; call `is_solution_valid()` to know
+        which. Progress is reported through the module logger, not printed.
+        """
+        budget = [MAX_SEARCH_NODES]
+
+        if self._search(budget):
+            logger.info("Grid solved (%d search node(s)).", MAX_SEARCH_NODES - budget[0])
+        elif budget[0] <= 0:
+            logger.warning(
+                "Search budget (%d nodes) exhausted; the result is not a valid solution.",
+                MAX_SEARCH_NODES,
+            )
+        else:
+            logger.warning("The grid has no solution; the result is not a valid solution.")
 
         return self.grid

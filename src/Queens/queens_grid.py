@@ -92,6 +92,15 @@ class Grid:
             return len(self.empty_cells)
 
         @property
+        def has_queen(self) -> bool:
+            return any(cell.is_queen() for cell in self.cells)
+
+        @property
+        def is_dead(self) -> bool:
+            """True when the region can no longer receive its queen."""
+            return not self.has_queen and self.nb_empty_cells == 0
+
+        @property
         def is_completed(self) -> bool:
             return self.nb_empty_cells == 0
 

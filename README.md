@@ -15,7 +15,7 @@ solution back into the page.
 
 | Game        | Resolver                                        |
 | ----------- | ----------------------------------------------- |
-| Queens      | ✅ constraint propagation (`Queens`)             |
+| Queens      | ✅ constraint propagation + backtracking (`Queens`) |
 | Mini Sudoku | ✅ CLP(FD) in SWI-Prolog (`Sudoku`)              |
 | Tango       | ❌ not implemented                               |
 | Zip         | ❌ not implemented                               |
@@ -24,8 +24,9 @@ solution back into the page.
 | Pinpoint    | ❌ not implemented                               |
 | Wend        | ❌ not implemented                               |
 
-The Queens resolver only propagates constraints, it never guesses. A grid that
-requires a guess is left unfinished, and nothing is clicked into the page.
+The Queens resolver first applies the usual deductions, then guesses in the
+most constrained region and backtracks where those stall. If it still finds no
+valid solution, nothing is clicked into the page.
 
 ## Requirements
 

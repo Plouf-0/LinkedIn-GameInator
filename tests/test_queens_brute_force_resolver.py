@@ -1202,8 +1202,8 @@ class TestResolve:
         assert isinstance(result, list)
         assert len(result) > 0
 
-    def test_resolve_max_iterations(self, caplog: pytest.LogCaptureFixture):
-        """Test that resolve stops at max iterations."""
+    def test_resolve_reports_an_unsolvable_grid(self, caplog: pytest.LogCaptureFixture):
+        """A single region cannot host five queens, so the search must give up."""
         test_grid = [
             "R R R R R",
             "R R R R R",
@@ -1216,8 +1216,18 @@ class TestResolve:
         with caplog.at_level(logging.DEBUG, logger="Queens.brute_force_resolver"):
             result = grid.resolve_grid()
 
-        assert f"Max iterations ({MAX_ITERATIONS}) reached" in caplog.text
+        assert "not a valid solution" in caplog.text
+        assert not grid.is_solution_valid()
         assert result is not None
+
+    def test_propagation_stops_at_a_fixed_point(self, caplog: pytest.LogCaptureFixture):
+        """Propagation must converge, not spin until MAX_ITERATIONS."""
+        grid = BruteForceResolver(build_example_grid(["R R R", "R R R", "R R R"]))
+        with caplog.at_level(logging.DEBUG, logger="Queens.brute_force_resolver"):
+            grid._propagate()
+
+        assert "fixed point" in caplog.text
+        assert f"Max propagation passes ({MAX_ITERATIONS})" not in caplog.text
 
 
 # =============================================================================
@@ -1305,3 +1315,89 @@ class TestQueenResolverIntegration:
         assert grid[5, 7].is_queen()
         assert grid[6, 5].is_queen()
         assert grid[7, 3].is_queen()
+
+
+# =============================================================================
+# Test backtracking search
+# =============================================================================
+
+
+class TestBacktracking:
+    """Tests for the search that takes over when propagation stalls."""
+
+    def test_solves_a_grid_propagation_alone_cannot(self):
+        """This board has no forced move at the start, so it needs a guess."""
+        test_grid = [
+            "R R B B B",
+            "R R B B B",
+            "G G Y Y B",
+            "G G Y Y W",
+            "G G Y W W",
+        ]
+        grid = BruteForceResolver(build_example_grid(test_grid))
+
+        # Propagation on its own reaches a fixed point without solving.
+        grid._propagate()
+        assert not grid.is_solution_valid()
+
+        grid = BruteForceResolver(build_example_grid(test_grid))
+        grid.resolve_grid()
+        assert grid.is_solution_valid()
+
+    def test_solution_places_one_queen_per_row_column_and_region(self):
+        test_grid = [
+            "R R B B B",
+            "R R B B B",
+            "G G Y Y B",
+            "G G Y Y W",
+            "G G Y W W",
+        ]
+        grid = BruteForceResolver(build_example_grid(test_grid))
+        grid.resolve_grid()
+
+        queens = grid.queens
+        assert len(queens) == 5
+        assert len({cell.row for cell in queens}) == 5
+        assert len({cell.col for cell in queens}) == 5
+        assert len({cell.color for cell in queens}) == 5
+
+    def test_search_restores_the_grid_after_a_failed_guess(self):
+        """An unsolvable board must be left with no queen half-placed."""
+        test_grid = [
+            "R R",
+            "G G",
+        ]
+        grid = BruteForceResolver(build_example_grid(test_grid))
+        grid.resolve_grid()
+
+        assert not grid.is_solution_valid()
+
+    def test_snapshot_and_restore_round_trip(self):
+        grid = BruteForceResolver(build_example_grid(["R B", "B R"]))
+        before = grid._snapshot()
+
+        grid.queenify_cell(grid[0, 0])
+        assert grid._snapshot() != before
+
+        grid._restore(before)
+        assert grid._snapshot() == before
+        assert all(cell.is_empty() for row in grid.grid for cell in row)
+
+    def test_search_budget_is_respected(self):
+        """With no budget left the search gives up instead of exploring."""
+        grid = BruteForceResolver(build_example_grid(["R R B", "R G B", "G G B"]))
+
+        assert grid._search(budget=[1]) is False
+
+    def test_dead_region_is_detected(self):
+        """A region with no queen and no empty cell can never be completed."""
+        grid = BruteForceResolver(build_example_grid(["R B", "R B"]))
+        region = grid.get_region_by_cell(grid[0, 0])
+
+        assert not region.is_dead
+        region.block_all_cells()
+        assert region.is_dead
+
+        grid2 = BruteForceResolver(build_example_grid(["R B", "R B"]))
+        grid2.queenify_cell(grid2[0, 0])
+        assert not grid2.get_region_by_cell(grid2[0, 0]).is_dead
