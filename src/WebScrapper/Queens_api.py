@@ -5,6 +5,7 @@ import re
 import time
 
 from selenium import webdriver
+from selenium.common.exceptions import ElementNotInteractableException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 
@@ -108,9 +109,15 @@ def put_queens_in_html(driver: webdriver.Firefox, grid: Grid) -> None:
         div = elements.get((cell.row, cell.col))
         if div is None:
             raise QueensGridError(f"No cell found at row {cell.row + 1}, column {cell.col + 1}")
-        # Two clicks: the first marks the cell, the second turns the mark into a queen.
-        div.click()
-        div.click()
+        try:
+            # Two clicks: the first marks the cell, the second turns it into a queen.
+            div.click()
+            div.click()
+        except ElementNotInteractableException as e:
+            raise QueensGridError(
+                "The board cannot be clicked. This usually means the puzzle is already "
+                "finished and its result overlay is covering the grid."
+            ) from e
         time.sleep(delay)
 
     logger.info("Placed %d queen(s) in the page.", len(queens))

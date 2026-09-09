@@ -4,6 +4,7 @@ import logging
 import re
 
 from selenium import webdriver
+from selenium.common.exceptions import ElementNotInteractableException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 
@@ -26,6 +27,7 @@ def sudoku_api(driver: webdriver.Firefox) -> None:
     grid: list[list[int]] = create_grid_from_html(driver)
     rows_per_area: int = get_amount_of_rows_by_area(driver)
     solved_grid: list[list[int]] = solve(grid, rows_per_area)
+    logger.debug("Solution:\n%s", format_grid(solved_grid))
 
     put_sudoku_in_html(driver, solved_grid)
 
@@ -65,7 +67,18 @@ def create_grid_from_html(driver: webdriver.Firefox) -> list[list[int]]:
     if not grid:
         raise SudokuGridError("No Sudoku cell found in the page")
 
+    logger.info("Read a %dx%d board with %d clue(s).", len(grid), cols_total, _clue_count(grid))
+    logger.debug("Board read from the page:\n%s", format_grid(grid))
     return grid
+
+
+def _clue_count(grid: list[list[int]]) -> int:
+    return sum(1 for row in grid for value in row if value)
+
+
+def format_grid(grid: list[list[int]]) -> str:
+    """Render a grid for the logs, dots for the empty cells."""
+    return "\n".join(" ".join(str(value) if value else "." for value in row) for row in grid)
 
 
 def get_amount_of_rows_by_area(driver: webdriver.Firefox) -> int:
@@ -75,6 +88,7 @@ def get_amount_of_rows_by_area(driver: webdriver.Firefox) -> int:
 
 def put_sudoku_in_html(driver: webdriver.Firefox, grid: list[list[int]]) -> None:
     index: int = 0
+    filled: int = 0
     for row in grid:
         for cell_value in row:
             board_cell: WebElement | None = find_board_cell(driver, index)
@@ -83,11 +97,22 @@ def put_sudoku_in_html(driver: webdriver.Firefox, grid: list[list[int]]) -> None
             index += 1
 
             cell_class: str = board_cell.get_attribute("class") or ""
-            if "sudoku-cell-prefilled" not in cell_class:
+            if "sudoku-cell-prefilled" in cell_class:
+                continue
+
+            try:
                 board_cell.click()
                 click_value_button(driver, cell_value)
+            except ElementNotInteractableException as e:
+                raise SudokuGridError(
+                    "The board cannot be clicked. This usually means the puzzle is already "
+                    "finished and its result overlay is covering the grid."
+                ) from e
+            filled += 1
 
-    logger.info("Filled %d cell(s) in the page.", index)
+    logger.info("Filled %d of %d cell(s) in the page.", filled, index)
+    if not filled:
+        logger.warning("Every cell was already filled in; nothing to do.")
 
 
 def find_board_cell(driver: webdriver.Firefox, index: int) -> WebElement | None:

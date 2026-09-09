@@ -5,6 +5,7 @@ from collections.abc import Callable
 from selenium import webdriver
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
+from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
@@ -79,16 +80,33 @@ def _wait_for_login(driver: webdriver.Firefox) -> None:
     print("User logged in")
 
 
-def _wait_for_game(driver: webdriver.Firefox) -> str:
-    """Block until a game is opened and return its page title."""
+def _wait_for_game(driver: webdriver.Firefox) -> WebElement:
+    """Block until a game is opened and return its clock element.
+
+    The element is the handle used later to tell when the user has left this
+    game: it goes stale as soon as the page changes.
+    """
     print("Now select a game to complete")
     try:
-        WebDriverWait(driver, GAME_SELECTION_TIMEOUT).until(
+        return WebDriverWait(driver, GAME_SELECTION_TIMEOUT).until(
             EC.presence_of_element_located((By.ID, "clock-small"))
         )
     except TimeoutException as e:
         raise LinkedInFlowError("User did not select a game") from e
-    return driver.title
+
+
+def _wait_until_game_left(driver: webdriver.Firefox, clock: WebElement) -> None:
+    """Block until the finished game's page is gone.
+
+    Without this the loop would find the very same clock element still on the
+    page, decide a game is open, and try to solve the finished board again --
+    forever.
+    """
+    print("Done with this game; go back and pick another one")
+    try:
+        WebDriverWait(driver, GAME_SELECTION_TIMEOUT).until(EC.staleness_of(clock))
+    except TimeoutException as e:
+        raise LinkedInFlowError("User stayed on the same game") from e
 
 
 def resolve_current_game(driver: webdriver.Firefox, title: str) -> None:
@@ -117,12 +135,17 @@ def main() -> None:
         _wait_for_login(driver)
 
         while True:
-            title = _wait_for_game(driver)
+            clock = _wait_for_game(driver)
+            title = driver.title
             print("game selected: " + title)
             try:
                 resolve_current_game(driver, title)
             except Exception:
                 logger.exception("Could not resolve %s.", title)
+
+            # Whether it worked or not, this game is done with. Waiting for the
+            # page to change is what keeps the loop from solving it over again.
+            _wait_until_game_left(driver, clock)
     except LinkedInFlowError as e:
         logger.error("%s", e)
     except KeyboardInterrupt:

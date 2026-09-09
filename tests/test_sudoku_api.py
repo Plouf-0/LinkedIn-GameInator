@@ -3,6 +3,8 @@
 The attribute parsing is pure; the rest is driven through a mocked driver.
 """
 
+import logging
+
 import pytest
 from pytest_mock import MockerFixture
 
@@ -113,6 +115,40 @@ class TestPutSudokuInHtml:
         prefilled.click.assert_not_called()
         editable.click.assert_called_once()
         click_button.assert_called_once_with(driver, 2)
+
+    def test_counts_only_the_cells_it_filled(
+        self, mocker: MockerFixture, caplog: pytest.LogCaptureFixture
+    ):
+        prefilled = _cell(mocker, **{"class": "sudoku-cell sudoku-cell-prefilled"})
+        editable = _cell(mocker, **{"class": "sudoku-cell"})
+        mocker.patch("WebScrapper.Sudoku_api.find_board_cell", side_effect=[prefilled, editable])
+        mocker.patch("WebScrapper.Sudoku_api.click_value_button")
+
+        with caplog.at_level(logging.INFO, logger="WebScrapper.Sudoku_api"):
+            put_sudoku_in_html(mocker.Mock(), [[1, 2]])
+
+        assert "Filled 1 of 2 cell(s)" in caplog.text
+
+    def test_warns_when_the_board_was_already_complete(
+        self, mocker: MockerFixture, caplog: pytest.LogCaptureFixture
+    ):
+        prefilled = _cell(mocker, **{"class": "sudoku-cell sudoku-cell-prefilled"})
+        mocker.patch("WebScrapper.Sudoku_api.find_board_cell", return_value=prefilled)
+
+        with caplog.at_level(logging.WARNING, logger="WebScrapper.Sudoku_api"):
+            put_sudoku_in_html(mocker.Mock(), [[1, 2]])
+
+        assert "already filled in" in caplog.text
+
+    def test_a_covered_board_gives_a_readable_error(self, mocker: MockerFixture):
+        from selenium.common.exceptions import ElementNotInteractableException
+
+        cell = _cell(mocker, **{"class": "sudoku-cell"})
+        cell.click.side_effect = ElementNotInteractableException("not scrolled into view")
+        mocker.patch("WebScrapper.Sudoku_api.find_board_cell", return_value=cell)
+
+        with pytest.raises(SudokuGridError, match="already .*finished"):
+            put_sudoku_in_html(mocker.Mock(), [[1]])
 
     def test_raises_when_board_cell_not_found(self, mocker: MockerFixture):
         driver = mocker.Mock()

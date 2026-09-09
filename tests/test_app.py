@@ -4,12 +4,14 @@ import pytest
 from pytest_mock import MockerFixture
 from selenium.common.exceptions import TimeoutException
 
+from WebScrapper import app
 from WebScrapper.app import (
     RESOLVERS,
     LinkedInFlowError,
     _hide_google_signin,
     _wait_for_game,
     _wait_for_login,
+    _wait_until_game_left,
     resolve_current_game,
 )
 from WebScrapper.Queens_api import queens_api
@@ -80,12 +82,30 @@ class TestWaitSteps:
         with pytest.raises(LinkedInFlowError, match="User did not select a game"):
             _wait_for_game(mocker.Mock())
 
-    def test_wait_for_game_returns_the_title(self, mocker: MockerFixture):
-        mocker.patch("WebScrapper.app.WebDriverWait")
-        driver = mocker.Mock()
-        driver.title = "Queens | LinkedIn"
+    def test_wait_for_game_returns_the_clock_element(self, mocker: MockerFixture):
+        """The clock is the handle used later to detect leaving the game."""
+        wait = mocker.patch("WebScrapper.app.WebDriverWait")
+        clock = mocker.Mock()
+        wait.return_value.until.return_value = clock
 
-        assert _wait_for_game(driver) == "Queens | LinkedIn"
+        assert _wait_for_game(mocker.Mock()) is clock
+
+    def test_wait_until_game_left_waits_for_staleness(self, mocker: MockerFixture):
+        wait = mocker.patch("WebScrapper.app.WebDriverWait")
+        staleness = mocker.patch("WebScrapper.app.EC.staleness_of")
+        clock = mocker.Mock()
+
+        _wait_until_game_left(mocker.Mock(), clock)
+
+        staleness.assert_called_once_with(clock)
+        wait.return_value.until.assert_called_once()
+
+    def test_wait_until_game_left_raises_on_timeout(self, mocker: MockerFixture):
+        wait = mocker.patch("WebScrapper.app.WebDriverWait")
+        wait.return_value.until.side_effect = TimeoutException()
+
+        with pytest.raises(LinkedInFlowError, match="stayed on the same game"):
+            _wait_until_game_left(mocker.Mock(), mocker.Mock())
 
 
 # =============================================================================
@@ -110,3 +130,65 @@ class TestHideGoogleSignin:
         _hide_google_signin(driver)
 
         driver.execute_script.assert_not_called()
+
+
+# =============================================================================
+# Test the main loop
+# =============================================================================
+
+
+class TestMainLoop:
+    """The loop must move on after each game instead of re-solving it."""
+
+    @staticmethod
+    def _driver(mocker: MockerFixture):
+        driver = mocker.Mock()
+        driver.title = "Queens | LinkedIn"
+        mocker.patch("WebScrapper.app.webdriver.Firefox", return_value=driver)
+        mocker.patch("WebScrapper.app.get_app_dir")
+        mocker.patch("WebScrapper.app._hide_google_signin")
+        mocker.patch("WebScrapper.app._wait_for_login")
+        return driver
+
+    def test_waits_for_the_page_to_change_before_the_next_game(self, mocker: MockerFixture):
+        driver = self._driver(mocker)
+        # The loop is bounded here, not by the assertions: a version that never
+        # waits would otherwise hang the suite instead of failing it.
+        mocker.patch(
+            "WebScrapper.app._wait_for_game",
+            side_effect=[mocker.Mock(), mocker.Mock(), LinkedInFlowError("stop")],
+        )
+        resolve = mocker.patch("WebScrapper.app.resolve_current_game")
+        left = mocker.patch("WebScrapper.app._wait_until_game_left")
+
+        app.main()
+
+        assert resolve.call_count == 2
+        assert left.call_count == 2, "each finished game must be waited out"
+        driver.quit.assert_called_once()
+
+    def test_a_failing_game_does_not_spin(self, mocker: MockerFixture):
+        """A resolver blowing up must still wait, not retry immediately."""
+        self._driver(mocker)
+        mocker.patch(
+            "WebScrapper.app._wait_for_game",
+            side_effect=[mocker.Mock(), LinkedInFlowError("stop")],
+        )
+        resolve = mocker.patch(
+            "WebScrapper.app.resolve_current_game",
+            side_effect=RuntimeError("board is covered"),
+        )
+        left = mocker.patch("WebScrapper.app._wait_until_game_left")
+
+        app.main()
+
+        assert resolve.call_count == 1
+        left.assert_called_once(), "a failed game must be waited out too"
+
+    def test_the_browser_is_closed_on_interrupt(self, mocker: MockerFixture):
+        driver = self._driver(mocker)
+        mocker.patch("WebScrapper.app._wait_for_game", side_effect=KeyboardInterrupt)
+
+        app.main()
+
+        driver.quit.assert_called_once()

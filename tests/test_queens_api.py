@@ -131,6 +131,21 @@ class TestPutQueensInHtml:
         with pytest.raises(QueensGridError, match="No cell found at row 1, column 1"):
             put_queens_in_html(driver, grid)
 
+    def test_a_covered_board_gives_a_readable_error(self, mocker: MockerFixture):
+        """A finished puzzle hides its grid behind an overlay."""
+        from selenium.common.exceptions import ElementNotInteractableException
+
+        mocker.patch("WebScrapper.Queens_api.time.sleep")
+        div = mocker.Mock()
+        div.click.side_effect = ElementNotInteractableException("not scrolled into view")
+        mocker.patch("WebScrapper.Queens_api.find_cell_elements", return_value={(0, 0): div})
+
+        grid = BruteForceResolver(build_example_grid(["R B", "B R"]))
+        grid[0, 0].make_queen()
+
+        with pytest.raises(QueensGridError, match="already .*finished"):
+            put_queens_in_html(mocker.Mock(), grid)
+
     def test_does_nothing_without_queens(self, mocker: MockerFixture):
         find = mocker.patch("WebScrapper.Queens_api.find_cell_elements")
         grid = BruteForceResolver(build_example_grid(["R B", "B R"]))
