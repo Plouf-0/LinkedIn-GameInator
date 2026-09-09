@@ -11,11 +11,12 @@ Comprehensive test suite covering:
 
 # pyright: reportPrivateUsage=false
 
+import logging
 import warnings
 
 import pytest
 
-from Queens.brute_force_resolver import BruteForceResolver
+from Queens.brute_force_resolver import MAX_ITERATIONS, BruteForceResolver
 from Queens.queens_grid import BLOCKED, QUEEN, Cell, Grid, build_example_grid
 from Queens.ui import print_grid
 
@@ -784,23 +785,24 @@ class TestBuildExampleGrid:
 class TestResolveGrid:
     """Tests for QueenResolver function."""
 
-    def test_resolve_grid_empty_grid(self, capsys: pytest.CaptureFixture[str]):
-        """Test QueenResolver with empty grid."""
+    def test_resolve_grid_empty_grid(self, caplog: pytest.LogCaptureFixture):
+        """An empty grid converges immediately but is not a valid solution."""
         grid = BruteForceResolver([])
-        grid.resolve_grid()
-        captured = capsys.readouterr()
-        assert len(captured.out) > 0
+        with caplog.at_level(logging.DEBUG, logger="Queens.brute_force_resolver"):
+            grid.resolve_grid()
+        assert "not a valid solution" in caplog.text
 
-    def test_resolve_grid_valid_grid(self, capsys: pytest.CaptureFixture[str]):
-        """Test QueenResolver with valid grid."""
+    def test_resolve_grid_valid_grid(self, caplog: pytest.LogCaptureFixture):
+        """A 2x2 grid cannot hold two non-adjacent queens, so it is reported invalid."""
         test_grid = [
             "R R",
             "G G",
         ]
         grid = BruteForceResolver(build_example_grid(test_grid))
-        grid.resolve_grid()
-        captured = capsys.readouterr()
-        assert len(captured.out) > 0
+        with caplog.at_level(logging.DEBUG, logger="Queens.brute_force_resolver"):
+            grid.resolve_grid()
+        assert "not a valid solution" in caplog.text
+        assert not grid.is_solution_valid()
 
     def testresolve_grid_modifies_grid(self):
         """Test that QueenResolver modifies the grid."""
@@ -1219,7 +1221,7 @@ class TestResolve:
         assert isinstance(result, list)
         assert len(result) > 0
 
-    def test_resolve_max_iterations(self, capsys: pytest.CaptureFixture[str]):
+    def test_resolve_max_iterations(self, caplog: pytest.LogCaptureFixture):
         """Test that resolve stops at max iterations."""
         test_grid = [
             "R R R R R",
@@ -1230,11 +1232,10 @@ class TestResolve:
         ]
         base_grid = build_example_grid(test_grid)
         grid = BruteForceResolver(base_grid)
-        result = grid.resolve_grid()
+        with caplog.at_level(logging.DEBUG, logger="Queens.brute_force_resolver"):
+            result = grid.resolve_grid()
 
-        captured = capsys.readouterr()
-        output = captured.out
-        assert "Max iterations reached, stopping resolution.\n" in output
+        assert f"Max iterations ({MAX_ITERATIONS}) reached" in caplog.text
         assert result is not None
 
 

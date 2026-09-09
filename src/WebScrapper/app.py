@@ -1,7 +1,6 @@
-# WebScrapper/LinkedInWebdriver.py
-import os
+# WebScrapper/app.py
+import logging
 from collections.abc import Callable
-from typing import Any, cast
 
 from selenium import webdriver
 from selenium.common.exceptions import TimeoutException
@@ -9,107 +8,127 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
-from Archiver.archiver import get_app_data_dir
+from Archiver.archiver import get_app_dir
 from WebScrapper.Queens_api import queens_api
 from WebScrapper.Sudoku_api import sudoku_api
 
+logger = logging.getLogger(__name__)
 
-def main() -> None:
+LOGIN_URL = (
+    "https://www.linkedin.com/uas/login"
+    "?session_redirect=%2Fgames%2F&fromSignIn=true&trk=games_nav-header-signin"
+)
 
-    app_data_dir = os.path.join(get_app_data_dir(), "LinkedIn-Gameinator")
-    if not os.path.exists(app_data_dir):
-        os.makedirs(app_data_dir)
+# How long to wait, in seconds, for each step of the flow.
+PAGE_LOAD_TIMEOUT = 1
+LOGIN_TIMEOUT = 600
+GAME_SELECTION_TIMEOUT = 600
 
-    login_url = "https://www.linkedin.com/uas/login?session_redirect=%2Fgames%2F&fromSignIn=true&trk=games_nav-header-signin"
+# Game title fragment -> resolver. Games without a resolver map to None.
+RESOLVERS: dict[str, Callable[[webdriver.Firefox], None] | None] = {
+    "Mini Sudoku": sudoku_api,
+    "Queens": queens_api,
+    "Patches": None,
+    "Zip": None,
+    "Tango": None,
+    "Crossclimb": None,
+    "Pinpoint": None,
+    "Wend": None,
+}
 
-    # DONE Open LinkedIn login window with redirection
-    driver: webdriver.Firefox = webdriver.Firefox()
-    driver.get(login_url)
-    assert "LinkedIn" in driver.title
 
-    # DONE Wait until page loaded then hide google auth elems
-    time_to_wait_page_loaded = 1
+class LinkedInFlowError(RuntimeError):
+    """Raised when the LinkedIn page does not reach an expected state."""
 
-    # Helper typed reference to execute_script to satisfy type checkers
-    exec_script: Callable[..., Any] = cast(Callable[..., Any], driver.execute_script)  # type: ignore
-    try:
-        # Hide alternate-signin-container
+
+def _hide_google_signin(driver: webdriver.Firefox) -> None:
+    """Hide the Google one-tap overlays that sit on top of the login form.
+
+    Purely cosmetic: a failure here must not stop the run.
+    """
+    overlays = (
+        (By.CLASS_NAME, "alternate-signin-container"),
+        (By.ID, "credential_picker_container"),
+    )
+    scripts = (
+        "(document.getElementsByClassName('alternate-signin-container'))[0]"
+        ".setAttribute('style', 'visibility: hidden');",
+        "document.getElementById('credential_picker_container')"
+        ".setAttribute('style', 'visibility: hidden');",
+    )
+
+    for locator, script in zip(overlays, scripts, strict=True):
         try:
-            WebDriverWait(driver, time_to_wait_page_loaded).until(
-                EC.presence_of_element_located((By.CLASS_NAME, "alternate-signin-container"))
-            )
-        except TimeoutException as e:
-            raise Exception("alternate-signin-container not found") from e
-        else:
-            exec_script(  # type: ignore
-                "(document.getElementsByClassName('alternate-signin-container'))[0] \
-                .setAttribute('style', 'visibility: hidden');"
-            )
+            WebDriverWait(driver, PAGE_LOAD_TIMEOUT).until(EC.presence_of_element_located(locator))
+            driver.execute_script(script)
+        except TimeoutException:
+            logger.debug("Google sign-in overlay %s not present, nothing to hide.", locator[1])
+        except Exception:
+            logger.debug("Could not hide the Google sign-in overlay %s.", locator[1])
 
-        # Hide credential_picker_container
-        try:
-            WebDriverWait(driver, time_to_wait_page_loaded).until(
-                EC.presence_of_element_located((By.ID, "credential_picker_container"))
-            )
-        except TimeoutException as e:
-            raise Exception("credential_picker_container not found") from e
-        else:
-            exec_script(
-                "document.getElementById('credential_picker_container') \
-                .setAttribute('style', 'visibility: hidden');"
-            )  # type: ignore
-    except Exception as e:
-        print(e)
-        print("Problème pour cacher les logins google")
-        pass
 
-    # DONE Wait until user logged in
+def _wait_for_login(driver: webdriver.Firefox) -> None:
+    """Block until the user has logged in, or raise on timeout."""
     print("Please login your LinkedIn account")
-
-    time_to_wait_user_login = 600  # 600s = 10 mins
     try:
-        WebDriverWait(driver, time_to_wait_user_login).until(
+        WebDriverWait(driver, LOGIN_TIMEOUT).until(
             EC.presence_of_element_located((By.CLASS_NAME, "msg-overlay-list-bubble"))
         )
-    except TimeoutException:
-        print("User did not login")
-        driver.close()
-
+    except TimeoutException as e:
+        raise LinkedInFlowError("User did not login") from e
     print("User logged in")
 
-    # DONE Detect which game is lunched and if game not resolved, call the game's resolver
-    while True:
-        print("Now select a game to complete")
 
-        time_to_wait_game_selected = 600  # 600s = 10 mins
-        try:
-            WebDriverWait(driver, time_to_wait_game_selected).until(
-                EC.presence_of_element_located((By.ID, "clock-small"))
-            )
-        except TimeoutException:
-            print("User did not select a game")
-            driver.close()
+def _wait_for_game(driver: webdriver.Firefox) -> str:
+    """Block until a game is opened and return its page title."""
+    print("Now select a game to complete")
+    try:
+        WebDriverWait(driver, GAME_SELECTION_TIMEOUT).until(
+            EC.presence_of_element_located((By.ID, "clock-small"))
+        )
+    except TimeoutException as e:
+        raise LinkedInFlowError("User did not select a game") from e
+    return driver.title
 
-        print("game selected: " + driver.title)
 
-        if "Patches" in driver.title:
-            print("Resolver not yet implemented")
-        elif "Zip" in driver.title:
-            print("Resolver not yet implemented")
-        elif "Mini Sudoku" in driver.title:
-            sudoku_api(driver)
-        elif "Tango" in driver.title:
-            print("Resolver not yet implemented")
-        elif "Queens" in driver.title:
-            queens_api(driver)
-        elif "Crossclimb" in driver.title:
-            print("Resolver not yet implemented")
-        elif "Pinpoint" in driver.title:
-            print("Resolver not yet implemented")
-        elif "Wend" in driver.title:
-            print("Resolver not yet implemented")
-        else:
-            print("Game not recognised")
+def resolve_current_game(driver: webdriver.Firefox, title: str) -> None:
+    """Dispatch to the resolver matching the opened game."""
+    for name, resolver in RESOLVERS.items():
+        if name in title:
+            if resolver is None:
+                print(f"{name}: resolver not yet implemented")
+                return
+            resolver(driver)
+            return
+    print("Game not recognised")
+
+
+def main() -> None:
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
+    get_app_dir()
+
+    driver: webdriver.Firefox = webdriver.Firefox()
+    try:
+        driver.get(LOGIN_URL)
+        if "LinkedIn" not in driver.title:
+            raise LinkedInFlowError(f"Unexpected page title: {driver.title!r}")
+
+        _hide_google_signin(driver)
+        _wait_for_login(driver)
+
+        while True:
+            title = _wait_for_game(driver)
+            print("game selected: " + title)
+            try:
+                resolve_current_game(driver, title)
+            except Exception:
+                logger.exception("Could not resolve %s.", title)
+    except LinkedInFlowError as e:
+        logger.error("%s", e)
+    except KeyboardInterrupt:
+        print("\nInterrupted, closing the browser.")
+    finally:
+        driver.quit()
 
 
 if __name__ == "__main__":

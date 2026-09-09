@@ -8,15 +8,20 @@ from Queens.ui import print_grid
 
 logger = logging.getLogger(__name__)
 
-# Try to import UI helpers from the same folder; prefer relative import when used as a package
-try:
-    pass  # type: ignore
-except Exception:
-    pass  # type: ignore
+# Upper bound on constraint-propagation passes. The propagation is monotonic
+# (it only ever fills cells in), so it always converges well before this; the
+# limit only guards against a rule that would never reach a fixed point.
+MAX_ITERATIONS = 100
 
 
 class BruteForceResolver(Grid):
-    """Resolver that uses brute-force backtracking to solve the grid."""
+    """Resolver that solves the grid by iterated constraint propagation.
+
+    It applies the usual Queens deductions (single-cell regions, aligned pairs
+    and triples, corners, parallel regions) until nothing changes. It does not
+    backtrack, so a grid that requires a guess is left unfinished rather than
+    solved -- check `is_solution_valid()` before trusting the result.
+    """
 
     def __init__(self, grid: list[list[Cell]]):
         super().__init__(grid)
@@ -56,7 +61,7 @@ class BruteForceResolver(Grid):
                 if cell.row != 0 and self.grid[cell.row - 1][cell.col].color != left.color:
                     self.grid[cell.row - 1][cell.col].block_cell()
                 if (
-                    cell.row != len(self.grid[0]) - 1
+                    cell.row != self.nb_rows - 1
                     and self.grid[cell.row + 1][cell.col].color != left.color
                 ):
                     self.grid[cell.row + 1][cell.col].block_cell()
@@ -65,7 +70,7 @@ class BruteForceResolver(Grid):
                 if cell.row != 0 and self.grid[cell.row - 1][cell.col].color != left.color:
                     self.grid[cell.row - 1][cell.col].block_cell()
                 if (
-                    cell.row < len(self.grid) - 1
+                    cell.row < self.nb_rows - 1
                     and self.grid[cell.row + 1][cell.col].color != left.color
                 ):
                     self.grid[cell.row + 1][cell.col].block_cell()
@@ -93,9 +98,8 @@ class BruteForceResolver(Grid):
 
         for row in rows:
             for cell in self.grid[row]:
-                if cell.color != color1 and cell.color != color2:
-                    if cell.is_empty():
-                        cell.block_cell()
+                if cell.is_empty() and cell.color not in (color1, color2):
+                    cell.block_cell()
         return
 
     # DONE
@@ -124,9 +128,8 @@ class BruteForceResolver(Grid):
         for col in cols:
             for cell in self.grid:
                 target_cell = cell[col]
-                if target_cell.color != color1 and target_cell.color != color2:
-                    if target_cell.is_empty():
-                        target_cell.block_cell()
+                if target_cell.is_empty() and target_cell.color not in (color1, color2):
+                    target_cell.block_cell()
         return
 
     # DONE
@@ -171,7 +174,7 @@ class BruteForceResolver(Grid):
                 if cell.col != 0 and self.grid[cell.row][cell.col - 1].color != top.color:
                     self.grid[cell.row][cell.col - 1].block_cell()
                 if (
-                    cell.col != len(self.grid[0]) - 1
+                    cell.col != self.nb_cols - 1
                     and self.grid[cell.row][cell.col + 1].color != top.color
                 ):
                     self.grid[cell.row][cell.col + 1].block_cell()
@@ -180,7 +183,7 @@ class BruteForceResolver(Grid):
                 if cell.col != 0 and self.grid[cell.row][cell.col - 1].color != top.color:
                     self.grid[cell.row][cell.col - 1].block_cell()
                 if (
-                    cell.col < len(self.grid[0]) - 1
+                    cell.col < self.nb_cols - 1
                     and self.grid[cell.row][cell.col + 1].color != top.color
                 ):
                     self.grid[cell.row][cell.col + 1].block_cell()
@@ -201,32 +204,32 @@ class BruteForceResolver(Grid):
                     self.grid[cells[0].row - 1][cells[0].col].block_cell()  # ↑
                 if cells[0].col - 1 >= 0:
                     self.grid[cells[0].row][cells[0].col - 1].block_cell()  # ←
-                if cells[0].row + 1 < len(self.grid) and cells[0].col + 1 < len(self.grid):
+                if cells[0].row + 1 < self.nb_rows and cells[0].col + 1 < self.nb_cols:
                     self.grid[cells[0].row + 1][cells[0].col + 1].block_cell()  # ↘
             # ¤ ¤
             #   ¤
             else:
                 if cells[1].row - 1 >= 0:
                     self.grid[cells[1].row - 1][cells[1].col].block_cell()  # ↑
-                if cells[1].col + 1 < len(self.grid):
+                if cells[1].col + 1 < self.nb_cols:
                     self.grid[cells[1].row][cells[1].col + 1].block_cell()  # →
-                if cells[1].row + 1 < len(self.grid) and cells[1].col - 1 >= 0:
+                if cells[1].row + 1 < self.nb_rows and cells[1].col - 1 >= 0:
                     self.grid[cells[1].row + 1][cells[1].col - 1].block_cell()  # ↙
         # ¤
         # ¤ ¤
         elif cells[0].col == cells[1].col:
-            if cells[1].row + 1 < len(self.grid):
+            if cells[1].row + 1 < self.nb_rows:
                 self.grid[cells[1].row + 1][cells[1].col].block_cell()  # ↓
             if cells[1].col - 1 >= 0:
                 self.grid[cells[1].row][cells[1].col - 1].block_cell()  # ←
-            if cells[1].row - 1 >= 0 and cells[1].col + 1 < len(self.grid):
+            if cells[1].row - 1 >= 0 and cells[1].col + 1 < self.nb_cols:
                 self.grid[cells[1].row - 1][cells[1].col + 1].block_cell()  # ↗
         #   ¤
         # ¤ ¤
         else:
-            if cells[2].row + 1 < len(self.grid):
+            if cells[2].row + 1 < self.nb_rows:
                 self.grid[cells[2].row + 1][cells[2].col].block_cell()  # ↓
-            if cells[2].col + 1 < len(self.grid):
+            if cells[2].col + 1 < self.nb_cols:
                 self.grid[cells[2].row][cells[2].col + 1].block_cell()  # →
             if cells[2].row - 1 >= 0 and cells[2].col - 1 >= 0:
                 self.grid[cells[2].row - 1][cells[2].col - 1].block_cell()  # ↖
@@ -266,14 +269,13 @@ class BruteForceResolver(Grid):
                     self._block_column_parallel(horizontal_region1, horizontal_region2)
         return
 
-    # WIP
     def resolve_grid(self) -> list[list[Cell]]:
-        max_iterations = 100
+        """Run constraint propagation until the grid stops changing.
 
-        iteration = 0
-        while iteration < max_iterations:
-            iteration += 1
-
+        Returns the grid, solved or not; call `is_solution_valid()` to know
+        which. Progress is reported through the module logger, not printed.
+        """
+        for iteration in range(1, MAX_ITERATIONS + 1):
             singles: list[Cell] = [
                 region.empty_cells[0] for region in self.regions if region.nb_empty_cells == 1
             ]
@@ -334,7 +336,7 @@ class BruteForceResolver(Grid):
             for region in two_row_regions:
                 rows = {cell.row for cell in region.empty_cells}
                 for other_region in two_row_regions:
-                    if region == other_region:
+                    if region is other_region:
                         continue
                     other_rows: set[int] = {cell.row for cell in other_region.empty_cells}
                     if rows == other_rows:
@@ -346,7 +348,7 @@ class BruteForceResolver(Grid):
             for region in two_col_regions:
                 cols = {cell.col for cell in region.empty_cells}
                 for other_region in two_col_regions:
-                    if region == other_region:
+                    if region is other_region:
                         continue
                     other_cols: set[int] = {cell.col for cell in other_region.empty_cells}
                     if cols == other_cols:
@@ -356,14 +358,20 @@ class BruteForceResolver(Grid):
                         )
 
             if self.is_grid_finished():
-                logger.info("Grid solved!")
-                print("Grid solved!")
+                if self.is_solution_valid():
+                    logger.info("Grid solved in %d iteration(s).", iteration)
+                else:
+                    logger.warning(
+                        "Propagation converged in %d iteration(s) but the result "
+                        "is not a valid solution.",
+                        iteration,
+                    )
                 break
 
-            if iteration == max_iterations:
-                logger.info("Max iterations reached, stopping resolution.")
-                print("Max iterations reached, stopping resolution.")
-
-            print_grid(self.grid)
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug("State after iteration %d:", iteration)
+                print_grid(self.grid)
+        else:
+            logger.warning("Max iterations (%d) reached, stopping resolution.", MAX_ITERATIONS)
 
         return self.grid

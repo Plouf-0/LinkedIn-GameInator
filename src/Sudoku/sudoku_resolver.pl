@@ -1,8 +1,10 @@
 :- use_module(library(clpfd)).
 
-% Areas (boxes) always span 3 columns; the number of rows per area varies
-% (e.g. 3 for a 9x9 grid, 2 for a 6x6 grid) and is passed in from Python.
-cols_per_area(3).
+% An area (box) holds exactly Size cells, so its width follows from its height:
+% a 9x9 grid with 3 rows per area has 3 columns per area, a 6x6 grid with 2 rows
+% per area has 3, a 4x4 grid with 2 rows per area has 2.
+cols_per_area(Size, RowsPerArea, ColsPerArea) :-
+    ColsPerArea is Size // RowsPerArea.
 
 % Splits a flat list into a list of Size-length rows.
 chunk(_, [], []).
@@ -18,7 +20,7 @@ prep([0|T], [_|T2]) :- !, prep(T, T2).
 prep([X|T], [X|T2]) :- prep(T, T2).
 
 sudoku(Grid, Size, RowsPerArea) :-
-    cols_per_area(ColsPerArea),
+    cols_per_area(Size, RowsPerArea, ColsPerArea),
 
     append(Grid, Vars),
     Vars ins 1..Size,
@@ -60,7 +62,7 @@ block_cell(Grid, BlockRow, BlockCol, DR-DC, Cell) :-
 % Entry point used from Python.
 % Puzzle: flat Prolog list of Size*Size integers (0 = empty cell).
 % Size: grid width/height (e.g. 9, 6).
-% RowsPerArea: number of rows in each area/box (columns per area is always 3).
+% RowsPerArea: number of rows in each area/box (columns per area is derived).
 % Solution: flat solved Puzzle, same length as Puzzle.
 resout(Puzzle, Size, RowsPerArea, Solution) :-
     prep(Puzzle, Solution),

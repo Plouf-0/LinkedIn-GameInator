@@ -12,6 +12,9 @@ uv run ruff format --check .
 echo "==> Type check (mypy)"
 uv run mypy .
 
+echo "==> Pre-commit hooks"
+uv run pre-commit run --all-files --show-diff-on-failure
+
 echo "==> Tests (pytest --cov)"
 uv run pytest --cov --cov-report=term
 

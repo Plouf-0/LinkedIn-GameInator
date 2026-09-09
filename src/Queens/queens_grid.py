@@ -2,22 +2,27 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from dataclasses import dataclass
 
 EMPTY = 0
 QUEEN = 1
 BLOCKED = -1
 
+# Maps the initial used in archives to every accepted name for that color.
+# The first name is the canonical one (what `convert_color` returns for an
+# initial); the others are aliases, so that both the French and the English
+# LinkedIn interfaces are understood.
 COLORS = {
     "B": ["bleu", "blue"],
-    "C": ["corail", "red"],
-    "G": ["gris", "gray"],
+    "C": ["corail", "red", "coral"],
+    "G": ["gris", "gray", "grey"],
     "N": ["beige", "black"],
     "O": ["orange"],
-    "P": ["lavande", "purple"],
-    "R": ["rose"],
+    "P": ["lavande", "purple", "lavender"],
+    "R": ["rose", "pink"],
     "V": ["vert", "green"],
-    "W": ["white"],
+    "W": ["white", "blanc"],
     "Y": ["jaune", "yellow"],
 }
 
@@ -45,7 +50,13 @@ class Cell:
         self.value = QUEEN
 
     def block_cell(self) -> None:
-        self.value = BLOCKED
+        """Block the cell, unless it already holds a queen.
+
+        Blocking is only ever a deduction ("no queen can go here"), so it must
+        never destroy a placement that has already been made.
+        """
+        if self.value != QUEEN:
+            self.value = BLOCKED
 
     def is_queen(self) -> bool:
         return self.value == QUEEN
@@ -69,7 +80,6 @@ class Grid:
         """Represents a group of cells sharing the same color within a grid."""
 
         cells: list[Cell]
-        grid: Grid
 
         @property
         def color(self) -> str:
@@ -94,13 +104,22 @@ class Grid:
 
     def __init__(self, grid: list[list[Cell]]):
         self.grid: list[list[Cell]] = grid
+        self._regions_by_color: dict[str, Grid.Region] = {}
         self.regions: list[Grid.Region] = self._setup_regions()
 
     def __getitem__(self, coord: tuple[int, int]) -> Cell:
         return self.grid[coord[0]][coord[1]]
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[list[Cell]]:
         return iter(self.grid)
+
+    @property
+    def nb_rows(self) -> int:
+        return len(self.grid)
+
+    @property
+    def nb_cols(self) -> int:
+        return len(self.grid[0]) if self.grid else 0
 
     def _get_row(self, row: int) -> list[Cell]:
         return self.grid[row]
@@ -111,23 +130,27 @@ class Grid:
     # DONE
     def _setup_regions(self) -> list[Grid.Region]:
         """Identify unique colors in the grid and group cells into regions based on their color"""
-        colors: list[str] = []
         regions: list[Grid.Region] = []
         for line in self.grid:
             for cell in line:
-                if cell.color not in colors:
-                    colors.append(cell.color)
-                    regions.append(Grid.Region(cells=[], grid=self))
-                regions[colors.index(cell.color)].cells.append(cell)
+                region = self._regions_by_color.get(cell.color)
+                if region is None:
+                    region = Grid.Region(cells=[])
+                    self._regions_by_color[cell.color] = region
+                    regions.append(region)
+                region.cells.append(cell)
         return regions
 
     # DONE
     def get_region_by_cell(self, cell: Cell) -> Grid.Region:
-        """Find the region that contains the given cell"""
-        for region in self.regions:
-            if cell in region.cells:
-                return region
-        raise ValueError(f"Cell {cell} not found in any region")
+        """Find the region that contains the given cell.
+
+        Lookup is done by color, which is what defines a region, so this is O(1).
+        """
+        region = self._regions_by_color.get(cell.color)
+        if region is None:
+            raise ValueError(f"Cell {cell} not found in any region")
+        return region
 
     # DONE
     def block_region(self, targetCell: Cell) -> None:
@@ -149,11 +172,10 @@ class Grid:
     def queenify_cell(self, cell: Cell) -> None:
         """Claim the cell as a queen and block all cells in the same row, column, and diagonals"""
         cell.make_queen()
-        for row in range(len(self.grid)):
-            for column in range(len(self.grid[0])):
-                if row == cell.row or column == cell.col:
-                    if self.grid[row][column].value == EMPTY:
-                        self.grid[row][column].value = BLOCKED
+        for row in range(self.nb_rows):
+            for column in range(self.nb_cols):
+                if (row == cell.row or column == cell.col) and self.grid[row][column].is_empty():
+                    self.grid[row][column].block_cell()
 
         self.block_cell_by_coord(cell.row - 1, cell.col - 1)
         self.block_cell_by_coord(cell.row - 1, cell.col + 1)
@@ -164,10 +186,43 @@ class Grid:
 
     # DONE
     def is_grid_finished(self) -> bool:
-        """Check if all regions in the grid are completed (i.e., no empty cells remain)"""
-        for region in self.regions:
-            if not region.is_completed:
-                return False
+        """Check if all regions in the grid are completed (i.e., no empty cells remain).
+
+        This only tells you that there is nothing left to deduce, *not* that the
+        grid holds a valid solution. Use `is_solution_valid` for that.
+        """
+        return all(region.is_completed for region in self.regions)
+
+    @property
+    def queens(self) -> list[Cell]:
+        """Every cell currently holding a queen."""
+        return [cell for row in self.grid for cell in row if cell.is_queen()]
+
+    def is_solution_valid(self) -> bool:
+        """Check that the grid holds a complete, legal Queens solution.
+
+        A grid is solved when there is exactly one queen per row, per column and
+        per region, and no two queens touch diagonally.
+        """
+        size = len(self.grid)
+        if size == 0:
+            return False
+
+        queens = self.queens
+        if len(queens) != size:
+            return False
+
+        if len({cell.row for cell in queens}) != size:
+            return False
+        if len({cell.col for cell in queens}) != size:
+            return False
+        if len({cell.color for cell in queens}) != len(self.regions):
+            return False
+
+        for i, first in enumerate(queens):
+            for second in queens[i + 1 :]:
+                if abs(first.row - second.row) <= 1 and abs(first.col - second.col) <= 1:
+                    return False
         return True
 
     def resolve_grid(self) -> list[list[Cell]]:

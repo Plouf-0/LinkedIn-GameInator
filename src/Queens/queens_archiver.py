@@ -1,4 +1,4 @@
-import os
+import logging
 from datetime import date as dt
 from pathlib import Path
 from typing import cast
@@ -6,11 +6,11 @@ from typing import cast
 from Archiver import Archiver
 from Queens.queens_grid import Cell, convert_color
 
+logger = logging.getLogger(__name__)
+
 
 class QueensArchiver(Archiver):
-    def __init__(
-        self,
-    ) -> None:
+    def __init__(self) -> None:
         """Initialize the QueensArchiver class."""
         super().__init__("Queens")
 
@@ -22,39 +22,38 @@ class QueensArchiver(Archiver):
         )
         self._archive_queens_grid(grid, opt_filename)
 
+    def _archive_path(self, filename: str) -> Path:
+        """Return the path of the archive file for the given name."""
+        return Path(self._archive_game_path) / f"{filename}_Queens.txt"
+
     def _archive_queens_grid(self, grid: list[list[Cell]], opt_filename: str = "") -> None:
-        """Archive the current state of the grid to a text file."""
-        today: str = str(dt.today())
+        """Archive the current state of the grid to a text file.
 
-        if opt_filename == "":
-            path = Path(f"{self._archive_game_path}/{today}_Queens.txt")
-            if self._create_archive(today):
-                return
-        else:
-            path = Path(f"{self._archive_game_path}/{opt_filename}_Queens.txt")
-            if self._create_archive(opt_filename):
-                return
+        One file is kept per day; if today's archive already exists the grid is
+        not written again.
+        """
+        filename = opt_filename or str(dt.today())
 
-        with open(path, "a", encoding="utf-8") as f:
+        if self._create_archive(filename):
+            return
+
+        path = self._archive_path(filename)
+        rows = [" ".join(convert_color(cell.color) or cell.color for cell in row) for row in grid]
+        with path.open("a", encoding="utf-8") as f:
             f.write(f"Today's grid size is {len(grid)}x{len(grid[0])}.\n\n")
-            for r in grid:
-                row: str = ""
-                for cell in r:
-                    row += convert_color(cell.color) + " "
-                f.write(row.strip() + "\n")
-        return
+            f.write("\n".join(rows) + "\n")
 
     def _create_archive(self, filename: str) -> bool:
-        """Create archive if doesn't exists.
+        """Create the archive file with its header if it does not exist yet.
 
         Output: True if the file already exists, False if it was created.
         """
-        path = Path(os.path.join(self._archive_game_path, f"{filename}_Queens.txt"))
+        path = self._archive_path(filename)
 
-        if not path.exists():
-            with open(path, "w", encoding="utf-8") as f:
-                f.write(f"Archive of the LinkedIn's game Queens on the day of {filename}\n")
-            return False
-        else:
-            print("File already exists.")
+        if path.exists():
+            logger.info("Archive %s already exists, skipping.", path.name)
             return True
+
+        with path.open("w", encoding="utf-8") as f:
+            f.write(f"Archive of the LinkedIn's game Queens on the day of {filename}\n")
+        return False
