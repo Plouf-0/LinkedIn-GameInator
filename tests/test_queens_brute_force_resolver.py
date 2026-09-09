@@ -11,11 +11,12 @@ Comprehensive test suite covering:
 
 # pyright: reportPrivateUsage=false
 
+import logging
 import warnings
 
 import pytest
 
-from Queens.brute_force_resolver import BruteForceResolver
+from Queens.brute_force_resolver import MAX_ITERATIONS, BruteForceResolver
 from Queens.queens_grid import BLOCKED, QUEEN, Cell, Grid, build_example_grid
 from Queens.ui import print_grid
 
@@ -169,14 +170,13 @@ def star_grid():
 
 
 # =============================================================================
-# TOTEST Test _block_row
+# Test _block_row
 # =============================================================================
 
 
 class TestBlockRow:
     """Tests for _block_row method."""
 
-    # DONE
     def test_block_row(self, three_squares_grid: BruteForceResolver):
         """Test _block_row block row"""
         left = three_squares_grid[1, 1]
@@ -191,7 +191,6 @@ class TestBlockRow:
         assert three_squares_grid[1, 8].is_blocked()
         assert three_squares_grid[1, 9].is_blocked()
 
-    # DONE
     def test_block_row_block_two_sides(self, three_squares_grid: BruteForceResolver):
         """Test _block_row block the two upper and under cells on a 2 cell block."""
         left = three_squares_grid[1, 1]
@@ -202,7 +201,6 @@ class TestBlockRow:
         assert three_squares_grid[2, 1].is_blocked()
         assert three_squares_grid[2, 2].is_blocked()
 
-    # DONE
     def test_block_row_block_three_sides(self, three_squares_grid: BruteForceResolver):
         """Test _block_row block the two upper and under cells on a 2 cell block."""
         left = three_squares_grid[1, 4]
@@ -216,7 +214,6 @@ class TestBlockRow:
         assert three_squares_grid[2, 5].is_blocked()
         assert not three_squares_grid[2, 6].is_blocked()
 
-    # DONE
     def test_block_row_block_big_sides(self, three_squares_grid: BruteForceResolver):
         """Test _block_row block the two upper and under cells on a 2 cell block."""
         left = three_squares_grid[8, 1]
@@ -229,7 +226,6 @@ class TestBlockRow:
         assert three_squares_grid[8, 8].is_blocked()
         assert three_squares_grid[8, 9].is_blocked()
 
-    # DONE
     def test_block_row_not_cells_color(self, three_squares_grid: BruteForceResolver):
         """Test _block_row don't block same color."""
         left = three_squares_grid[8, 2]
@@ -239,7 +235,6 @@ class TestBlockRow:
         assert not three_squares_grid[8, 6].is_blocked()
         assert not three_squares_grid[8, 7].is_blocked()
 
-    # DONE
     def test_block_row_not_cells_color_two_sides(self, star_grid: BruteForceResolver):
         """Test _block_row block the two upper and under cells on a 2 cell block."""
         left = star_grid[1, 5]
@@ -257,7 +252,6 @@ class TestBlockRow:
         assert star_grid[10, 5].is_blocked()
         assert star_grid[10, 6].is_blocked()
 
-    # DONE
     def test_block_row_not_cells_color_three_sides(self, star_grid: BruteForceResolver):
         """Test _block_row block the two upper and under cells on a 2 cell block."""
         left = star_grid[2, 4]
@@ -279,7 +273,6 @@ class TestBlockRow:
         assert not star_grid[9, 5].is_blocked()
         assert not star_grid[9, 6].is_blocked()
 
-    # DONE
     def test_claim_row_different_rows_raises(self, three_squares_grid: BruteForceResolver):
         """Test _claim_row raises ValueError for different rows."""
         left = three_squares_grid[0, 0]
@@ -298,14 +291,13 @@ class TestBlockRow:
 
 
 # =============================================================================
-# TOTEST Test _block_column
+# Test _block_column
 # =============================================================================
 
 
 class TestBlockColumn:
     """Tests for _block_column method."""
 
-    # DONE
     def test_block_column(self, three_squares_grid: BruteForceResolver):
         """Test _block_column block column"""
         up = three_squares_grid[3, 1]
@@ -319,7 +311,6 @@ class TestBlockColumn:
         assert three_squares_grid[8, 1].is_blocked()
         assert three_squares_grid[9, 1].is_blocked()
 
-    # DONE
     def test_block_column_block_two_sides(self, three_squares_grid: BruteForceResolver):
         """Test _block_column block the two upper and under cells on a 2 cell block."""
         up = three_squares_grid[3, 1]
@@ -330,7 +321,6 @@ class TestBlockColumn:
         assert three_squares_grid[3, 2].is_blocked()
         assert three_squares_grid[4, 2].is_blocked()
 
-    # DONE
     def test_block_column_block_three_sides(self, three_squares_grid: BruteForceResolver):
         """Test _block_column block the two upper and under cells on a 2 cell block."""
         up = three_squares_grid[3, 5]
@@ -343,7 +333,6 @@ class TestBlockColumn:
         assert three_squares_grid[4, 6].is_blocked()
         assert not three_squares_grid[5, 6].is_blocked()
 
-    # DONE
     def test_block_column_block_big_sides(self, three_squares_grid: BruteForceResolver):
         """Test _block_column block the two upper and under cells on a 2 cell block."""
         up = three_squares_grid[2, 8]
@@ -358,7 +347,6 @@ class TestBlockColumn:
         assert three_squares_grid[8, 8].is_blocked()
         assert three_squares_grid[9, 8].is_blocked()
 
-    # DONE
     def test_block_column_not_cells_color(self, three_squares_grid: BruteForceResolver):
         """Test _block_column don't block same color."""
         up = three_squares_grid[3, 8]
@@ -367,7 +355,6 @@ class TestBlockColumn:
         assert not three_squares_grid[2, 8].is_blocked()
         assert not three_squares_grid[6, 8].is_blocked()
 
-    # DONE
     def test_block_column_not_cells_color_two_sides(self, star_grid: BruteForceResolver):
         """Test _block_column block the two upper and under cells on a 2 cell block."""
         up = star_grid[4, 1]
@@ -385,7 +372,6 @@ class TestBlockColumn:
         assert star_grid[5, 10].is_blocked()
         assert star_grid[6, 10].is_blocked()
 
-    # DONE
     def test_block_column_not_cells_color_three_sides(self, star_grid: BruteForceResolver):
         """Test _block_column block the two upper and under cells on a 2 cell block."""
         up = star_grid[4, 2]
@@ -407,7 +393,6 @@ class TestBlockColumn:
         assert not star_grid[5, 9].is_blocked()
         assert not star_grid[6, 9].is_blocked()
 
-    # DONE
     def test_block_column_different_rows_raises(self, three_squares_grid: BruteForceResolver):
         """Test _block_column raises ValueError for different columns."""
         up = three_squares_grid[0, 0]
@@ -415,7 +400,6 @@ class TestBlockColumn:
         with pytest.raises(ValueError, match="Top and bottom cells must be in the same column."):
             three_squares_grid._block_column(up, bottom)
 
-    # DONE
     def test_block_column_swaps_up_bottom_with_warning(
         self, three_squares_grid: BruteForceResolver
     ):
@@ -537,14 +521,13 @@ class TestClaimCorner:
 
 
 # =============================================================================
-# DONE Test Parallel Claiming
+# Test Parallel Claiming
 # =============================================================================
 
 
 class TestClaimParallel:
     """Tests for parallel claiming methods."""
 
-    # DONE
     def test_block_row_parallel_basic(self, three_squares_grid: BruteForceResolver):
         """Test _block_row_parallel basic execution."""
         cells1 = [three_squares_grid[3, 1], three_squares_grid[4, 1]]
@@ -568,7 +551,6 @@ class TestClaimParallel:
         assert three_squares_grid[4, 8].is_blocked()
         assert three_squares_grid[4, 9].is_blocked()
 
-    # DONE
     def test_block_column_parallel_basic(self, three_squares_grid: BruteForceResolver):
         """Test _block_column_parallel basic execution."""
         cells1 = [three_squares_grid[1, 1], three_squares_grid[1, 2]]
@@ -784,23 +766,24 @@ class TestBuildExampleGrid:
 class TestResolveGrid:
     """Tests for QueenResolver function."""
 
-    def test_resolve_grid_empty_grid(self, capsys: pytest.CaptureFixture[str]):
-        """Test QueenResolver with empty grid."""
+    def test_resolve_grid_empty_grid(self, caplog: pytest.LogCaptureFixture):
+        """An empty grid converges immediately but is not a valid solution."""
         grid = BruteForceResolver([])
-        grid.resolve_grid()
-        captured = capsys.readouterr()
-        assert len(captured.out) > 0
+        with caplog.at_level(logging.DEBUG, logger="Queens.brute_force_resolver"):
+            grid.resolve_grid()
+        assert "not a valid solution" in caplog.text
 
-    def test_resolve_grid_valid_grid(self, capsys: pytest.CaptureFixture[str]):
-        """Test QueenResolver with valid grid."""
+    def test_resolve_grid_valid_grid(self, caplog: pytest.LogCaptureFixture):
+        """A 2x2 grid cannot hold two non-adjacent queens, so it is reported invalid."""
         test_grid = [
             "R R",
             "G G",
         ]
         grid = BruteForceResolver(build_example_grid(test_grid))
-        grid.resolve_grid()
-        captured = capsys.readouterr()
-        assert len(captured.out) > 0
+        with caplog.at_level(logging.DEBUG, logger="Queens.brute_force_resolver"):
+            grid.resolve_grid()
+        assert "not a valid solution" in caplog.text
+        assert not grid.is_solution_valid()
 
     def testresolve_grid_modifies_grid(self):
         """Test that QueenResolver modifies the grid."""
@@ -1219,8 +1202,8 @@ class TestResolve:
         assert isinstance(result, list)
         assert len(result) > 0
 
-    def test_resolve_max_iterations(self, capsys: pytest.CaptureFixture[str]):
-        """Test that resolve stops at max iterations."""
+    def test_resolve_reports_an_unsolvable_grid(self, caplog: pytest.LogCaptureFixture):
+        """A single region cannot host five queens, so the search must give up."""
         test_grid = [
             "R R R R R",
             "R R R R R",
@@ -1230,12 +1213,21 @@ class TestResolve:
         ]
         base_grid = build_example_grid(test_grid)
         grid = BruteForceResolver(base_grid)
-        result = grid.resolve_grid()
+        with caplog.at_level(logging.DEBUG, logger="Queens.brute_force_resolver"):
+            result = grid.resolve_grid()
 
-        captured = capsys.readouterr()
-        output = captured.out
-        assert "Max iterations reached, stopping resolution.\n" in output
+        assert "not a valid solution" in caplog.text
+        assert not grid.is_solution_valid()
         assert result is not None
+
+    def test_propagation_stops_at_a_fixed_point(self, caplog: pytest.LogCaptureFixture):
+        """Propagation must converge, not spin until MAX_ITERATIONS."""
+        grid = BruteForceResolver(build_example_grid(["R R R", "R R R", "R R R"]))
+        with caplog.at_level(logging.DEBUG, logger="Queens.brute_force_resolver"):
+            grid._propagate()
+
+        assert "fixed point" in caplog.text
+        assert f"Max propagation passes ({MAX_ITERATIONS})" not in caplog.text
 
 
 # =============================================================================
@@ -1323,3 +1315,89 @@ class TestQueenResolverIntegration:
         assert grid[5, 7].is_queen()
         assert grid[6, 5].is_queen()
         assert grid[7, 3].is_queen()
+
+
+# =============================================================================
+# Test backtracking search
+# =============================================================================
+
+
+class TestBacktracking:
+    """Tests for the search that takes over when propagation stalls."""
+
+    def test_solves_a_grid_propagation_alone_cannot(self):
+        """This board has no forced move at the start, so it needs a guess."""
+        test_grid = [
+            "R R B B B",
+            "R R B B B",
+            "G G Y Y B",
+            "G G Y Y W",
+            "G G Y W W",
+        ]
+        grid = BruteForceResolver(build_example_grid(test_grid))
+
+        # Propagation on its own reaches a fixed point without solving.
+        grid._propagate()
+        assert not grid.is_solution_valid()
+
+        grid = BruteForceResolver(build_example_grid(test_grid))
+        grid.resolve_grid()
+        assert grid.is_solution_valid()
+
+    def test_solution_places_one_queen_per_row_column_and_region(self):
+        test_grid = [
+            "R R B B B",
+            "R R B B B",
+            "G G Y Y B",
+            "G G Y Y W",
+            "G G Y W W",
+        ]
+        grid = BruteForceResolver(build_example_grid(test_grid))
+        grid.resolve_grid()
+
+        queens = grid.queens
+        assert len(queens) == 5
+        assert len({cell.row for cell in queens}) == 5
+        assert len({cell.col for cell in queens}) == 5
+        assert len({cell.color for cell in queens}) == 5
+
+    def test_search_restores_the_grid_after_a_failed_guess(self):
+        """An unsolvable board must be left with no queen half-placed."""
+        test_grid = [
+            "R R",
+            "G G",
+        ]
+        grid = BruteForceResolver(build_example_grid(test_grid))
+        grid.resolve_grid()
+
+        assert not grid.is_solution_valid()
+
+    def test_snapshot_and_restore_round_trip(self):
+        grid = BruteForceResolver(build_example_grid(["R B", "B R"]))
+        before = grid._snapshot()
+
+        grid.queenify_cell(grid[0, 0])
+        assert grid._snapshot() != before
+
+        grid._restore(before)
+        assert grid._snapshot() == before
+        assert all(cell.is_empty() for row in grid.grid for cell in row)
+
+    def test_search_budget_is_respected(self):
+        """With no budget left the search gives up instead of exploring."""
+        grid = BruteForceResolver(build_example_grid(["R R B", "R G B", "G G B"]))
+
+        assert grid._search(budget=[1]) is False
+
+    def test_dead_region_is_detected(self):
+        """A region with no queen and no empty cell can never be completed."""
+        grid = BruteForceResolver(build_example_grid(["R B", "R B"]))
+        region = grid.get_region_by_cell(grid[0, 0])
+
+        assert not region.is_dead
+        region.block_all_cells()
+        assert region.is_dead
+
+        grid2 = BruteForceResolver(build_example_grid(["R B", "R B"]))
+        grid2.queenify_cell(grid2[0, 0])
+        assert not grid2.get_region_by_cell(grid2[0, 0]).is_dead

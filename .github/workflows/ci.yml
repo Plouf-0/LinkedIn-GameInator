@@ -33,6 +33,9 @@ jobs:
       - name: Type check (mypy)
         run: uv run mypy .
 
+      - name: Pre-commit hooks
+        run: uv run pre-commit run --all-files --show-diff-on-failure
+
   tests:
     name: Tests
     runs-on: ubuntu-latest
@@ -40,7 +43,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.11", "3.12", "3.13"]
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
 
     steps:
       - name: Checkout du code
@@ -114,20 +117,48 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: choco install swi-prolog -y
 
+      - name: Ajouter SWI-Prolog au PATH - Windows
+        if: matrix.os == 'windows-latest'
+        shell: bash
+        run: echo "/c/Program Files/swipl/bin" >> "$GITHUB_PATH"
+
       - name: Installer les dépendances
         run: uv sync --locked --dev
 
-      - name: Installer PyInstaller
-        run: uv add --dev pyinstaller
-
+      # Le .spec embarque SWI-Prolog dans l'exécutable, pour que le résolveur
+      # Sudoku fonctionne sur une machine qui ne l'a pas installé.
       - name: Build de l'exécutable
-        run: uv run pyinstaller --onefile --name ${{ matrix.artifact_name }} --paths src --hidden-import selenium.webdriver.firefox.webdriver "src/linkedin_gameinator/__main__.py"
+        run: uv run pyinstaller --noconfirm --clean linkedin-gameinator.spec
+
+      # Vérifie l'artefact lui-même : sans ça, un exe qui ne démarre pas ou qui
+      # ne trouve pas son SWI-Prolog embarqué partirait en release sans bruit.
+      - name: Smoke test de l'exécutable
+        shell: bash
+        run: |
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            binary="dist/linkedin-gameinator.exe"
+          else
+            binary="dist/linkedin-gameinator"
+            chmod +x "$binary"
+          fi
+          output=$("$binary" --self-test)
+          echo "$output"
+          echo "$output" | grep -q "the bundled SWI-Prolog"             || { echo "::error::l'exécutable n'utilise pas le SWI-Prolog embarqué"; exit 1; }
+
+      - name: Renommer l'artefact
+        shell: bash
+        run: |
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            mv dist/linkedin-gameinator.exe "dist/${{ matrix.artifact_name }}"
+          else
+            mv dist/linkedin-gameinator "dist/${{ matrix.artifact_name }}"
+          fi
 
       - name: Upload de l'artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact_name }}
-          path: dist/${{ matrix.artifact_name }}*
+          path: dist/${{ matrix.artifact_name }}
 
   release:
     name: Publier la release

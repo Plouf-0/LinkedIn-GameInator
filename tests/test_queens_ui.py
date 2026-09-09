@@ -427,7 +427,7 @@ class TestPrintRegions:
 
     def test_print_regions_single(self, capsys: pytest.CaptureFixture[str]):
         """Test printing a single region."""
-        regions = [[Cell(0, 0, "red"), Cell(0, 1, "red"), Cell(1, 0, "red")]]
+        regions = [Grid.Region(cells=[Cell(0, 0, "red"), Cell(0, 1, "red"), Cell(1, 0, "red")])]
         print_regions(regions)
         captured = capsys.readouterr()
 
@@ -442,7 +442,7 @@ class TestPrintRegions:
         self, simple_grid_2x2: Grid, capsys: pytest.CaptureFixture[str]
     ):
         """Test printing multiple regions from grid."""
-        regions = [region.cells for region in simple_grid_2x2.regions]
+        regions = simple_grid_2x2.regions
         print_regions(regions)
         captured = capsys.readouterr()
 
@@ -454,7 +454,7 @@ class TestPrintRegions:
 
     def test_print_regions_format(self, simple_grid_2x2: Grid, capsys: pytest.CaptureFixture[str]):
         """Test the format of region output."""
-        regions = [region.cells for region in simple_grid_2x2.regions]
+        regions = simple_grid_2x2.regions
         print_regions(regions)
         captured = capsys.readouterr()
 
@@ -470,7 +470,7 @@ class TestPrintRegions:
         self, grid_all_colors: Grid, capsys: pytest.CaptureFixture[str]
     ):
         """Test printing regions with various coordinate values."""
-        regions = [region.cells for region in grid_all_colors.regions]
+        regions = grid_all_colors.regions
         print_regions(regions)
         captured = capsys.readouterr()
 
@@ -482,7 +482,7 @@ class TestPrintRegions:
         self, simple_grid_2x2: Grid, capsys: pytest.CaptureFixture[str]
     ):
         """Test that region order is preserved in output."""
-        regions = [region.cells for region in simple_grid_2x2.regions]
+        regions = simple_grid_2x2.regions
         print_regions(regions)
         captured = capsys.readouterr()
 
@@ -494,7 +494,7 @@ class TestPrintRegions:
         self, grid_from_builder: Grid, capsys: pytest.CaptureFixture[str]
     ):
         """Test printing regions extracted from grid.regions."""
-        regions = [region.cells for region in grid_from_builder.regions]
+        regions = grid_from_builder.regions
         print_regions(regions)
         captured = capsys.readouterr()
 
@@ -506,7 +506,7 @@ class TestPrintRegions:
         self, grid_single_color: Grid, capsys: pytest.CaptureFixture[str]
     ):
         """Test printing regions with single color grid."""
-        regions = [region.cells for region in grid_single_color.regions]
+        regions = grid_single_color.regions
         print_regions(regions)
         captured = capsys.readouterr()
 
@@ -518,7 +518,7 @@ class TestPrintRegions:
         self, grid_with_queens: Grid, capsys: pytest.CaptureFixture[str]
     ):
         """Test printing regions from grid with queens."""
-        regions = [region.cells for region in grid_with_queens.regions]
+        regions = grid_with_queens.regions
         print_regions(regions)
         captured = capsys.readouterr()
 
@@ -601,7 +601,7 @@ class TestIntegration:
         print_grid(grid_from_builder.grid)
         captured_grid = capsys.readouterr()
 
-        regions = [region.cells for region in grid_from_builder.regions]
+        regions = grid_from_builder.regions
         print_regions(regions)
         captured_regions = capsys.readouterr()
 
@@ -620,7 +620,7 @@ class TestIntegration:
         print_grid(grid.grid)
         captured_grid = capsys.readouterr()
 
-        regions = [region.cells for region in grid.regions]
+        regions = grid.regions
         print_regions(regions)
         captured_regions = capsys.readouterr()
 
@@ -657,14 +657,14 @@ class TestIntegration:
         self, grid_single_color: Grid, capsys: pytest.CaptureFixture[str]
     ):
         """Test printing regions from single color grid."""
-        regions = [region.cells for region in grid_single_color.regions]
+        regions = grid_single_color.regions
         print_regions(regions)
         captured = capsys.readouterr()
 
         output = captured.out
         assert "Region 0:" in output
         assert len(regions) == 1
-        assert len(regions[0]) == 9
+        assert len(regions[0].cells) == 9
 
     def test_print_complex_example_grid(self, capsys: pytest.CaptureFixture[str]):
         """Test printing a complex 10x10 example grid with multiple colors."""
@@ -676,32 +676,14 @@ class TestIntegration:
                 # Determine color based on the pattern
                 if r == 0:
                     color = "pourpre"
-                elif r == 1:
+                elif r == 1 or r == 2:
                     if c == 4:
                         color = "vert"
                     elif c == 6:
                         color = "black"
                     else:
                         color = "pourpre"
-                elif r == 2:
-                    if c == 4:
-                        color = "vert"
-                    elif c == 6:
-                        color = "black"
-                    else:
-                        color = "pourpre"
-                elif r == 3:
-                    if c == 3:
-                        color = "bleu"
-                    elif c == 4:
-                        color = "vert"
-                    elif c == 5:
-                        color = "gris"
-                    elif c == 6:
-                        color = "black"
-                    else:
-                        color = "pourpre"
-                elif r == 4:
+                elif r == 3 or r == 4:
                     if c == 3:
                         color = "bleu"
                     elif c == 4:
@@ -808,7 +790,7 @@ class TestIntegration:
         # Row 9 (line 10 in output): contains jaune at cols 0-8 (9 cells)
         assert lines[10].count("\033[1;30;103m") >= 9  # jaune cells in row 9
 
-        regions = [region.cells for region in grid.regions]
+        regions = grid.regions
         print_regions(regions)
         captured_regions = capsys.readouterr()
 

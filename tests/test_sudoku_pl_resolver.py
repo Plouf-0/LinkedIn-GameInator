@@ -5,7 +5,8 @@ from Sudoku.sudoku_pl_resolver import solve
 
 def _is_valid_solution(grid: list[list[int]], rows_per_area: int) -> bool:
     size = len(grid)
-    cols_per_area = 3
+    # An area holds exactly `size` cells, so its width follows from its height.
+    cols_per_area = size // rows_per_area
 
     rows_ok = all(sorted(row) == list(range(1, size + 1)) for row in grid)
     cols_ok = all(sorted(col) == list(range(1, size + 1)) for col in zip(*grid, strict=True))
@@ -122,3 +123,19 @@ def test_solve_raises_on_unsolvable_grid():
 
     with pytest.raises(ValueError, match="No solution found"):
         solve(grid, rows_per_area=3)
+
+
+def test_solve_returns_a_valid_solution_4x4():
+    """A 4x4 grid has 2x2 areas, which the solver derives from rows_per_area."""
+    grid = [
+        [1, 0, 0, 0],
+        [0, 0, 3, 0],
+        [0, 4, 0, 0],
+        [0, 0, 0, 2],
+    ]
+
+    solution = solve(grid, rows_per_area=2)
+
+    assert _is_valid_solution(solution, rows_per_area=2)
+    assert solution[0][0] == 1
+    assert solution[3][3] == 2

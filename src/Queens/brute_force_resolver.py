@@ -8,20 +8,30 @@ from Queens.ui import print_grid
 
 logger = logging.getLogger(__name__)
 
-# Try to import UI helpers from the same folder; prefer relative import when used as a package
-try:
-    pass  # type: ignore
-except Exception:
-    pass  # type: ignore
+# Upper bound on constraint-propagation passes. The propagation is monotonic
+# (it only ever fills cells in), so it always converges well before this; the
+# limit only guards against a rule that would never reach a fixed point.
+MAX_ITERATIONS = 100
+
+# Upper bound on the number of guesses the backtracking search may make. A
+# LinkedIn board has at most a handful of regions, so a real puzzle settles in
+# far fewer nodes; the budget only stops a pathological grid from hanging.
+MAX_SEARCH_NODES = 20_000
 
 
 class BruteForceResolver(Grid):
-    """Resolver that uses brute-force backtracking to solve the grid."""
+    """Resolver that combines constraint propagation with backtracking.
+
+    It first applies the usual Queens deductions (single-cell regions, aligned
+    pairs and triples, corners, parallel regions) until nothing changes. Where
+    that stalls, it guesses a queen in the most constrained region and recurses,
+    undoing the guess if it leads nowhere. Check `is_solution_valid()` to know
+    whether the returned grid is actually solved.
+    """
 
     def __init__(self, grid: list[list[Cell]]):
         super().__init__(grid)
 
-    # DONE
     def _block_row(self, left: Cell, right: Cell) -> None:
         """Block the cells outside of the row selected by two cells in the same region
 
@@ -56,7 +66,7 @@ class BruteForceResolver(Grid):
                 if cell.row != 0 and self.grid[cell.row - 1][cell.col].color != left.color:
                     self.grid[cell.row - 1][cell.col].block_cell()
                 if (
-                    cell.row != len(self.grid[0]) - 1
+                    cell.row != self.nb_rows - 1
                     and self.grid[cell.row + 1][cell.col].color != left.color
                 ):
                     self.grid[cell.row + 1][cell.col].block_cell()
@@ -65,13 +75,12 @@ class BruteForceResolver(Grid):
                 if cell.row != 0 and self.grid[cell.row - 1][cell.col].color != left.color:
                     self.grid[cell.row - 1][cell.col].block_cell()
                 if (
-                    cell.row < len(self.grid) - 1
+                    cell.row < self.nb_rows - 1
                     and self.grid[cell.row + 1][cell.col].color != left.color
                 ):
                     self.grid[cell.row + 1][cell.col].block_cell()
         return
 
-    # DONE
     def _block_row_parallel(self, cells1: list[Cell], cells2: list[Cell]) -> None:
         """Block cells in the same row of the cells1 and cells2
         that are not of the same color as the given parallel regions.
@@ -93,12 +102,10 @@ class BruteForceResolver(Grid):
 
         for row in rows:
             for cell in self.grid[row]:
-                if cell.color != color1 and cell.color != color2:
-                    if cell.is_empty():
-                        cell.block_cell()
+                if cell.is_empty() and cell.color not in (color1, color2):
+                    cell.block_cell()
         return
 
-    # DONE
     def _block_column_parallel(self, cells1: list[Cell], cells2: list[Cell]) -> None:
         """Block cells in the same column of the cells1 and cells2
         that are not of the same color as the given parallel regions.
@@ -124,12 +131,10 @@ class BruteForceResolver(Grid):
         for col in cols:
             for cell in self.grid:
                 target_cell = cell[col]
-                if target_cell.color != color1 and target_cell.color != color2:
-                    if target_cell.is_empty():
-                        target_cell.block_cell()
+                if target_cell.is_empty() and target_cell.color not in (color1, color2):
+                    target_cell.block_cell()
         return
 
-    # DONE
     def _block_column(self, top: Cell, bottom: Cell) -> None:
         """Block cells in the same column of the given top and bottom cells
         that are not of the same color as the given top and bottom cells.
@@ -171,7 +176,7 @@ class BruteForceResolver(Grid):
                 if cell.col != 0 and self.grid[cell.row][cell.col - 1].color != top.color:
                     self.grid[cell.row][cell.col - 1].block_cell()
                 if (
-                    cell.col != len(self.grid[0]) - 1
+                    cell.col != self.nb_cols - 1
                     and self.grid[cell.row][cell.col + 1].color != top.color
                 ):
                     self.grid[cell.row][cell.col + 1].block_cell()
@@ -180,13 +185,12 @@ class BruteForceResolver(Grid):
                 if cell.col != 0 and self.grid[cell.row][cell.col - 1].color != top.color:
                     self.grid[cell.row][cell.col - 1].block_cell()
                 if (
-                    cell.col < len(self.grid[0]) - 1
+                    cell.col < self.nb_cols - 1
                     and self.grid[cell.row][cell.col + 1].color != top.color
                 ):
                     self.grid[cell.row][cell.col + 1].block_cell()
         return
 
-    # DONE
     def _claim_corner(self, cells: list[Cell]) -> None:
         """Claim cells around the given 3 cells that form a corner
         that are not of the same color as the given 3 cells."""
@@ -201,38 +205,37 @@ class BruteForceResolver(Grid):
                     self.grid[cells[0].row - 1][cells[0].col].block_cell()  # ↑
                 if cells[0].col - 1 >= 0:
                     self.grid[cells[0].row][cells[0].col - 1].block_cell()  # ←
-                if cells[0].row + 1 < len(self.grid) and cells[0].col + 1 < len(self.grid):
+                if cells[0].row + 1 < self.nb_rows and cells[0].col + 1 < self.nb_cols:
                     self.grid[cells[0].row + 1][cells[0].col + 1].block_cell()  # ↘
             # ¤ ¤
             #   ¤
             else:
                 if cells[1].row - 1 >= 0:
                     self.grid[cells[1].row - 1][cells[1].col].block_cell()  # ↑
-                if cells[1].col + 1 < len(self.grid):
+                if cells[1].col + 1 < self.nb_cols:
                     self.grid[cells[1].row][cells[1].col + 1].block_cell()  # →
-                if cells[1].row + 1 < len(self.grid) and cells[1].col - 1 >= 0:
+                if cells[1].row + 1 < self.nb_rows and cells[1].col - 1 >= 0:
                     self.grid[cells[1].row + 1][cells[1].col - 1].block_cell()  # ↙
         # ¤
         # ¤ ¤
         elif cells[0].col == cells[1].col:
-            if cells[1].row + 1 < len(self.grid):
+            if cells[1].row + 1 < self.nb_rows:
                 self.grid[cells[1].row + 1][cells[1].col].block_cell()  # ↓
             if cells[1].col - 1 >= 0:
                 self.grid[cells[1].row][cells[1].col - 1].block_cell()  # ←
-            if cells[1].row - 1 >= 0 and cells[1].col + 1 < len(self.grid):
+            if cells[1].row - 1 >= 0 and cells[1].col + 1 < self.nb_cols:
                 self.grid[cells[1].row - 1][cells[1].col + 1].block_cell()  # ↗
         #   ¤
         # ¤ ¤
         else:
-            if cells[2].row + 1 < len(self.grid):
+            if cells[2].row + 1 < self.nb_rows:
                 self.grid[cells[2].row + 1][cells[2].col].block_cell()  # ↓
-            if cells[2].col + 1 < len(self.grid):
+            if cells[2].col + 1 < self.nb_cols:
                 self.grid[cells[2].row][cells[2].col + 1].block_cell()  # →
             if cells[2].row - 1 >= 0 and cells[2].col - 1 >= 0:
                 self.grid[cells[2].row - 1][cells[2].col - 1].block_cell()  # ↖
         return
 
-    # WIP first version for 2 empty-cells regions
     def _claim_parallel(self, regions: list[list[Cell]]) -> None:
         """Claim cells in the same row or column of the given parallel regions
         that are not of the same color as the given parallel regions."""
@@ -266,13 +269,15 @@ class BruteForceResolver(Grid):
                     self._block_column_parallel(horizontal_region1, horizontal_region2)
         return
 
-    # WIP
-    def resolve_grid(self) -> list[list[Cell]]:
-        max_iterations = 100
+    def _propagate(self) -> None:
+        """Apply every deduction rule until the grid stops changing.
 
-        iteration = 0
-        while iteration < max_iterations:
-            iteration += 1
+        Propagation is monotonic -- a cell only ever goes from empty to queen or
+        blocked -- so a pass that changes nothing means a fixed point has been
+        reached and further passes would be wasted work.
+        """
+        for iteration in range(1, MAX_ITERATIONS + 1):
+            before = self._snapshot()
 
             singles: list[Cell] = [
                 region.empty_cells[0] for region in self.regions if region.nb_empty_cells == 1
@@ -334,7 +339,7 @@ class BruteForceResolver(Grid):
             for region in two_row_regions:
                 rows = {cell.row for cell in region.empty_cells}
                 for other_region in two_row_regions:
-                    if region == other_region:
+                    if region is other_region:
                         continue
                     other_rows: set[int] = {cell.row for cell in other_region.empty_cells}
                     if rows == other_rows:
@@ -346,7 +351,7 @@ class BruteForceResolver(Grid):
             for region in two_col_regions:
                 cols = {cell.col for cell in region.empty_cells}
                 for other_region in two_col_regions:
-                    if region == other_region:
+                    if region is other_region:
                         continue
                     other_cols: set[int] = {cell.col for cell in other_region.empty_cells}
                     if cols == other_cols:
@@ -355,15 +360,71 @@ class BruteForceResolver(Grid):
                             [other_region.empty_cells[0], other_region.empty_cells[-1]],
                         )
 
-            if self.is_grid_finished():
-                logger.info("Grid solved!")
-                print("Grid solved!")
-                break
+            if self.is_grid_finished() or self._snapshot() == before:
+                logger.debug("Propagation reached a fixed point in %d pass(es).", iteration)
+                return
 
-            if iteration == max_iterations:
-                logger.info("Max iterations reached, stopping resolution.")
-                print("Max iterations reached, stopping resolution.")
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug("State after pass %d:", iteration)
+                print_grid(self.grid)
+        else:
+            logger.warning("Max propagation passes (%d) reached.", MAX_ITERATIONS)
 
-            print_grid(self.grid)
+    def _snapshot(self) -> list[int]:
+        """Capture the state of every cell, cheaply enough to do it per search node."""
+        return [cell.value for row in self.grid for cell in row]
+
+    def _restore(self, snapshot: list[int]) -> None:
+        """Put every cell back to the state captured by `_snapshot`."""
+        cells = (cell for row in self.grid for cell in row)
+        for cell, value in zip(cells, snapshot, strict=True):
+            cell.value = value
+
+    def _search(self, budget: list[int]) -> bool:
+        """Propagate, then guess a queen for the most constrained region.
+
+        `budget` is a single-element list holding the number of nodes still
+        allowed, so that the count is shared across the whole recursion.
+        """
+        self._propagate()
+
+        if self.is_solution_valid():
+            return True
+
+        open_regions = [region for region in self.regions if not region.is_completed]
+        if not open_regions or any(region.is_dead for region in self.regions):
+            return False
+
+        budget[0] -= 1
+        if budget[0] <= 0:
+            return False
+
+        # Guessing in the region with the fewest options keeps the tree narrow.
+        region = min(open_regions, key=lambda r: r.nb_empty_cells)
+        snapshot = self._snapshot()
+        for cell in region.empty_cells:
+            self.queenify_cell(cell)
+            if self._search(budget):
+                return True
+            self._restore(snapshot)
+        return False
+
+    def resolve_grid(self) -> list[list[Cell]]:
+        """Solve the grid by constraint propagation, guessing where it stalls.
+
+        Returns the grid, solved or not; call `is_solution_valid()` to know
+        which. Progress is reported through the module logger, not printed.
+        """
+        budget = [MAX_SEARCH_NODES]
+
+        if self._search(budget):
+            logger.info("Grid solved (%d search node(s)).", MAX_SEARCH_NODES - budget[0])
+        elif budget[0] <= 0:
+            logger.warning(
+                "Search budget (%d nodes) exhausted; the result is not a valid solution.",
+                MAX_SEARCH_NODES,
+            )
+        else:
+            logger.warning("The grid has no solution; the result is not a valid solution.")
 
         return self.grid

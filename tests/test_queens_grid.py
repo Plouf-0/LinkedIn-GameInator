@@ -186,10 +186,10 @@ class TestCell:
         assert blocked_cell.value == BLOCKED
 
     def test_block_cell_on_queen(self, queen_cell: Cell):
-        """Test block_cell on queen cell - should override to blocked."""
+        """Test block_cell on a queen cell - the queen must be preserved."""
         assert queen_cell.value == QUEEN
         queen_cell.block_cell()
-        assert queen_cell.value == BLOCKED
+        assert queen_cell.value == QUEEN
 
     def test_is_empty_true(self, empty_cell: Cell):
         """Test is_empty returns True for empty cell."""

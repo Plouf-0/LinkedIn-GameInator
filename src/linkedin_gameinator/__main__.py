@@ -1,9 +1,4 @@
-from WebScrapper.app import main as run_scrapper
-
-
-def main() -> None:
-    run_scrapper()
-
+from linkedin_gameinator.cli import main
 
 if __name__ == "__main__":
     main()
