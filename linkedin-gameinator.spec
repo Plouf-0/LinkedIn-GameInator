@@ -12,6 +12,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(SPECPATH) / "packaging"))
 
+from PyInstaller.utils.hooks import copy_metadata  # noqa: E402
+
 from collect_swipl import SwiplNotFound, collect  # noqa: E402
 
 try:
@@ -25,7 +27,12 @@ a = Analysis(
     ["src/linkedin_gameinator/__main__.py"],
     pathex=["src"],
     binaries=swipl_binaries,
-    datas=[("src/Sudoku/sudoku_resolver.pl", "Sudoku"), *swipl_datas],
+    datas=[
+        ("src/Sudoku/sudoku_resolver.pl", "Sudoku"),
+        # So that `--version` can read it from the package metadata.
+        *copy_metadata("linkedin-gameinator"),
+        *swipl_datas,
+    ],
     hiddenimports=[
         "selenium.webdriver.firefox.webdriver",
         "pyswip",

@@ -23,7 +23,5 @@ __all__ = [
     "print_grid",
 ]
 
-__version__: str = "0.2.0"
-
 # Package logger (users can configure logging as needed)
 logger = logging.getLogger(__name__)

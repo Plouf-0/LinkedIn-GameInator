@@ -11,8 +11,24 @@ from __future__ import annotations
 import argparse
 import logging
 import sys
+from importlib.metadata import PackageNotFoundError, version
 
-__version__ = "0.1.0"
+DISTRIBUTION = "linkedin-gameinator"
+
+
+def _resolve_version() -> str:
+    """Read the version from the installed package metadata.
+
+    pyproject.toml stays the single source of truth: the spec copies the
+    distribution metadata into the bundle so this works frozen too.
+    """
+    try:
+        return version(DISTRIBUTION)
+    except PackageNotFoundError:
+        return "unknown"
+
+
+__version__ = _resolve_version()
 
 # A 6x6 board whose regions force a unique solution, small enough to solve
 # instantly and varied enough to exercise propagation and backtracking.

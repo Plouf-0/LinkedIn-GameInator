@@ -1,6 +1,6 @@
 [project]
 name = "linkedin-gameinator"
-version = "0.1.0"
+version = "0.2.0"
 description = "Many different ways to resolve the LinkedIn games"
 
 authors = [
