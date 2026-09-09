@@ -30,19 +30,44 @@ valid solution, nothing is clicked into the page.
 
 ## Requirements
 
-- **Python 3.11+**
-- **Firefox** — Selenium drives it, so it must be installed and on the `PATH`.
-- **SWI-Prolog** — required by `pyswip` for the Sudoku resolver.
-  - Linux: `sudo apt-get install swi-prolog`
-  - macOS: `brew install swi-prolog`
-  - Windows: `choco install swi-prolog`
+**Firefox** is always required — Selenium drives it, so it must be installed
+and on the `PATH`.
+
+The rest depends on how you run the app:
+
+| | Python | SWI-Prolog |
+| --- | --- | --- |
+| Released executable | not needed | **bundled**, nothing to install |
+| From source | 3.11+ | must be installed |
+
+SWI-Prolog powers the Sudoku resolver through `pyswip`. To run from source:
+
+- Linux: `sudo apt-get install swi-prolog`
+- macOS: `brew install swi-prolog`
+- Windows: `choco install swi-prolog`
+
+Without it, the app still starts and Queens still works; opening a Sudoku grid
+prints an install hint instead of solving it.
 
 ## Install & run
+
+Download the executable for your OS from the
+[releases](https://github.com/Plouf-0/LinkedIn-GameInator/releases) and run it,
+or from source:
 
 ```bash
 uv sync
 uv run linkedin-gameinator
 ```
+
+Check that everything works before opening a browser:
+
+```bash
+linkedin-gameinator --self-test
+```
+
+It solves one Queens board and one Sudoku grid offline, and reports which
+SWI-Prolog answered. `--verbose` logs the resolvers' reasoning step by step.
 
 Then, in the Firefox window that opens:
 
@@ -88,6 +113,21 @@ Run the same checks as CI before pushing:
 That runs `ruff check`, `ruff format --check`, `mypy`, the pre-commit hooks and
 `pytest --cov`.
 
+### Building the executable
+
+```bash
+uv run pyinstaller --noconfirm --clean linkedin-gameinator.spec
+dist/linkedin-gameinator --self-test
+```
+
+The spec collects the SWI-Prolog found on the build machine (via
+`swipl --dump-runtime-variables`) and copies its home into the bundle, minus
+the documentation, demos and xpce; a runtime hook then points `SWI_HOME_DIR`
+and `LIBSWIPL_PATH` at it before `pyswip` is imported. Building without
+SWI-Prolog installed still produces a working executable, just one that cannot
+solve Sudoku. SWI-Prolog is redistributed under its own licence, a copy of
+which travels in the bundle.
+
 ### Layout
 
 | Path                | Contents                                              |
@@ -96,4 +136,5 @@ That runs `ruff check`, `ruff format --check`, `mypy`, the pre-commit hooks and
 | `src/Queens`        | Queens grid model, resolver, archiver and terminal UI |
 | `src/Sudoku`        | Sudoku resolver (Python wrapper + CLP(FD) program)    |
 | `src/Archiver`      | Shared archiving base class                           |
+| `packaging`         | PyInstaller helpers (SWI-Prolog collection, runtime hook) |
 | `tests`             | Pytest suite                                          |

@@ -1,3 +1,3 @@
-from linkedin_gameinator.__main__ import main
+from linkedin_gameinator.cli import main
 
 __all__ = ["main"]

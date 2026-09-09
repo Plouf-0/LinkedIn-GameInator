@@ -104,7 +104,7 @@ def resolve_current_game(driver: webdriver.Firefox, title: str) -> None:
 
 
 def main() -> None:
-    logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
+    """Drive the browser flow. Logging is configured by the CLI entry point."""
     get_app_dir()
 
     driver: webdriver.Firefox = webdriver.Firefox()
