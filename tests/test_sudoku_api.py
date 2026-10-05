@@ -10,6 +10,8 @@ from pytest_mock import MockerFixture
 
 from WebScrapper.Sudoku_api import (
     SudokuGridError,
+    board_is_rendered,
+    check_grid_is_readable,
     click_value_button,
     create_grid_from_html,
     find_board_cell,
@@ -17,6 +19,7 @@ from WebScrapper.Sudoku_api import (
     parse_rows_per_area,
     put_sudoku_in_html,
     sudoku_api,
+    wait_for_board,
 )
 
 
@@ -25,6 +28,18 @@ def _cell(mocker: MockerFixture, text: str = "", **attributes: str):
     element.text = text
     element.get_attribute.side_effect = lambda name: attributes.get(name)
     return element
+
+
+def _board(mocker: MockerFixture, texts: list[str]):
+    """Build the cells of a fully painted board: its clues are prefilled."""
+    return [
+        _cell(
+            mocker,
+            text,
+            **{"class": "sudoku-cell sudoku-cell-prefilled" if text else "sudoku-cell"},
+        )
+        for text in texts
+    ]
 
 
 # =============================================================================
@@ -73,10 +88,10 @@ class TestCreateGridFromHtml:
         driver = mocker.Mock()
         grid_div = _cell(mocker, style="--cols: 4;")
         driver.find_element.return_value = grid_div
-        driver.find_elements.return_value = [
-            _cell(mocker, text)
-            for text in ["1", "", "3", "", "", "4", "", "2", "2", "", "4", "", "", "3", "", "1"]
-        ]
+        driver.find_elements.return_value = _board(
+            mocker,
+            ["1", "", "3", "", "", "4", "", "2", "2", "", "4", "", "", "3", "", "1"],
+        )
 
         assert create_grid_from_html(driver) == [
             [1, 0, 3, 0],
@@ -85,13 +100,87 @@ class TestCreateGridFromHtml:
             [0, 3, 0, 1],
         ]
 
-    def test_raises_when_the_board_is_empty(self, mocker: MockerFixture):
+    def test_raises_when_the_board_never_loads(self, mocker: MockerFixture):
+        mocker.patch("WebScrapper.Sudoku_api.GRID_READY_TIMEOUT", 0)
         driver = mocker.Mock()
         driver.find_element.return_value = _cell(mocker, style="--cols: 4;")
         driver.find_elements.return_value = []
 
-        with pytest.raises(SudokuGridError, match="No Sudoku cell found"):
+        with pytest.raises(SudokuGridError, match="did not finish loading"):
             create_grid_from_html(driver)
+
+
+# =============================================================================
+# Test the board readiness checks
+#
+# The page is live while it loads: reading it too early used to produce a board
+# that looked blank, which the solver then "solved" into an answer that
+# contradicted the real clues.
+# =============================================================================
+
+
+class TestBoardIsRendered:
+    def test_a_fully_painted_board_is_ready(self, mocker: MockerFixture):
+        driver = mocker.Mock()
+        driver.find_elements.return_value = _board(mocker, ["1", "", "", "2"])
+
+        assert board_is_rendered(driver, 2) is True
+
+    def test_a_board_missing_cells_is_not_ready(self, mocker: MockerFixture):
+        driver = mocker.Mock()
+        driver.find_elements.return_value = _board(mocker, ["1", ""])
+
+        assert board_is_rendered(driver, 2) is False
+
+    def test_a_board_without_a_clue_is_not_ready(self, mocker: MockerFixture):
+        driver = mocker.Mock()
+        driver.find_elements.return_value = _board(mocker, ["", "", "", ""])
+
+        assert board_is_rendered(driver, 2) is False
+
+    def test_a_clue_whose_digit_is_not_painted_yet_is_not_ready(self, mocker: MockerFixture):
+        driver = mocker.Mock()
+        blank_clue = _cell(mocker, "  ", **{"class": "sudoku-cell sudoku-cell-prefilled"})
+        driver.find_elements.return_value = [
+            blank_clue,
+            *_board(mocker, ["", "", "2"]),
+        ]
+
+        assert board_is_rendered(driver, 2) is False
+
+
+class TestWaitForBoard:
+    def test_returns_the_cells_once_the_board_is_ready(self, mocker: MockerFixture):
+        driver = mocker.Mock()
+        cells = _board(mocker, ["1", "", "", "2"])
+        driver.find_elements.return_value = cells
+
+        assert wait_for_board(driver, 2) == cells
+
+    def test_waits_through_a_board_that_is_still_painting(self, mocker: MockerFixture):
+        driver = mocker.Mock()
+        painting = _board(mocker, ["", "", "", ""])
+        painted = _board(mocker, ["1", "", "", "2"])
+        driver.find_elements.side_effect = [painting, painting, painted, painted]
+
+        assert wait_for_board(driver, 2) == painted
+
+
+class TestCheckGridIsReadable:
+    def test_accepts_a_complete_board(self):
+        check_grid_is_readable([[1, 0], [0, 2]], 2)
+
+    def test_rejects_a_board_with_no_cell(self):
+        with pytest.raises(SudokuGridError, match="No Sudoku cell found"):
+            check_grid_is_readable([], 2)
+
+    def test_rejects_a_board_read_half_way(self):
+        with pytest.raises(SudokuGridError, match="expected 4x4"):
+            check_grid_is_readable([[1, 0, 3, 0], [0, 4]], 4)
+
+    def test_rejects_a_board_read_without_its_clues(self):
+        with pytest.raises(SudokuGridError, match="without a single clue"):
+            check_grid_is_readable([[0, 0], [0, 0]], 2)
 
 
 # =============================================================================
