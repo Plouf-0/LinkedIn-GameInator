@@ -62,7 +62,7 @@ def solve(grid: list[list[int]], rows_per_area: int) -> list[list[int]]:
     flat_grid = [cell for row in grid for cell in row]
     solutions = list(prolog.query(f"resout({flat_grid}, {size}, {rows_per_area}, X)", maxresult=1))
     if not solutions:
-        raise ValueError("No solution found for the given sudoku grid")
+        raise ValueError("No solution found for the given sudoku grid.")
 
     flat_solution: list[int] = solutions[0]["X"]
     return [flat_solution[row * size : (row + 1) * size] for row in range(size)]
