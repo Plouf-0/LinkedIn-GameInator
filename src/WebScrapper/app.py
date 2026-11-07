@@ -89,7 +89,7 @@ def _wait_for_game(driver: webdriver.Firefox) -> WebElement:
     print("Now select a game to complete")
     try:
         return WebDriverWait(driver, GAME_SELECTION_TIMEOUT).until(
-            EC.presence_of_element_located((By.ID, "clock-small"))
+            EC.presence_of_element_located((By.ID, "clock-outline-small"))
         )
     except TimeoutException as e:
         raise LinkedInFlowError("User did not select a game") from e
