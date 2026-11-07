@@ -5,7 +5,6 @@ from collections.abc import Callable
 from selenium import webdriver
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
-from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
@@ -24,6 +23,11 @@ LOGIN_URL = (
 PAGE_LOAD_TIMEOUT = 1
 LOGIN_TIMEOUT = 600
 GAME_SELECTION_TIMEOUT = 600
+GAME_FRAME_TIMEOUT = 2
+
+# The iframe LinkedIn renders each game in for guests (src: /games/view/<game>/desktop).
+# Logged in, the board sits in the page itself, so the wait for it is kept short.
+GAME_FRAME = (By.CSS_SELECTOR, "iframe[src*='/games/view/']")
 
 # Game title fragment -> resolver. Games without a resolver map to None.
 RESOLVERS: dict[str, Callable[[webdriver.Firefox], None] | None] = {
@@ -80,31 +84,61 @@ def _wait_for_login(driver: webdriver.Firefox) -> None:
     print("User logged in")
 
 
-def _wait_for_game(driver: webdriver.Firefox) -> WebElement:
-    """Block until a game is opened and return its clock element.
+def _open_game_name(driver: webdriver.Firefox) -> str | None:
+    """Return the name of the game open in the browser, or None.
 
-    The element is the handle used later to tell when the user has left this
-    game: it goes stale as soon as the page changes.
+    A game is told apart by its page alone -- a /games/ URL whose title names a
+    known game -- rather than by an element inside it: LinkedIn keeps renaming
+    those, and the game itself now lives in an iframe.
+    """
+    if "/games/" not in driver.current_url:
+        return None
+    title = driver.title
+    return next((name for name in RESOLVERS if name in title), None)
+
+
+def _enter_game_frame(driver: webdriver.Firefox) -> None:
+    """Point the driver at the document holding the game board.
+
+    LinkedIn renders the game in an iframe; without switching into it no cell
+    of the board can be found. If no such frame shows up, the board is assumed
+    to be in the page itself.
+    """
+    try:
+        WebDriverWait(driver, GAME_FRAME_TIMEOUT).until(
+            EC.frame_to_be_available_and_switch_to_it(GAME_FRAME)
+        )
+    except TimeoutException:
+        logger.debug("No game iframe found, looking for the board in the page itself.")
+
+
+def _wait_for_game(driver: webdriver.Firefox) -> str:
+    """Block until a game is opened, enter its frame, and return the page URL.
+
+    The URL is the handle used later to tell when the user has left this game.
     """
     print("Now select a game to complete")
+    driver.switch_to.default_content()
     try:
-        return WebDriverWait(driver, GAME_SELECTION_TIMEOUT).until(
-            EC.presence_of_element_located((By.ID, "clock-outline-small"))
-        )
+        WebDriverWait(driver, GAME_SELECTION_TIMEOUT).until(_open_game_name)
     except TimeoutException as e:
         raise LinkedInFlowError("User did not select a game") from e
 
+    url = driver.current_url
+    _enter_game_frame(driver)
+    return url
 
-def _wait_until_game_left(driver: webdriver.Firefox, clock: WebElement) -> None:
-    """Block until the finished game's page is gone.
 
-    Without this the loop would find the very same clock element still on the
-    page, decide a game is open, and try to solve the finished board again --
-    forever.
+def _wait_until_game_left(driver: webdriver.Firefox, url: str) -> None:
+    """Block until the browser has moved away from the finished game.
+
+    Without this the loop would find the very same game still open and try to
+    solve the finished board again -- forever.
     """
     print("Done with this game; go back and pick another one")
+    driver.switch_to.default_content()
     try:
-        WebDriverWait(driver, GAME_SELECTION_TIMEOUT).until(EC.staleness_of(clock))
+        WebDriverWait(driver, GAME_SELECTION_TIMEOUT).until(EC.url_changes(url))
     except TimeoutException as e:
         raise LinkedInFlowError("User stayed on the same game") from e
 
@@ -135,7 +169,7 @@ def main() -> None:
         _wait_for_login(driver)
 
         while True:
-            clock = _wait_for_game(driver)
+            game_url = _wait_for_game(driver)
             title = driver.title
             print("game selected: " + title)
             try:
@@ -145,7 +179,7 @@ def main() -> None:
 
             # Whether it worked or not, this game is done with. Waiting for the
             # page to change is what keeps the loop from solving it over again.
-            _wait_until_game_left(driver, clock)
+            _wait_until_game_left(driver, game_url)
     except LinkedInFlowError as e:
         logger.error("%s", e)
     except KeyboardInterrupt:

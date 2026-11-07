@@ -11,6 +11,7 @@ from selenium.common.exceptions import (
 )
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
 from Sudoku.sudoku_pl_resolver import solve
@@ -77,6 +78,18 @@ def board_is_rendered(driver: webdriver.Firefox, cols_total: int) -> bool:
     return bool(clues) and all(cell.text.strip() for cell in clues)
 
 
+def wait_for_grid(driver: webdriver.Firefox) -> WebElement:
+    """Block until the grid container is in the page, then return it."""
+    try:
+        return WebDriverWait(driver, GRID_READY_TIMEOUT).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "sudoku-grid"))
+        )
+    except TimeoutException as e:
+        raise SudokuGridError(
+            f"No Sudoku grid showed up within {GRID_READY_TIMEOUT}s; nothing was read or clicked."
+        ) from e
+
+
 def wait_for_board(driver: webdriver.Firefox, cols_total: int) -> list[WebElement]:
     """Block until the board is readable, then return its cells."""
     try:
@@ -122,7 +135,7 @@ def check_grid_is_readable(grid: list[list[int]], cols_total: int) -> None:
 def create_grid_from_html(driver: webdriver.Firefox) -> list[list[int]]:
     grid: list[list[int]] = []
 
-    sudoku_grid_div: WebElement = driver.find_element(By.CLASS_NAME, "sudoku-grid")
+    sudoku_grid_div: WebElement = wait_for_grid(driver)
     cols_total: int = parse_cols_total(sudoku_grid_div.get_attribute("style") or "")
 
     cells: list[WebElement] = wait_for_board(driver, cols_total)

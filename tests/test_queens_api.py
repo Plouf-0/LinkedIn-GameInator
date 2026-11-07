@@ -16,6 +16,7 @@ from WebScrapper.Queens_api import (
     parse_cell_label,
     put_queens_in_html,
     queens_api,
+    wait_for_board,
 )
 
 
@@ -176,8 +177,30 @@ class TestQueensApi:
             "WebScrapper.Queens_api.create_grid_from_html",
             return_value=build_example_grid(["R R", "G G"]),
         )
+        mocker.patch("WebScrapper.Queens_api.wait_for_board")
         put = mocker.patch("WebScrapper.Queens_api.put_queens_in_html")
 
         with pytest.raises(QueensGridError, match="did not find a valid solution"):
             queens_api(driver)
         put.assert_not_called()
+
+
+# =============================================================================
+# Test wait_for_board
+# =============================================================================
+
+
+class TestWaitForBoard:
+    def test_returns_once_cells_are_in_the_page(self, mocker: MockerFixture):
+        driver = mocker.Mock()
+        driver.find_elements.return_value = [_element(mocker, "couleur bleu, ligne 1, colonne 1")]
+
+        wait_for_board(driver)
+
+    def test_raises_when_the_board_never_shows_up(self, mocker: MockerFixture):
+        mocker.patch("WebScrapper.Queens_api.BOARD_READY_TIMEOUT", 0)
+        driver = mocker.Mock()
+        driver.find_elements.return_value = [_element(mocker, "Fermer")]
+
+        with pytest.raises(QueensGridError, match="No Queens board showed up"):
+            wait_for_board(driver)

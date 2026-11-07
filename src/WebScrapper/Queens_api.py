@@ -5,9 +5,14 @@ import re
 import time
 
 from selenium import webdriver
-from selenium.common.exceptions import ElementNotInteractableException
+from selenium.common.exceptions import (
+    ElementNotInteractableException,
+    StaleElementReferenceException,
+    TimeoutException,
+)
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
+from selenium.webdriver.support.wait import WebDriverWait
 
 from Queens.brute_force_resolver import BruteForceResolver, Cell, Grid
 from Queens.queens_archiver import QueensArchiver
@@ -17,6 +22,9 @@ logger = logging.getLogger(__name__)
 
 # Total time budget, in seconds, spread over the queens placed in the page.
 TIME_TO_RESOLVE = 4
+
+# How long to wait, in seconds, for the board to show up in the page.
+BOARD_READY_TIMEOUT = 30
 
 # LinkedIn labels its cells "couleur <color>, ligne <r>, colonne <c>" in French
 # and "<color> color, row <r>, column <c>" in English.
@@ -36,6 +44,7 @@ def queens_api(driver: webdriver.Firefox) -> None:
     if "Queens" not in driver.title:
         raise QueensGridError(f"Not on a Queens page (title: {driver.title!r})")
 
+    wait_for_board(driver)
     grid = BruteForceResolver(create_grid_from_html(driver))
     print_grid(grid.grid)
     grid.resolve_grid()
@@ -62,6 +71,21 @@ def parse_cell_label(label: str) -> Cell | None:
                 match.group("color").lower(),
             )
     return None
+
+
+def wait_for_board(driver: webdriver.Firefox) -> None:
+    """Block until the board's cells are in the page."""
+    try:
+        WebDriverWait(
+            driver,
+            BOARD_READY_TIMEOUT,
+            # The board re-renders while it loads: a stale cell means "not yet".
+            ignored_exceptions=(StaleElementReferenceException,),
+        ).until(find_cell_elements)
+    except TimeoutException as e:
+        raise QueensGridError(
+            f"No Queens board showed up within {BOARD_READY_TIMEOUT}s; nothing was read or clicked."
+        ) from e
 
 
 def create_grid_from_html(driver: webdriver.Firefox) -> list[list[Cell]]:

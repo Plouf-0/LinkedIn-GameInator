@@ -8,7 +8,9 @@ from WebScrapper import app
 from WebScrapper.app import (
     RESOLVERS,
     LinkedInFlowError,
+    _enter_game_frame,
     _hide_google_signin,
+    _open_game_name,
     _wait_for_game,
     _wait_for_login,
     _wait_until_game_left,
@@ -82,22 +84,31 @@ class TestWaitSteps:
         with pytest.raises(LinkedInFlowError, match="User did not select a game"):
             _wait_for_game(mocker.Mock())
 
-    def test_wait_for_game_returns_the_clock_element(self, mocker: MockerFixture):
-        """The clock is the handle used later to detect leaving the game."""
+    def test_wait_for_game_enters_the_frame_and_returns_the_url(self, mocker: MockerFixture):
+        """The URL is the handle used later to detect leaving the game."""
+        mocker.patch("WebScrapper.app.WebDriverWait")
+        enter = mocker.patch("WebScrapper.app._enter_game_frame")
+        driver = mocker.Mock()
+        driver.current_url = "https://www.linkedin.com/games/queens/"
+
+        assert _wait_for_game(driver) == "https://www.linkedin.com/games/queens/"
+        enter.assert_called_once_with(driver)
+
+    def test_a_missing_game_frame_is_not_fatal(self, mocker: MockerFixture):
         wait = mocker.patch("WebScrapper.app.WebDriverWait")
-        clock = mocker.Mock()
-        wait.return_value.until.return_value = clock
+        wait.return_value.until.side_effect = TimeoutException()
 
-        assert _wait_for_game(mocker.Mock()) is clock
+        _enter_game_frame(mocker.Mock())
 
-    def test_wait_until_game_left_waits_for_staleness(self, mocker: MockerFixture):
+    def test_wait_until_game_left_waits_for_the_url_to_change(self, mocker: MockerFixture):
         wait = mocker.patch("WebScrapper.app.WebDriverWait")
-        staleness = mocker.patch("WebScrapper.app.EC.staleness_of")
-        clock = mocker.Mock()
+        url_changes = mocker.patch("WebScrapper.app.EC.url_changes")
+        driver = mocker.Mock()
 
-        _wait_until_game_left(mocker.Mock(), clock)
+        _wait_until_game_left(driver, "https://www.linkedin.com/games/queens/")
 
-        staleness.assert_called_once_with(clock)
+        driver.switch_to.default_content.assert_called_once()
+        url_changes.assert_called_once_with("https://www.linkedin.com/games/queens/")
         wait.return_value.until.assert_called_once()
 
     def test_wait_until_game_left_raises_on_timeout(self, mocker: MockerFixture):
@@ -105,7 +116,36 @@ class TestWaitSteps:
         wait.return_value.until.side_effect = TimeoutException()
 
         with pytest.raises(LinkedInFlowError, match="stayed on the same game"):
-            _wait_until_game_left(mocker.Mock(), mocker.Mock())
+            _wait_until_game_left(mocker.Mock(), "https://www.linkedin.com/games/queens/")
+
+
+# =============================================================================
+# Test _open_game_name
+# =============================================================================
+
+
+class TestOpenGameName:
+    @pytest.mark.parametrize(
+        ("url", "title", "expected"),
+        [
+            ("https://www.linkedin.com/games/queens/", "Queens | LinkedIn", "Queens"),
+            (
+                "https://www.linkedin.com/games/mini-sudoku/",
+                "Mini Sudoku | LinkedIn",
+                "Mini Sudoku",
+            ),
+            ("https://www.linkedin.com/games/", "Games | LinkedIn", None),
+            ("https://www.linkedin.com/feed/", "Queens | LinkedIn", None),
+        ],
+    )
+    def test_detects_a_game_from_its_url_and_title(
+        self, mocker: MockerFixture, url: str, title: str, expected: str | None
+    ):
+        driver = mocker.Mock()
+        driver.current_url = url
+        driver.title = title
+
+        assert _open_game_name(driver) == expected
 
 
 # =============================================================================
